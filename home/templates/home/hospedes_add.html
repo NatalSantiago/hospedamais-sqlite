@@ -1,0 +1,48 @@
+{% extends "home/base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+        <h4>ADICIONAR HOSPEDES<h4>
+        <hr>
+        <form action="{% url 'hospedes_add' %}" method='POST'>
+            {% csrf_token %}
+            {{ form.media }}    
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                {{ form.nome|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-6 mb-0">
+                {{ form.cpf|as_crispy_field }}
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                {{ form.datanascimento|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-6 mb-0">
+                {{ form.generohospede|as_crispy_field }}
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                {{ form.email|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-6 mb-0">
+                {{ form.fone|as_crispy_field }}
+              </div>
+            </div>
+
+            <button class="btn btn-success" type="submit">Salvar</button>
+            <a href="{% url 'hospedes' %}" class="btn btn-danger">Cancelar</a>
+        </form>
+    </div>
+</div>    
+
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "home/base.html" %}
+
+{% block content %}
+
+<br>
+<div class="container mt-5" style="width: 550px;">
+    <div class="card p-3 border-dark">
+       <h6 class="modal-title">
+           <i class="fas fa-trash-alt"></i> Deletar hospede
+       </h6>
+       <div class="text-center text-danger"><i class="far fa-times-circle fa-5x mb-4 mt-2"></i></div>
+       <div class="text-center text-danger">
+           <span>DESEJA REALMENTE EXCLUIR ESTE HOSPEDE ???</span>
+
+           <div class="text-dark mt-2 mb-2 ">Cliente: {{ hospedeNome }}</div>
+       </div>
+       <hr>
+       <span class="text-center text-danger">Se você continuar, esses dados se tornarão irrecuperáveis.</span>
+       <hr>
+       <form method='post'>
+           {% csrf_token %}
+           <input style="margin-left: 155px;" class="btn btn-outline-danger btn-sm ms-4" type="submit" value="Confirmar" style="float: right;">
+           <a style="margin-right: 175px;" href="{% url 'hospedes' %}" class="btn btn-secondary btn-sm" style="float: right">Cancelar</a>
+       </form>
+    </div>
+</div>
+
+
+{% endblock %}
