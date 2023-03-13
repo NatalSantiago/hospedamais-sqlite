@@ -22,15 +22,15 @@ Este é um projeto de um sistema de gestão hoteleira multi-empresas, com funcio
 - E-mail: [![Gmail](https://img.shields.io/badge/Gmail-Email-red)](mailto:natal.santiago.filha@gmail.com)
 - LinkedIn: [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-blue)](https://www.linkedin.com/in/natal-santiago-986680257/)
 
-## Como clonar e executar o projeto
+### Como clonar e executar o projeto
 
-### 1. Clone o repositório:
+# 1. Clone o repositório:
 
 git clone https://github.com/NatalSantiago/hospedamais-sqlite.git
 
 cd hospedamais-sqlite
 
-### 2. Crie um ambiente virtual e ative-o:
+# 2. Crie um ambiente virtual e ative-o:
 
 python -m venv venv
 
@@ -38,26 +38,26 @@ source venv/bin/activate # Linux/Mac
 
 venv\Scripts\activate # Windows
 
-### 3. Instale as dependências do projeto:
+# 3. Instale as dependências do projeto:
 
 pip install -r requirements.txt
 
-### 4. Crie as tabelas do banco de dados:
+# 4. Crie as tabelas do banco de dados:
 
 python manage.py migrate
 
-### 5. Crie um superusuário:
+# 5. Crie um superusuário:
 
 python manage.py createsuperuser
   
-### 6. Execute o projeto:
+# 6. Execute o projeto:
 
 python manage.py runserver
   
 O projeto estará disponível em http://localhost:8000/.
 
-### 7. Faça login no painel de administração usando as credenciais do superusuário criado anteriormente:
+# 7. Faça login no painel de administração usando as credenciais do superusuário criado anteriormente:
 
 http://localhost:8000/admin/
 
-### 8. Adicione novos hóspedes e gerencie os existentes usando as funcionalidades CRUD disponíveis.
+# 8. Adicione novos hóspedes e gerencie os existentes usando as funcionalidades CRUD disponíveis.
