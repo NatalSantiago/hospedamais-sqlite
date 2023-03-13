@@ -1,6 +1,5 @@
-<p align="center">
-  <b><font size="+6">Hospedamais SQLite</font></b>
-</p>
+# Hospedamais SQLite
+
 
 Este é um projeto de um sistema de gestão hoteleira multi-empresas, com funcionalidades CRUD para cadastro de hóspedes, utilizando Django e SQLite.
 
@@ -22,7 +21,7 @@ Este é um projeto de um sistema de gestão hoteleira multi-empresas, com funcio
 - E-mail: [![Gmail](https://img.shields.io/badge/Gmail-Email-red)](mailto:natal.santiago.filha@gmail.com)
 - LinkedIn: [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-blue)](https://www.linkedin.com/in/natal-santiago-986680257/)
 
-### Como clonar e executar o projeto
+## Como clonar e executar o projeto
 
 # 1. Clone o repositório:
 
