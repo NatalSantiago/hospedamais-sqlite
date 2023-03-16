@@ -30,7 +30,7 @@
       <li class="nav-item d-none d-sm-inline-block">
         <a href="{% url "inicio" %}" class="nav-link"><i class="fa fa-home" aria-hidden="true"></i>  Home  </a>
 
-      </li>  
+      </li>
 
       {% if request.user.is_authenticated %}
       <li class="nav-item d-none d-sm-inline-block">
@@ -78,9 +78,8 @@
       <!-- Sidebar user panel (optional) -->
 
       {% if user.id %}
-
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-          <a href="#" class="nav-link">
+          <a href="{% url "inicio" %}" class="nav-link">
             <i class="fa fa-home" style="font-size:24px"> - Home </i>
           </a>
       </div>
@@ -89,6 +88,7 @@
 
       <!-- Sidebar Menu -->
 
+      {% if request.user.is_authenticated %}
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item has-treeview menu-close">
@@ -101,7 +101,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{% url "hospedes" %}" class="nav-link">
                   <i class="far fa-address-card"></i>
                   <p>
                   Hóspedes
@@ -127,48 +127,32 @@
                </a>
               </li>
               <!-- Sub-Menus -->
-
-
-
-              
             </ul>
           </li>
-
-
-
-
-
-
-
-
         </ul>
       </nav>
+      {% endif %}
     </div>
   </aside>
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    {% block content %}  
-      
+    {% block content %}
+
     {% endblock %}
-    
+
   </div>
 
   <footer class="main-footer">
-    <strong>Copyright &copy; <a>2022 - M.C. EA - FOREX</a>.</strong> Todos os direitos reservados.
+    <strong>Copyright &copy; <a>2022 - HOSPEDA-MAIS</a>.</strong> Todos os direitos reservados.
   </footer>
 </div>
-
-
-
-
 
 <!-- AdminLTE App -->
 <script src="{% static 'js/adminlte.js' %}"></script>
 <script src="{% static 'js/custom.js' %}"></script>
 
 </body>
-
 </html>
 
 <style>
