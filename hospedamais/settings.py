@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'crispy_bootstrap4',
     'bootstrap_datepicker_plus',
     'home.apps.HomeConfig',
-
+    'cpf_field',
 ]
 
 # Crispy Forms
