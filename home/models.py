@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from django.contrib.auth.models import User,AbstractUser
+from django.contrib.auth.models import User
 
 from django.db import models
 
@@ -15,6 +15,10 @@ from django import forms
 from datetime import datetime
 
 from bootstrap_datepicker_plus.widgets import DatePickerInput
+
+from django.core.exceptions import ValidationError
+
+import locale
 
 # Create your models here.
 class Empresa(models.Model):
@@ -40,6 +44,10 @@ class PerfilUsuario(models.Model):
         return f"{self.user.get_username()} - {self.empresa.nome}"
 
 
+def validar_cpf(value):
+    if not value.isdigit():
+        raise ValidationError('O CPF deve conter apenas números')
+
 class hospedes(models.Model):
 
     SEXOHOSPEDE = ( ("Masculino", "Masculino"), ("Femenino", "Femenino") )    
@@ -51,7 +59,7 @@ class hospedes(models.Model):
 
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
     nome = models.CharField("Nome", max_length=100, blank=True, null=False )
-    cpf = CPFField('cpf', max_length=14, blank=True, null=False)
+    cpf = CPFField('cpf', max_length=14, blank=True, null=False, validators=[validar_cpf])
     datanascimento = models.DateField(("Data Nascimento"), null=True, blank=True )
     generohospede = models.CharField(("Gênero"), max_length=10, choices=SEXOHOSPEDE, blank=True, null=False )
     email = models.EmailField(("Email"), max_length=254, blank=True, null=False )
@@ -84,3 +92,19 @@ class hospedes(models.Model):
     def __str__(self):
       return self.nome
     
+
+
+class apartamentos(models.Model):
+
+    TIPOAPART = ( ("Simples", "Simples"), ("Stander", "Stander"), ("Luxo", "Luxo"), ("Super Luxo", "Super Luxo"), ("Duplex", "Duplex"), ("Cobertura", "Cobertura"), ("Loft", "Loft"), ("Rústico", "Rústico"))    
+
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
+    descricao = models.CharField("Descrição", max_length=50, blank=True, null=False )
+    tipoapart = models.CharField(("Tipo"), max_length=50, choices=TIPOAPART)
+    ramal = models.CharField(("Ramal"), max_length=10, blank=True, null=False )
+    valordiaria = models.DecimalField(("Valor da diária"), max_digits=10, decimal_places=2)
+    observacao = models.CharField(("Observação"), max_length=255, blank=True, null=False )
+
+    def __str__(self):
+        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+        return f"{self.descricao} - Valor da diário R$ {locale.currency(self.valordiaria, grouping=True)}"

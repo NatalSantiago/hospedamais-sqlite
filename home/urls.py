@@ -25,4 +25,12 @@ urlpatterns = [
 
     path('logout', views.logoutuser, name='logout'),
 
+    path('apartamentos/', views.apartamento_list, name='apartamentos'),
+
+    path('apartamentos/add/', views.apartamentos_add, name='apartamentos_add'),
+
+    path('apartamentos/edit/<int:apartamento_pk>', views.apartamentos_edit, name='apartamentos_edit'),
+
+    path('apartamentos/delete/<int:apartamento_pk>',views.apartamentos_delete, name='apartamentos_delete'),
+
 ]

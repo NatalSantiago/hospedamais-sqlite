@@ -1,10 +1,12 @@
 {% load static %}
 
+{% load user_agents %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
 
   <title>HOSPEDA-MAIS</title>
@@ -43,21 +45,28 @@
     </ul>
        <!-- Right -->
        <ul class="navbar-nav ml-auto">
-           {% if user.id %}
+       {% if user.id %}
+         {% if request|is_mobile %}
            <li class="nav-item me-3 me-lg-0">
-              <a class="nav-link" href="#">[ {{ empresa_iduser }} - {{ nome_empresa }} ] - Bem vindo(a), {{ user.first_name }} {{user.last_name}}</a>
+              <a class="nav-link" href="#">[ {{ nome_empresa }} ]</a>
            </li>
-
            <li class="nav-item">
-              <a class="nav-link" href="{% url 'logout' %}"> Logout <i class="fa fa-sign-out"></i></a>
+             <a class="nav-link" href="{% url 'logout' %}"><i class="fa fa-sign-out"></i></a>
            </li>
-           {% else %}
+         {% else %}
+           <li class="nav-item me-3 me-lg-0">
+             <a class="nav-link" href="#">[ {{ empresa_iduser }} - {{ nome_empresa }} ] - Bem vindo(a), {{ user.first_name }} {{user.last_name}}</a>
+           </li>
            <li class="nav-item">
-              <a class="nav-link" href="{% url 'login' %}"> Login <i class="fa fa-sign-in"></i></a>
-            </li>
-            {% endif %}
-         </ul>
-
+             <a class="nav-link" href="{% url 'logout' %}"> Logout <i class="fa fa-sign-out"></i></a>
+           </li>
+         {% endif %}
+       {% else %}
+         <li class="nav-item">
+           <a class="nav-link" href="{% url 'login' %}"> Login <i class="fa fa-sign-in"></i></a>
+         </li>
+       {% endif %}
+       </ul>
     </nav>
   <!-- /.navbar -->
   <!-- Main Sidebar Container -->
@@ -110,7 +119,7 @@
               </li>
               <!-- Sub-Menus -->
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{% url "apartamentos" %}" class="nav-link">
                   <i class="fas fa-bed"></i>
                   <p>
                   Apartamentos

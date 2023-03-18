@@ -33,66 +33,64 @@
         <div class="row">
             <div class="col-12">
                 <div class="data_table">
-                    <table id="tabelaclientes" class="table table-striped table-bordered">
+                    <table id="tabelaApartamentos" class="table table-striped table-bordered">
                         {% if request|is_mobile %}
                            <thead class="table-dark">
                            <hr>
-                           <a href="{% url 'hospedes_add' %}" class="btn btn-success btn-sm">ADICIONAR NOVO HÓSPEDE</a>
+                           <a href="{% url 'apartamentos_add' %}" class="btn btn-success btn-sm">NOVO APART.</a>
                            <tr>
-                               <th style="text-align: center; width: 27%;">Nome</th>
+                               <th style="text-align: center; width: 27%;">Descrição</th>
                                <th style="text-align: center; width: 5%;">OP</th>
                            </tr>
                            </thead>
                            <tbody>
-                           {% for hospede in hospedes  %}
+                           {% for apart in apartamentos  %}
                               <tr>
-                                <td>{{ hospede.nome }}</td>
+                                <td>{{ apart.descricao }}</td>
                                 <td>
-                                  <form method="POST" action="{% url 'hospedes_delete' hospede.id %}">
+                                  <form method="POST" action="{% url 'apartamentos_delete' apart.id %}">
                                     {% csrf_token %}
-                                    <div class="btn-opcoes">
-                                      <a class="btn btn-success btn-sm"  href="{% url 'hospedes_edit' hospede.id %}" title="Editar"><i class="fa fa-edit"></i></a>
-                                      <a class="btn btn-danger btn-sm"  href="{% url 'hospedes_delete' hospede.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
-                                    </div>  
+                                    <a class="btn btn-success btn-sm"  href="{% url 'apartamentos_edit' apart.id %}" title="Editar"><i class="fa fa-edit"></i></a>
+                                    <a class="btn btn-danger btn-sm"  href="{% url 'apartamentos_delete' apart.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
                                    </form>
                                 </td>
                               </tr>
                               {% empty %}
                                   <tr class="text-center">
-                                    <td colspan="4">Não existe hospedes cadastrados</td>
+                                    <td colspan="4">Não existe apartamentos cadastrados</td>
                                   </tr>
                               {% endfor %}
                            </tbody>
                         {% else %}
                            <thead class="table-dark">
                            <hr>
-                           <a href="{% url 'hospedes_add' %}" class="btn btn-success btn-sm">ADICIONAR NOVO HÓSPEDE</a>
+                           <a href="{% url 'apartamentos_add' %}" class="btn btn-success btn-sm">NOVO APART.</a>
                            <tr>
-                              <th style="text-align: center; width: 30%;">Nome</th>
-                              <th style="text-align: center; width: 25%;">E-mail</th>
-                              <th style="text-align: center; width: 15%;">Telefone</th>
+                              <th style="text-align: center; width: 30%;">Descrição</th>
+                              <th style="text-align: center; width: 25%;">Tipo</th>
+                              <th style="text-align: center; width: 15%;">Valor Diária</th>
                               <th style="text-align: center; width: 10%;">Opções</th>
                            </tr>
                            </thead>
                            <tbody>
-                           {% for hospede in hospedes  %}
+                           {% for apart in apartamentos  %}
                                <tr>
-                                 <td>{{ hospede.nome }}</td>
-                                 <td>{{ hospede.email }}</td>
-                               <td>{{ hospede.fone }}</td>
-                               <td>
-                                 <form method="POST" action="{% url 'hospedes_delete' hospede.id %}">
+                                 <td>{{ apart.descricao }}</td>
+                                 <td>{{ apart.tipoapart }}</td>
+                                 <td style="text-align: right;">R$ {{ apart.valordiaria|floatformat:2 }}</td>
+                                 <td>
+                                 <form method="POST" action="{% url 'apartamentos_delete' apart.id %}">
                                       {% csrf_token %}
-                                    <div class="btn-opcoes">
-                                      <a class="btn btn-success btn-sm"  href="{% url 'hospedes_edit' hospede.id %}" title="Editar"><i class="fa fa-edit"></i></a>
-                                      <a class="btn btn-danger btn-sm"  href="{% url 'hospedes_delete' hospede.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
-                                    </div>  
-                                  </form>
+                                      <div class="btn-opcoes">
+                                        <a class="btn btn-success btn-sm" href="{% url 'apartamentos_edit' apart.id %}" title="Editar"><i class="fa fa-edit"></i></a>
+                                        <a class="btn btn-danger btn-sm" href="{% url 'apartamentos_delete' apart.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
+                                      </div>
+                                 </form>
                                 </td>
                               </tr>
                               {% empty %}
                                   <tr class="text-center">
-                                    <td colspan="4">Não existe hospedes cadastrados</td>
+                                    <td colspan="4">Não existe apartamentos cadastrados</td>
                                   </tr>
                               {% endfor %}
                            </tbody>

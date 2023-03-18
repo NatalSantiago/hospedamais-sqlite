@@ -45,12 +45,17 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'home.apps.HomeConfig',
     'cpf_field',
+    'django_user_agents',
 ]
 
 # Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+USER_AGENTS_CACHE = 'default'
 
+USE_L10N = True         # essa é padrão
+
+USE_THOUSAND_SEPARATOR = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
