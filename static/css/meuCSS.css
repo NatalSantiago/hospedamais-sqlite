@@ -1,0 +1,23 @@
+.main-sidebar {
+    background-color: #373636;
+    color: #ffffff;
+}
+
+.main-header {
+    background-color: #373636;
+    color: #ffffff;
+}
+
+.main-header .navbar {
+    min-width: 20px;
+}
+
+.main-header .navbar .navbar-nav>li>a {
+    padding: 15px 5px;
+    /* opcional: ajuste o preenchimento para se adequar ao tamanho dos ícones */
+}
+
+.main-header .navbar .navbar-nav>li>a .sr-only {
+    display: none;
+}
+
