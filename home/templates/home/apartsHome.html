@@ -1,0 +1,47 @@
+{% extends "home/base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+    <!-- =======  Data-Table  = Start  ========================== -->
+    <br>
+    <div class="container">
+      <div class="row m-0">
+
+        {% for aparts in apartamentos  %}
+        <div class="col-xl-3 col-lg-6 col-md-6 col-12 mb-6">
+          <div class="card {% if aparts.tipostatus == 'Livre' %}bg-success{% elif aparts.tipostatus == 'Reservado' %}bg-warning{% elif aparts.tipostatus == 'Ocupado' %}bg-danger{% elif aparts.tipostatus == 'Em manutenção' %}bg-purple{% endif %}">
+            <div class="card-body text-center">
+              <i style="display: block; margin-bottom: 10px;">{{ aparts.descricao }}</i>  
+              <hr>
+              <i>Tipo: {{ aparts.tipoapart }}</i>  
+              <br>
+              <i>Status: {{ aparts.tipostatus }}</i>  
+            </div>
+          </div>
+        </div>
+        {% empty %}
+            <tr class="text-center">
+              <td colspan="4">Não existe apartamentos cadastrados</td>
+            </tr>
+        {% endfor %}
+
+    </div>
+    </div>
+
+    <!-- =======  Data-Table  = End  ===================== -->
+    <style>
+      .bg-success {background-color: #28a745;}
+      .bg-warning {background-color: #ffc107;}
+      .bg-danger {background-color: #dc3545;}
+      .bg-purple {background-color: #6f42c1;}
+      .text-white {color: #fff;}
+      .bg-success .text-white {color: #fff;} /* ajuste de cor para o painel com status livre */
+      .bg-warning .text-white {color: #000;} /* ajuste de cor para o painel com status reservado */
+      .bg-danger .text-white {color: #fff;} /* ajuste de cor para o painel com status ocupado */
+      .bg-purple .text-white {color: #fff;} /* ajuste de cor para o painel com status manutenção */
+      .card:hover {cursor: pointer;}      
+    </style>
+
+{% endblock %}

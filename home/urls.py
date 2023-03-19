@@ -11,6 +11,8 @@ urlpatterns = [
 
     path('', PaginaInicial.as_view(), name='inicio'),
 
+    path('apartHome/', views.ApartHome_list, name='apartHome'),
+
     path('hospedes/', views.hospedes_list, name='hospedes'),
 
     path('hospedes/add/', views.hospedes_add, name='hospedes_add'),

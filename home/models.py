@@ -98,12 +98,17 @@ class apartamentos(models.Model):
 
     TIPOAPART = ( ("Simples", "Simples"), ("Stander", "Stander"), ("Luxo", "Luxo"), ("Super Luxo", "Super Luxo"), ("Duplex", "Duplex"), ("Cobertura", "Cobertura"), ("Loft", "Loft"), ("Rústico", "Rústico"))    
 
+    TIPOSTATUS = ( ("Livre", "Livre"), ("Ocupado", "Ocupado"), ("Reservado", "Reservado"), ("Em manutenção", "Em manutenção"), ("Outro", "Outro") )    
+
+
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
     descricao = models.CharField("Descrição", max_length=50, blank=True, null=False )
     tipoapart = models.CharField(("Tipo"), max_length=50, choices=TIPOAPART)
     ramal = models.CharField(("Ramal"), max_length=10, blank=True, null=False )
     valordiaria = models.DecimalField(("Valor da diária"), max_digits=10, decimal_places=2)
     observacao = models.CharField(("Observação"), max_length=255, blank=True, null=False )
+    tipostatus = models.CharField(("Tipo"), max_length=50, choices=TIPOSTATUS)
+
 
     def __str__(self):
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')

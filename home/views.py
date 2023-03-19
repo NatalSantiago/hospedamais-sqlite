@@ -354,3 +354,29 @@ def apartamentos_delete(request, apartamento_pk):
 
     }            
     return render(request, 'home/apartamentos_delete.html', context )
+
+
+################### Listagem de Apartamentos ###################
+
+@login_required
+def ApartHome_list(request):
+    try:
+        perfil_usuario = request.user.perfilusuario
+        empresa = perfil_usuario.empresa
+        nome_empresa = empresa.nome
+        empresa_iduser = perfil_usuario.empresa.pk
+        apartList = apartamentos.objects.filter(empresa=empresa)
+    except PerfilUsuario.DoesNotExist:
+        empresa = None
+        empresa_iduser = None
+        nome_empresa = 'Mostrando os apartamentos de todas a empresas'
+        apartList = apartamentos.objects.all()
+
+    context = {
+        'apartamentos': apartList,
+        'empresa': empresa,
+        'empresa_iduser': empresa_iduser,
+        'nome_empresa': nome_empresa
+    }
+
+    return render(request, 'home/apartsHome.html', context)

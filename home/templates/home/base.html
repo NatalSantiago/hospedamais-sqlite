@@ -30,7 +30,7 @@
       </li>
 
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="{% url "inicio" %}" class="nav-link"><i class="fa fa-home" aria-hidden="true"></i>  Home  </a>
+        <a href="{% url "inicio" %}" class="nav-link"><i class="fa fa-home" aria-hidden="true"></i>  Inicio  </a>
 
       </li>
 
@@ -73,14 +73,10 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="" class="brand-link">
-      <img src="{% static 'img/MeuLogo02.png' %}" width="300px" alt="HOSPEDA-MAIS Logo" class="brand-image img-circle elevation-3"
+      <img src="{% static 'img/MeuLogoMini.png' %}" width="300px" alt="HOSPEDA-MAIS Logo" class="brand-image img-circle elevation-3"
            style="opacity: .8">
       <span class="brand-text font-weight-light">HOSPEDA-MAIS</span>
     </a>
-
-
-
-
 
     <!-- Sidebar -->
     <div class="sidebar">
@@ -89,7 +85,12 @@
       {% if user.id %}
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
           <a href="{% url "inicio" %}" class="nav-link">
-            <i class="fa fa-home" style="font-size:24px"> - Home </i>
+            <i class="fa fa-home" style="font-size:22px">  - Inicio </i>
+          </a>
+      </div>
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <a href="{% url "apartHome" %}" class="nav-link">
+            <i class="fas fa-door-open" style="font-size:22px">  - Aparts.Home </i>
           </a>
       </div>
       {% endif %}
@@ -127,20 +128,13 @@
                </a>
               </li>
               <!-- Sub-Menus -->
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="fas fa-cart-arrow-down"></i>
-                  <p>
-                  Itens Consumo
-                  </p>
-               </a>
-              </li>
-              <!-- Sub-Menus -->
             </ul>
           </li>
         </ul>
       </nav>
       {% endif %}
+
+
     </div>
   </aside>
 
