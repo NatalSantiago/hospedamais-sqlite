@@ -9,15 +9,56 @@
     <div class="container">
       <div class="row m-0">
 
-        {% for aparts in apartamentos  %}
+        {% for apartamento in apartamentos %}
         <div class="col-xl-3 col-lg-6 col-md-6 col-12 mb-6">
-          <div class="card {% if aparts.tipostatus == 'Livre' %}bg-success{% elif aparts.tipostatus == 'Reservado' %}bg-warning{% elif aparts.tipostatus == 'Ocupado' %}bg-danger{% elif aparts.tipostatus == 'Em manutenção' %}bg-purple{% endif %}">
+          <div class="card text-center">
+            <div class="card-header {% if apartamento.tipostatus == 'Livre' %}bg-success{% elif apartamento.tipostatus == 'Reservado' %}bg-warning{% elif apartamento.tipostatus == 'Ocupado' %}bg-danger{% elif apartamento.tipostatus == 'Em manutenção' %}bg-purple{% endif %}">
+              {{ apartamento.descricao }}
+            </div>
+
             <div class="card-body text-center">
-              <i style="display: block; margin-bottom: 10px;">{{ aparts.descricao }}</i>  
-              <hr>
-              <i>Tipo: {{ aparts.tipoapart }}</i>  
-              <br>
-              <i>Status: {{ aparts.tipostatus }}</i>  
+              {% if apartamento.tipostatus == 'Livre' %}
+                 <i class="card-title" style="font-size: 15px;">Tipo: {{ apartamento.tipoapart }}</i><br>
+                 <i class="card-title" style="font-size: 15px;">Status: {{ apartamento.tipostatus }}</i><br>
+              {% elif apartamento.tipostatus == 'Reservado' %}                 
+                 <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
+                 <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: 20/10/2023</i><br>
+              {% elif apartamento.tipostatus == 'Ocupado' %}
+                 <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
+                 <i class="card-title fa fa-calendar-check-o text-center" style="font-size: 15px;"> 20/10/2023  -  22/10/2023</i><br>
+              {% elif apartamento.tipostatus == 'Em manutenção' %}
+                 <i>Tipo: {{ apartamento.tipoapart }}</i><br>
+                 <i>Status: {{ apartamento.tipostatus }}</i>
+              {% endif %}
+            </div>
+
+
+<!--
+
+            <div class="card-body">
+              <i class="card-title fa fa-user-o" style="font-size: 15px;"> Natal de Jesus da Silva Santiago</i>
+            </div>
+            <i class="card-title fa fa-calendar-check-o text-center" style="font-size: 13px;"> 20/10/2023   -   20/10/2023</i>
+            <br>
+-->
+
+            <div class="card-footer text-muted">
+              {% if apartamento.tipostatus == 'Livre' %}
+                <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In</button>
+              {% elif apartamento.tipostatus == 'Reservado' %}                 
+                <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In</button>
+              {% elif apartamento.tipostatus == 'Ocupado' %}
+                <div class="icons">
+                  <i class="fas fa-shopping-basket icon-spacing" title="Lançar consumo"></i>
+                  <i class="fas fa-light fa-envelope icon-spacing" title="Enviar mensagem"></i>
+                  <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ver dados do hospede"></i>
+                  <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual"></i>
+                  <i class="fa fa-exchange icon-spacing" aria-hidden="true" title="Mudar de acomodação"></i>
+                  <i class="fa fa-sign-out" aria-hidden="true" title="Efetuar Check-Out"></i>
+                </div>
+              {% elif apartamento.tipostatus == 'Em manutenção' %}                 
+                 <button type="button" class="btn btn-outline-success fa fa-wrench btn-short"> Liberar</button>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -27,7 +68,7 @@
             </tr>
         {% endfor %}
 
-    </div>
+      </div>
     </div>
 
     <!-- =======  Data-Table  = End  ===================== -->
@@ -37,11 +78,23 @@
       .bg-danger {background-color: #dc3545;}
       .bg-purple {background-color: #6f42c1;}
       .text-white {color: #fff;}
+      .text-dark {color: #000;}
       .bg-success .text-white {color: #fff;} /* ajuste de cor para o painel com status livre */
-      .bg-warning .text-white {color: #000;} /* ajuste de cor para o painel com status reservado */
+      .bg-warning .text-dark {color: #000;} /* ajuste de cor para o painel com status reservado */
       .bg-danger .text-white {color: #fff;} /* ajuste de cor para o painel com status ocupado */
       .bg-purple .text-white {color: #fff;} /* ajuste de cor para o painel com status manutenção */
       .card:hover {cursor: pointer;}      
+      .card-body {line-height: 1.9;}
+      .icon-spacing {margin-right: 14px;}
+      .icon-spacing:last-child {margin-right: 0;}
+      .btn-short {
+        padding-top: 0.20rem; /* Defina o valor de padding superior desejado */
+        padding-bottom: 0.20rem; /* Defina o valor de padding inferior desejado */
+      }
+
+
+
+
     </style>
 
 {% endblock %}
