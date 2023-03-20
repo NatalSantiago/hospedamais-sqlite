@@ -1,0 +1,13 @@
+Observações para instalar um app corretamento no pythonanywhere..
+
+1. pip install static
+
+2. pip install pillow
+
+3. pip install -r requirements.txt
+
+4. Não esqueçer de copiar os arquivos static e media
+
+  - cp -avf pasta_django_criada_pythonanywhere/static sua_pasta_django/
+
+  - cp -avf pasta_django_criada_pythonanywhere/media sua_pasta_django/
