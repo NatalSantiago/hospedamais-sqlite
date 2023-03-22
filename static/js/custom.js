@@ -57,7 +57,7 @@ $(document).ready(function () {
         ],
         lengthMenu: [[6, 10, 25, 50, -1], [6, 10, 25, 50, "Todos"]],
         pageLength: 6,
-        order: [[0, 'des']], // define a primeira coluna (índices) como coluna de ordenação padrão
+        order: [[0, 'asc']], // define a primeira coluna (índices) como coluna de ordenação padrão
     });
 
     $('.dataTables_filter input[type=search]').css({ 'width': '300px' });
@@ -130,3 +130,7 @@ $(document).ready(function () {
 
     $('.dataTables_filter input[type=search]').css({ 'width': '300px' });
 });
+
+
+
+

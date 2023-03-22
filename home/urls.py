@@ -35,4 +35,7 @@ urlpatterns = [
 
     path('apartamentos/delete/<int:apartamento_pk>',views.apartamentos_delete, name='apartamentos_delete'),
 
+    path('',views.apartamentos_erro, name='apartamentos_erro'),
+
+
 ]

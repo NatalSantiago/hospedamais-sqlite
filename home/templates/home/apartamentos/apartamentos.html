@@ -37,7 +37,9 @@
                         {% if request|is_mobile %}
                            <thead class="table-dark">
                            <hr>
-                           <a href="{% url 'apartamentos_add' %}" class="btn btn-success btn-sm">NOVO APART.</a>
+                             {% if empresa_plano == 'Chumbo' %}
+                                   <a href="{% url 'apartamentos_add' %}" class="btn btn-success btn-sm">NOVO APART. - {{qtdAparts}}</a>
+                             {% endif %}
                            <tr>
                                <th style="text-align: center; width: 27%;">Descrição</th>
                                <th style="text-align: center; width: 5%;">OP</th>
@@ -64,8 +66,8 @@
                         {% else %}
                            <thead class="table-dark">
                            <hr>
-                           <a href="{% url 'apartamentos_add' %}" class="btn btn-success btn-sm">NOVO APART.</a>
-                           <tr>
+                             <a href="{% url 'apartamentos_add' %}" class="btn btn-success btn-sm">Nova Acomodação</a>
+                             <tr>
                               <th style="text-align: center; width: 30%;">Descrição</th>
                               <th style="text-align: center; width: 25%;">Tipo</th>
                               <th style="text-align: center; width: 15%;">Valor Diária</th>

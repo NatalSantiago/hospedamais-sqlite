@@ -4,12 +4,13 @@
 
 {% block content %}
 
-<div class="card">
+
+<div class "card">
     <div class="card-body">
-        <h4>ADICIONAR HOSPEDES<h4>
+        <h4>EDITANDO HOSPEDE<h4>
         <hr>
         {{ form.media }}        
-        <form action="{% url 'hospedes_add' %}" method='POST'>
+        <form method='POST'>
             {% csrf_token %}
             <div class="form-row">
               <div class="form-group col-md-6 mb-0">
@@ -139,5 +140,6 @@
         </form>
     </div>
 </div>    
+
 
 {% endblock %}

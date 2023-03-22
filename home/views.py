@@ -15,9 +15,6 @@ from home.models import PerfilUsuario,hospedes,apartamentos
 
 from home.forms import HospedesForm,ApartamentosForm
 
-class TabelaClientes(TemplateView):
-    template_name = 'home/tabela.html'
-
 class PaginaInicial(LoginRequiredMixin, TemplateView):
     template_name = 'home/base.html'
 
@@ -57,12 +54,15 @@ def hospedes_list(request):
         'nome_empresa': nome_empresa
     }
 
-    return render(request, 'home/hospedes.html', context)
+    return render(request, 'home/hospedes/hospedes.html', context)
 
 ################### Adicionar Hospedes ###################
 
 @login_required
 def hospedes_add(request):
+
+    action = '' # Inicializa a variável action com um valor padrão
+
     form = HospedesForm(request.POST or None)
 
     if request.POST:
@@ -93,13 +93,22 @@ def hospedes_add(request):
                         hospede = form.save(commit=False)
                         hospede.empresa = empresa
                         hospede.save()
-                        return redirect('hospedes')
+                        action = request.POST.get('action')
+                        if action == 'save_exit':
+                           return redirect('hospedes')
+                        elif action == 'save_add':
+                           return redirect('hospedes_add')
                 else:
                     # Se o hóspede não existe e o CPF não foi informado ou não foi encontrado com outro nome, salva o novo registro
                     hospede = form.save(commit=False)
                     hospede.empresa = empresa
                     hospede.save()
-                    return redirect('hospedes')
+
+                    action = request.POST.get('action')
+                    if action == 'save_exit':
+                       return redirect('hospedes')
+                    elif action == 'save_add':
+                       return redirect('hospedes_add')
 
     nome_empresa = None
     empresa_iduser = None
@@ -118,7 +127,7 @@ def hospedes_add(request):
         'empresa_iduser': empresa_iduser
     }
 
-    return render(request, 'home/hospedes_add.html', context)
+    return render(request, 'home/hospedes/hospedes_add.html', context)
 
 
 ################### Editar Hospedes ###################
@@ -126,8 +135,19 @@ def hospedes_add(request):
 @login_required
 def hospedes_edit(request, hospede_pk):
     hospedeEdit = hospedes.objects.get(pk=hospede_pk)
-
     form = HospedesForm(request.POST or None, instance=hospedeEdit)
+    try:
+        perfil_usuario = request.user.perfilusuario
+        empresa = perfil_usuario.empresa
+        nome_empresa = empresa.nome
+        empresa_iduser = perfil_usuario.empresa.pk
+        context = {
+          'form': form,
+          'nome_empresa': nome_empresa,
+          'empresa_iduser': empresa_iduser
+        }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('hospedes')
 
     if request.POST:
         if form.is_valid():
@@ -140,53 +160,31 @@ def hospedes_edit(request, hospede_pk):
                 hospede.save()
                 return redirect('hospedes')
 
-    nome_empresa = None
-    empresa_iduser = None
-
-    try:
-        perfil_usuario = request.user.perfilusuario
-        empresa = perfil_usuario.empresa
-        nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
-    except PerfilUsuario.DoesNotExist:
-        pass
-
-    context = {
-        'form': form,
-        'nome_empresa': nome_empresa,
-        'empresa_iduser': empresa_iduser
-    }
-
-    return render(request, 'home/hospedes_edit.html', context)
+    return render(request, 'home/hospedes/hospedes_edit.html', context)
 
 ################### Exclusão de Clientes ###################
 
 @login_required
 def hospedes_delete(request, hospede_pk):
     hospedeDelete = hospedes.objects.get(pk=hospede_pk)
-
-    nome_empresa = None
-    empresa_iduser = None
-
     try:
         perfil_usuario = request.user.perfilusuario
         empresa = perfil_usuario.empresa
-        nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
+        context = {
+          'emmpresa': empresa,
+          'hospede': hospedeDelete.id,
+          'hospedeNome': hospedeDelete.nome,
+        }            
     except PerfilUsuario.DoesNotExist:
-        pass
+        return redirect('hospedes')
 
     if request.POST:
         hospedeDelete.delete()
         return redirect('hospedes')
-    context = {
-        'hospede': hospedeDelete.id,
-        'hospedeNome': hospedeDelete.nome,
-        'nome_empresa': empresa.nome,
-        'empresa_iduser': perfil_usuario.empresa.pk
+    
+    return render(request, 'home/hospedes/hospedes_delete.html', context )
 
-    }            
-    return render(request, 'home/hospedes_delete.html', context )
+###############################################################
 
 def login_user(request):
     logout(request)
@@ -222,22 +220,28 @@ def apartamento_list(request):
         perfil_usuario = request.user.perfilusuario
         empresa = perfil_usuario.empresa
         nome_empresa = empresa.nome
+        empresa_plano = empresa.tipoplano
         empresa_iduser = perfil_usuario.empresa.pk
+        qtdAparts = apartamentos.objects.filter(empresa=empresa).count()
         apartList = apartamentos.objects.filter(empresa=empresa)
     except PerfilUsuario.DoesNotExist:
         empresa = None
         empresa_iduser = None
         nome_empresa = 'Mostrando os apartamentos de todas a empresas'
+        empresa_plano = None
+        qtdAparts = None
         apartList = apartamentos.objects.all()
 
     context = {
         'apartamentos': apartList,
         'empresa': empresa,
         'empresa_iduser': empresa_iduser,
-        'nome_empresa': nome_empresa
+        'nome_empresa': nome_empresa,
+        'empresa_plano': empresa_plano,
+        'qtdAparts': qtdAparts
     }
 
-    return render(request, 'home/apartamentos.html', context)
+    return render(request, 'home/apartamentos/apartamentos.html', context)
 
 
 ################### Adicionar Apartamentos ###################
@@ -245,7 +249,45 @@ def apartamento_list(request):
 @login_required
 def apartamentos_add(request):
     form = ApartamentosForm(request.POST or None)
-
+    action = '' # Inicializa a variável action com um valor padrão
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = request.user.perfilusuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       empresa_plano = empresa.tipoplano
+       qtdAparts = apartamentos.objects.filter(empresa=empresa).count()
+       context = {
+            'form': form,
+            'perfil_usuario': perfil_usuario,
+            'nome_empresa': nome_empresa,
+            'empresa_iduser': empresa_iduser,
+            'empresa_plano': empresa_plano,
+            'qtdAparts': qtdAparts,
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('apartamentos')
+    ###############################################################
+    ## Se o usuário tiver no limete do plano escolhido não o deixa incluir outro apartamento ##
+    if empresa_plano == 'Chumbo' and qtdAparts >= 10:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Zinco' and qtdAparts >= 20:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Alumínio' and qtdAparts >= 30:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Níquel' and qtdAparts >= 50:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Cobre' and qtdAparts >= 80:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Prata' and qtdAparts >= 100:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Paládio' and qtdAparts >= 130:
+           return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Ouro' and qtdAparts >= 150:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    elif empresa_plano == 'Platina' and qtdAparts >= 200:
+       return render(request, 'home/apartamentos/apartamentos_erro.html', context)
+    #####################################################
     if request.POST:
         if form.is_valid():
             # Verifica se o apartamento já existe
@@ -265,35 +307,33 @@ def apartamentos_add(request):
                     apartamento = form.save(commit=False)
                     apartamento.empresa = empresa
                     apartamento.save()
-                    return redirect('apartamentos')
+                    action = request.POST.get('action')
+                    if action == 'save_exit':
+                       return redirect('apartamentos')
+                    elif action == 'save_add':
+                       return redirect('apartamentos_add')
 
-    nome_empresa = None
-    empresa_iduser = None
-
-    try:
-        perfil_usuario = request.user.perfilusuario
-        empresa = perfil_usuario.empresa
-        nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
-    except PerfilUsuario.DoesNotExist:
-        pass
-
-    context = {
-        'form': form,
-        'nome_empresa': nome_empresa,
-        'empresa_iduser': empresa_iduser
-    }
-
-    return render(request, 'home/apartamentos_add.html', context)
-
+    return render(request, 'home/apartamentos/apartamentos_add.html', context)
 
 ################### Editar Apartamentos ###################
 
 @login_required
 def apartamentos_edit(request, apartamento_pk):
     apartamentoEdit = apartamentos.objects.get(pk=apartamento_pk)
-
     form = ApartamentosForm(request.POST or None, instance=apartamentoEdit)
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = perfil_usuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       context = {
+            'form': form,
+            'perfil_usuario': perfil_usuario,
+            'nome_empresa': nome_empresa,
+            'empresa_iduser': empresa_iduser,
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('apartamentos')
 
     if request.POST:
         if form.is_valid():
@@ -306,24 +346,7 @@ def apartamentos_edit(request, apartamento_pk):
                 apartamento.save()
                 return redirect('apartamentos')
 
-    nome_empresa = None
-    empresa_iduser = None
-
-    try:
-        perfil_usuario = request.user.perfilusuario
-        empresa = perfil_usuario.empresa
-        nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
-    except PerfilUsuario.DoesNotExist:
-        pass
-
-    context = {
-        'form': form,
-        'nome_empresa': nome_empresa,
-        'empresa_iduser': empresa_iduser
-    }
-
-    return render(request, 'home/apartamentos_edit.html', context)
+    return render(request, 'home/apartamentos/apartamentos_edit.html', context)
 
 
 ################### Exclusão de Apartamentos ###################
@@ -331,29 +354,49 @@ def apartamentos_edit(request, apartamento_pk):
 @login_required
 def apartamentos_delete(request, apartamento_pk):
     apartamentoDelete = apartamentos.objects.get(pk=apartamento_pk)
+    try:
+      perfil_usuario = request.user.perfilusuario
+      empresa = perfil_usuario.empresa
+      context = {
+        'apartamento': apartamentoDelete.id,
+        'apartamentodescricao': apartamentoDelete.descricao,
+        'nome_empresa': empresa.nome,
+        'empresa_iduser': perfil_usuario.empresa.pk
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('apartamentos')
+    ###############################################################
+    if request.POST:
+        apartamentoDelete.delete()
+        return redirect('apartamentos')
 
-    nome_empresa = None
-    empresa_iduser = None
+    return render(request, 'home/apartamentos/apartamentos_delete.html', context )
+
+################### Mensagem de erro qtd. aparts atingida  ###################
+
+@login_required
+def apartamentos_erro(request):
+
+    empresa = request.user.perfilusuario.empresa
+    nome_empresa = empresa.nome
+    empresa_plano = empresa.tipoplano
+    qtdAparts = apartamentos.objects.filter(empresa=empresa).count()
 
     try:
         perfil_usuario = request.user.perfilusuario
         empresa = perfil_usuario.empresa
         nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
+        empresa_plano = empresa.tipoplano
+        qtdAparts = apartamentos.objects.filter(empresa=empresa).count()
     except PerfilUsuario.DoesNotExist:
         pass
 
-    if request.POST:
-        apartamentoDelete.delete()
-        return redirect('apartamentos')
     context = {
-        'apartamento': apartamentoDelete.id,
-        'apartamentodescricao': apartamentoDelete.descricao,
-        'nome_empresa': empresa.nome,
-        'empresa_iduser': perfil_usuario.empresa.pk
-
+        'nome_empresa': nome_empresa,
+        'empresa_plano': empresa_plano,
+        'qtdAparts': qtdAparts,
     }            
-    return render(request, 'home/apartamentos_delete.html', context )
+    return render(request, 'home/apartamentos/apartamentos_erro.html', context )
 
 
 ################### Listagem de Apartamentos ###################
@@ -379,4 +422,4 @@ def ApartHome_list(request):
         'nome_empresa': nome_empresa
     }
 
-    return render(request, 'home/apartsHome.html', context)
+    return render(request, 'home/apartamentos/apartsHome.html', context)

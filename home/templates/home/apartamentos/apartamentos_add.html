@@ -35,7 +35,8 @@
             </div>
             <!-- ###########################################################  -->
             <br>
-            <button class="btn btn-success" type="submit">Salvar</button>
+            <button id="btn-save" class="btn btn-primary" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
+            <button class="btn btn-success" type="submit" name="action" value="save_exit">Salvar e sair</button>
             <a href="{% url 'apartamentos' %}" class="btn btn-danger">Cancelar</a>
         </form>
     </div>

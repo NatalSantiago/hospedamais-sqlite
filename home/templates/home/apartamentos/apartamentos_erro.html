@@ -1,0 +1,24 @@
+{% extends "home/base.html" %}
+
+{% block content %}
+
+<br>
+<div class="container mt-5" style="max-width: 550px;">
+    <div class="card p-3 border-dark">
+       <div class="text-center text-danger"><i class="far fa-times-circle fa-5x mb-4 mt-2"></i></div>
+       <div class="text-center text-danger">
+           <span>VOCÊ ATINGIU A QTD DE ACOMODAÇÕES REFERENTE A SEU PLANO</span>
+       <div class="text-dark mt-2 mb-2 ">{{ nome_empresa }} / {{ empresa_plano }}</div>
+       <div class="text-dark mt-2 mb-2 ">Qtds. acomodações de seu plano: {{ qtdAparts }}</div>
+
+   </div>
+   <hr>
+   <span class="text-center text-danger">Entre em contato com o suporte técnio para mudar seu plano</span>
+   <hr>
+     <form method='post' class="d-flex justify-content-center">
+     {% csrf_token %}
+        <a href="{% url 'apartamentos' %}" class="btn btn-primary">   OK   </a>
+     </form>
+   </div>
+</div>
+{% endblock %}
