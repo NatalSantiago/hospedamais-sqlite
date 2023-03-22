@@ -33,66 +33,68 @@
         <div class="row">
             <div class="col-12">
                 <div class="data_table">
-                    <table id="tabelaclientes" class="table table-striped table-bordered">
+                    <table id="tabelaitensConsumo" class="table table-striped table-bordered">
                         {% if request|is_mobile %}
                            <thead class="table-dark">
                            <hr>
-                           <a href="{% url 'hospedes_add' %}" class="btn btn-success btn-sm">ADICIONAR NOVO HÓSPEDE</a>
+                           <a href="{% url 'itensConsumo_add' %}" class="btn btn-success btn-sm">NOVO ITEM</a>
                            <tr>
-                               <th style="text-align: center; width: 27%;">Nome</th>
+                               <th style="text-align: center; width: 27%;">Descrição</th>
                                <th style="text-align: center; width: 5%;">OP</th>
                            </tr>
                            </thead>
                            <tbody>
-                           {% for hospede in hospedes  %}
+                           {% for itenConsumo in itensConsumo %}
                               <tr>
-                                <td>{{ hospede.nome }}</td>
+                                <td>{{ itenConsumo.descricao }}</td>
                                 <td>
-                                  <form method="POST" action="{% url 'hospedes_delete' hospede.id %}">
+                                  <form method="POST" action="{% url 'itensConsumo_delete' itenConsumo.id %}">
                                     {% csrf_token %}
                                     <div class="btn-opcoes">
-                                      <a class="btn btn-success btn-sm"  href="{% url 'hospedes_edit' hospede.id %}" title="Editar"><i class="fa fa-edit"></i></a>
-                                      <a class="btn btn-danger btn-sm"  href="{% url 'hospedes_delete' hospede.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
+                                      <a class="btn btn-success btn-sm"  href="{% url 'itensConsumo_edit' itenConsumo.id %}" title="Editar"><i class="fa fa-edit"></i></a>
+                                      <a class="btn btn-danger btn-sm"  href="{% url 'itensConsumo_delete' itenConsumo.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
                                     </div>  
                                    </form>
                                 </td>
                               </tr>
                               {% empty %}
                                   <tr class="text-center">
-                                    <td colspan="4">Não existe hospedes cadastrados</td>
+                                    <td colspan="4">Não existem itens cadastrados</td>
                                   </tr>
                               {% endfor %}
                            </tbody>
                         {% else %}
                            <thead class="table-dark">
                            <hr>
-                           <a href="{% url 'hospedes_add' %}" class="btn btn-success btn-sm">ADICIONAR NOVO HÓSPEDE</a>
+                           <a href="{% url 'itensConsumo_add' %}" class="btn btn-success btn-sm">NOVO ITEM</a>
                            <tr>
-                              <th style="text-align: center; width: 30%;">Nome</th>
-                              <th style="text-align: center; width: 25%;">E-mail</th>
-                              <th style="text-align: center; width: 15%;">Telefone</th>
-                              <th style="text-align: center; width: 10%;">Opções</th>
+                              <th style="text-align: center; width: 40%;">Descrição</th>
+                              <th style="text-align: center; width: 10%;">Und.</th>
+                              <th style="text-align: center; width: 10%;">Estoque</th>
+                              <th style="text-align: center; width: 10%;">P. Venda</th>
+                              <th style="text-align: center; width: 7%;">Opções</th>
                            </tr>
                            </thead>
                            <tbody>
-                           {% for hospede in hospedes  %}
+                           {% for itenConsumo in itensConsumo  %}
                                <tr>
-                                 <td>{{ hospede.nome }}</td>
-                                 <td>{{ hospede.email }}</td>
-                               <td>{{ hospede.fone }}</td>
+                                 <td>{{ itenConsumo.descricao }}</td>
+                                 <td style="text-align: center;">{{ itenConsumo.unidade }}</td>
+                                 <td style="text-align: center;">{{ itenConsumo.estoqueAtual|floatformat:2 }}</td>
+                                 <td style="text-align: right;">RS: {{ itenConsumo.precoVenda|floatformat:2 }}</td>
                                <td>
-                                 <form method="POST" action="{% url 'hospedes_delete' hospede.id %}">
+                                 <form method="POST" action="{% url 'itensConsumo_delete' itenConsumo.id %}">
                                       {% csrf_token %}
                                     <div class="btn-opcoes">
-                                      <a class="btn btn-success btn-sm"  href="{% url 'hospedes_edit' hospede.id %}" title="Editar"><i class="fa fa-edit"></i></a>
-                                      <a class="btn btn-danger btn-sm"  href="{% url 'hospedes_delete' hospede.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
+                                      <a class="btn btn-success btn-sm"  href="{% url 'itensConsumo_edit' itenConsumo.id %}" title="Editar"><i class="fa fa-edit"></i></a>
+                                      <a class="btn btn-danger btn-sm"  href="{% url 'itensConsumo_delete' itenConsumo.id %}" title="Excluir"><i class="fa fa-trash"></i></a>
                                     </div>  
                                   </form>
                                 </td>
                               </tr>
                               {% empty %}
                                   <tr class="text-center">
-                                    <td colspan="4">Não existe hospedes cadastrados</td>
+                                    <td colspan="4">Não existem itens de consumo cadastrados</td>
                                   </tr>
                               {% endfor %}
                            </tbody>

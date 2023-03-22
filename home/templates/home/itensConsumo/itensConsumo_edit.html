@@ -7,136 +7,40 @@
 
 <div class "card">
     <div class="card-body">
-        <h4>EDITANDO HOSPEDE<h4>
+        <h4>EDITANDO ITEM<h4>
         <hr>
         {{ form.media }}        
         <form method='POST'>
             {% csrf_token %}
             <div class="form-row">
               <div class="form-group col-md-6 mb-0">
-                {{ form.nome|as_crispy_field }}
+                {{ form.descricao|as_crispy_field }}
               </div>
               <div class="form-group col-md-2 mb-0">
-                {{ form.cpf|as_crispy_field }}
+                {{ form.unidade|as_crispy_field }}
               </div>
               <div class="form-group col-md-2 mb-0">
-                {{ form.datanascimento|as_crispy_field }}
+                {{ form.estoqueAtual|as_crispy_field }}
               </div>
               <div class="form-group col-md-2 mb-0">
-                {{ form.generohospede|as_crispy_field }}
+                {{ form.precoCompra|as_crispy_field }}
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group col-md-6 mb-0">
-                {{ form.email|as_crispy_field }}
+              <div class="form-group col-md-2 mb-0">
+                {{ form.margemLucro|as_crispy_field }}
               </div>
-              <div class="form-group col-md-3 mb-0">
-                {{ form.fone|as_crispy_field }}
+              <div class="form-group col-md-2 mb-0">
+                {{ form.precoVenda|as_crispy_field }}
               </div>
-              <div class="form-group col-md-3 mb-0">
-                {{ form.profissao|as_crispy_field }}
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-3 mb-0">
-                {{ form.nacionalidade|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-5 mb-0">
-                {{ form.endereco|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-3 mb-0">
-                {{ form.cidade|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-1 mb-0">
-                {{ form.estado|as_crispy_field }}
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group col-md-3 mb-0">
-                {{ form.Pais|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-3 mb-0">
-                {{ form.tipodocindentificacao|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-3 mb-0">
-                {{ form.numerodocumento|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-3 mb-0">
-                {{ form.orgaodocumento|as_crispy_field }}
-              </div>
-            </div>
-            <!-- ###########################################################  -->
-            <div class="container-fluid">
-              <div class="row">
-                <div class="card col-md-6 mb-0">
-                  <div class="card-header">Movivo viagem</div>
-                  <div class="card-body">
-                    <div class="form-row">
-                      <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemLazerferias|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemCongressoFeira|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemEstudoCursos|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemNegocios|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemParentesAmigos|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemReligiao|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemCompras|as_crispy_field }}
-                       </div>
-                       <div class="form-group col-md-4 mb-0">
-                         {{ form.motviagemOutros|as_crispy_field }}
-                       </div>
-                     </div>
-                    </div>
-                </div>
-                <!-- ###########################################################  -->
-                <div class="card col-md-6 mb-0">
-                  <div class="card-header">Meio de transporte</div>
-                  <div class="card-body">
-                    <div class="form-row">
-                      <div class="form-row">
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteAviao|as_crispy_field }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteCarro|as_crispy_field }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteOnibus|as_crispy_field }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteMoto|as_crispy_field }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteNavio|as_crispy_field }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteTrem|as_crispy_field }}
-                        </div>
-                        <div class="form-group col-md-4 mb-0">
-                          {{ form.meiotransporteOutros|as_crispy_field }}
-                        </div>
-                      </div>
-                     </div>
-                  </div>
-                </div>
+              <div class="form-group col-md-8 mb-0">
+                {{ form.observacao|as_crispy_field }}
               </div>
             </div>
             <!-- ###########################################################  -->
             <br>
             <button class="btn btn-success" type="submit">Salvar</button>
-            <a href="{% url 'hospedes' %}" class="btn btn-danger">Cancelar</a>
+            <a href="{% url 'itensConsumo' %}" class="btn btn-danger">Cancelar</a>
         </form>
     </div>
 </div>    

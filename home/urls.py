@@ -38,4 +38,14 @@ urlpatterns = [
     path('',views.apartamentos_erro, name='apartamentos_erro'),
 
 
+
+    path('itensConsumo/', views.itensConsumo_list, name='itensConsumo'),
+
+    path('itensConsumo/add/', views.itensConsumo_add, name='itensConsumo_add'),
+
+    path('itensConsumo/edit/<int:itenConsumo_pk>', views.itensConsumo_edit, name='itensConsumo_edit'),
+
+    path('itensConsumo/delete/<int:itenConsumo_pk>',views.itensConsumo_delete, name='itensConsumo_delete'),
+
+
 ]

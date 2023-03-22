@@ -11,9 +11,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 import json
 
-from home.models import PerfilUsuario,hospedes,apartamentos
+from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo
 
-from home.forms import HospedesForm,ApartamentosForm
+from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm
 
 class PaginaInicial(LoginRequiredMixin, TemplateView):
     template_name = 'home/base.html'
@@ -423,3 +423,135 @@ def ApartHome_list(request):
     }
 
     return render(request, 'home/apartamentos/apartsHome.html', context)
+
+
+################### Listagem de Itens de Consumo ###################
+
+@login_required
+def itensConsumo_list(request):
+    try:
+        perfil_usuario = request.user.perfilusuario
+        empresa = perfil_usuario.empresa
+        nome_empresa = empresa.nome
+        empresa_iduser = perfil_usuario.empresa.pk
+        itenList = ItensConsumo.objects.filter(empresa=empresa)
+    except PerfilUsuario.DoesNotExist:
+        empresa = None
+        empresa_iduser = None
+        nome_empresa = 'Mostrando os itns de consumo de todas a empresas'
+        itenList = apartamentos.objects.all()
+
+    context = {
+        'itensConsumo': itenList,
+        'empresa': empresa,
+        'empresa_iduser': empresa_iduser,
+        'nome_empresa': nome_empresa,
+    }
+
+    return render(request, 'home/itensConsumo/itensConsumo.html', context)
+
+
+################### Adicionar Itens Consumo ###################
+
+@login_required
+def itensConsumo_add(request):
+    form = ItensConsumoForm(request.POST or None)
+    action = '' # Inicializa a variável action com um valor padrão
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = request.user.perfilusuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       context = {
+            'form': form,
+            'perfil_usuario': perfil_usuario,
+            'nome_empresa': nome_empresa,
+            'empresa_iduser': empresa_iduser,
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('itensConsumo')
+    #####################################################
+    if request.POST:
+        if form.is_valid():
+            # Verifica se o apartamento já existe
+            descricao = form.cleaned_data.get('descricao')
+            if not descricao:
+                form.add_error('descricao', 'O campo descrição é obrigatório.')
+            else:
+                empresa = request.user.perfilusuario.empresa
+                item_existente = ItensConsumo.objects.filter(descricao=descricao, empresa=empresa).first()
+
+                if item_existente:
+                    # Se o apartamento já existe com o nome informado, define a instância do formulário para a instância do hóspede encontrado e redireciona para a página de edição
+                    form = ItensConsumoForm(instance=item_existente)
+                    return redirect('itensConsumo_edit', itenConsumo_pk=item_existente.pk)
+                else:
+                    # Se o hóspede não existe e o CPF não foi informado ou não foi encontrado com outro nome, salva o novo registro
+                    itemconsumo = form.save(commit=False)
+                    itemconsumo.empresa = empresa
+                    itemconsumo.save()
+                    action = request.POST.get('action')
+                    if action == 'save_exit':
+                       return redirect('itensConsumo')
+                    elif action == 'save_add':
+                       return redirect('itensConsumo_add')
+
+    return render(request, 'home/itensConsumo/itensConsumo_add.html', context)
+
+################### Editar Apartamentos ###################
+
+@login_required
+def itensConsumo_edit(request, itenConsumo_pk):
+    itenConsumoEdit = ItensConsumo.objects.get(pk=itenConsumo_pk)
+    form = ItensConsumoForm(request.POST or None, instance=itenConsumoEdit)
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = perfil_usuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       context = {
+            'form': form,
+            'perfil_usuario': perfil_usuario,
+            'nome_empresa': nome_empresa,
+            'empresa_iduser': empresa_iduser,
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('itensConsumo')
+
+    if request.POST:
+        if form.is_valid():
+            descricao = form.cleaned_data.get('descricao')
+            if not descricao:
+                form.add_error('descricao', 'O campo descrição é obrigatório.')
+            else:
+                itenConsumo = form.save(commit=False)
+                itenConsumo.empresa = request.user.perfilusuario.empresa or None            
+                itenConsumo.save()
+                return redirect('itensConsumo')
+
+    return render(request, 'home/itensConsumo/itensConsumo_edit.html', context)
+
+
+################### Exclusão de Itens de Consumo ###################
+
+@login_required
+def itensConsumo_delete(request, itenConsumo_pk):
+    itenConsumoDelete = ItensConsumo.objects.get(pk=itenConsumo_pk)
+    try:
+      perfil_usuario = request.user.perfilusuario
+      empresa = perfil_usuario.empresa
+      context = {
+        'itenConsumo': itenConsumoDelete.id,
+        'itenConsumodescricao': itenConsumoDelete.descricao,
+        'nome_empresa': empresa.nome,
+        'empresa_iduser': perfil_usuario.empresa.pk
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('itensConsumo')
+    ###############################################################
+    if request.POST:
+        itenConsumoDelete.delete()
+        return redirect('itensConsumo')
+
+    return render(request, 'home/itensConsumo/itensConsumo_delete.html', context )
+
