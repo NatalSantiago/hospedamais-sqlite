@@ -66,11 +66,13 @@ class ItensConsumo(models.Model):
               ("KG", "Kilo"),
               ("DZ", "Duzia"),
               ("PC", "Peça"),
-              ("LT", "Litro"))
+              ("LT", "Litro"),
+              ("SV", "Serviço(s)"))
 
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
     descricao = models.CharField("Descrição", max_length=100, unique=True, error_messages={'unique': "Produto já cadastrado ! ! !", })
     unidade = models.CharField(("Unidade"), max_length=20, choices=TIPOUND)
+    estoqueMinimo = models.DecimalField(("Estoque Mínimo"), max_digits=10, decimal_places=2)
     estoqueAtual = models.DecimalField(("Estoque Atual"), max_digits=10, decimal_places=2)
     precoCompra = models.DecimalField(("Preço Compra"), max_digits=10, decimal_places=2, blank=True, null=False)
     margemLucro = models.DecimalField(("Margem %"), max_digits=10, decimal_places=2, blank=True, null=False)
@@ -140,8 +142,10 @@ class apartamentos(models.Model):
     tipoapart = models.CharField(("Tipo"), max_length=50, choices=TIPOAPART)
     ramal = models.CharField(("Ramal"), max_length=10, blank=True, null=False )
     valordiaria = models.DecimalField(("Valor da diária"), max_digits=10, decimal_places=2)
+    qtdpessoas = models.IntegerField(("Nº. Pessoas"))
+    valorporexcedente = models.DecimalField(("Valor por excedente"), max_digits=10, decimal_places=2)
     observacao = models.CharField(("Observação"), max_length=255, blank=True, null=False )
-    tipostatus = models.CharField(("Tipo"), max_length=50, choices=TIPOSTATUS)
+    tipostatus = models.CharField(("Status"), max_length=50, choices=TIPOSTATUS)
 
 
     def __str__(self):

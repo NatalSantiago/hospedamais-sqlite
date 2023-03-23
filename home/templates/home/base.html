@@ -109,18 +109,19 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item has-treeview menu-close">
             <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-id-card"></i>
+              <i class="fa fa-list-alt" aria-hidden="true"></i>
               <p>
-                Cadastros
+                Cadastros Auxiliares
                 <i class="right fas fa-angle-left"></i>
               </p>
             </a>
             <ul class="nav nav-treeview">
+              <!-- Sub-Menus -->
               <li class="nav-item">
-                <a href="{% url "hospedes" %}" class="nav-link">
-                  <i class="fas fa-users-cog"></i>
+                <a href="#" class="nav-link">
+                  <i class="fa fa-address-book-o" aria-hidden="true"></i>
                   <p>
-                  Hóspedes
+                  Funcionários
                   </p>
                </a>
               </li>
@@ -136,7 +137,7 @@
               <!-- Sub-Menus -->
               <li class="nav-item">
                 <a href="{% url "itensConsumo" %}" class="nav-link">
-                  <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                  <i class="fa fa-shopping-basket" aria-hidden="true"></i>
                   <p>
                   Itens Consumo
                   </p>
@@ -147,6 +148,22 @@
           </li>
         </ul>
       </nav>
+
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-item has-treeview menu-close">
+            <a href="{% url "hospedes" %}" class="nav-link">
+              <i class="fas fa-users-cog"></i>
+              <p>
+                Cadastro Hóspedes
+              </p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+
+
       {% endif %}
 
 

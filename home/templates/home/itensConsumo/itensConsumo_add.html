@@ -13,11 +13,16 @@
         <form action="{% url 'itensConsumo_add' %}" method='POST'>
             {% csrf_token %}
             <div class="form-row">
-              <div class="form-group col-md-6 mb-0">
+              <div class="form-group col-md-8 mb-0">
                 {{ form.descricao|as_crispy_field }}
               </div>
               <div class="form-group col-md-2 mb-0">
                 {{ form.unidade|as_crispy_field }}
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-2 mb-0">
+                {{ form.estoqueMinimo|as_crispy_field }}
               </div>
               <div class="form-group col-md-2 mb-0">
                 {{ form.estoqueAtual|as_crispy_field }}
@@ -25,15 +30,15 @@
               <div class="form-group col-md-2 mb-0">
                 {{ form.precoCompra|as_crispy_field }}
               </div>
-            </div>
-            <div class="form-row">
               <div class="form-group col-md-2 mb-0">
                 {{ form.margemLucro|as_crispy_field }}
               </div>
               <div class="form-group col-md-2 mb-0">
                 {{ form.precoVenda|as_crispy_field }}
               </div>
-              <div class="form-group col-md-8 mb-0">
+            </div>  
+            <div class="form-row">
+              <div class="form-group col-md-10 mb-0">
                 {{ form.observacao|as_crispy_field }}
               </div>
             </div>
