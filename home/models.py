@@ -75,7 +75,7 @@ class ItensConsumo(models.Model):
     estoqueMinimo = models.DecimalField(("Estoque Mínimo"), max_digits=10, decimal_places=2)
     estoqueAtual = models.DecimalField(("Estoque Atual"), max_digits=10, decimal_places=2)
     precoCompra = models.DecimalField(("Preço Compra"), max_digits=10, decimal_places=2, blank=True, null=False)
-    margemLucro = models.DecimalField(("Margem %"), max_digits=10, decimal_places=2, blank=True, null=False)
+    margemLucro = models.DecimalField(("Margem %"), max_digits=10, decimal_places=2)
     precoVenda = models.DecimalField(("Preço Venda"), max_digits=10, decimal_places=2)
     observacao = models.CharField("Observação", max_length=100, blank=True, null=False)
 

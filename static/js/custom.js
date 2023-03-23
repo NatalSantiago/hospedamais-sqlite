@@ -66,7 +66,6 @@ $(document).ready(function () {
 
 // =============  Data Table - (End) ================= //
 
-
 $(document).ready(function () {
     $('#tabelaApartamentos').DataTable({
         language: {

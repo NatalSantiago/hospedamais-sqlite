@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'cpf_field',
     'django_user_agents',
-    'sweetify',
+    'widget_tweaks',
 ]
 
 # Crispy Forms
@@ -57,9 +57,6 @@ USER_AGENTS_CACHE = 'default'
 USE_L10N = True         # essa é padrão
 
 USE_THOUSAND_SEPARATOR = True
-
-SWEETIFY_SWEETALERT_LIBRARY = 'sweetalert'
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
