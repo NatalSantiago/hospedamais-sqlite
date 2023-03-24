@@ -6,6 +6,8 @@
 
 {% load widget_tweaks %}
 
+{% load static %}
+
 <div class "card">
     <div class="card-body">
         <h4>EDITANDO ITEM<h4>
@@ -51,12 +53,23 @@
     </div>
 </div>    
 
+<!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
+<script src="{% static 'js/custom.js' %}"></script>
+<script>
+  enableFormTabbing();
+</script>
+<!-- ########################## FIM ################################# -->
+
+
+<!-- ########### Colocar o foco no campo descricao ##################  -->
 <script>
    document.addEventListener('DOMContentLoaded', function() {
    document.getElementById('{{ form.descricao.id_for_label }}').focus();
    });
 </script>
+<!-- ########################## FIM ################################# -->
 
+<!-- ############# Efetua o calculo do precoVenda ##################  -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const precoCompra = document.getElementById('precoCompra');
@@ -71,6 +84,7 @@
         }
     });
 </script>
+<!-- ########################## FIM ################################# -->
 
 
 {% endblock %}

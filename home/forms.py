@@ -6,6 +6,8 @@ from bootstrap_datepicker_plus.widgets import DatePickerInput
 
 import re
 
+import widget_tweaks 
+
 class HospedesForm(forms.ModelForm):
     class Meta:
        model = hospedes
@@ -47,9 +49,9 @@ class ApartamentosForm(forms.ModelForm):
 
 class ItensConsumoForm(forms.ModelForm):
     class Meta:
-       model = ItensConsumo
-       
-       fields = '__all__'
+      model = ItensConsumo
+
+      fields = '__all__'
 
     def clean_descricao(self):
         nome = self.cleaned_data['descricao']

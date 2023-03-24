@@ -7,6 +7,10 @@ from django.views.generic.base import RedirectView
 
 from .views import PaginaInicial
 
+
+from .views import itensConsumo_check_description,verificaSeHospedeExite,verificaSeApartamentoExite
+
+
 urlpatterns = [
 
     path('', PaginaInicial.as_view(), name='inicio'),
@@ -20,6 +24,8 @@ urlpatterns = [
     path('hospedes/edit/<int:hospede_pk>', views.hospedes_edit, name='hospedes_edit'),
 
     path('hospedes/delete/<int:hospede_pk>',views.hospedes_delete, name='hospedes_delete'),
+
+    path('hospedes/verificaSeHospedeExite/', verificaSeHospedeExite, name='verificaSeHospedeExite'),
 
     path('login', auth_views.LoginView.as_view(template_name="home/login.html", redirect_authenticated_user=True), name='login'),
 
@@ -35,8 +41,9 @@ urlpatterns = [
 
     path('apartamentos/delete/<int:apartamento_pk>',views.apartamentos_delete, name='apartamentos_delete'),
 
-    path('',views.apartamentos_erro, name='apartamentos_erro'),
+    path('apartamentos/verificaSeApartamentoExite/', verificaSeApartamentoExite, name='verificaSeApartamentoExite'),
 
+    path('',views.apartamentos_erro, name='apartamentos_erro'),
 
 
     path('itensConsumo/', views.itensConsumo_list, name='itensConsumo'),
@@ -46,6 +53,8 @@ urlpatterns = [
     path('itensConsumo/edit/<int:itenConsumo_pk>', views.itensConsumo_edit, name='itensConsumo_edit'),
 
     path('itensConsumo/delete/<int:itenConsumo_pk>',views.itensConsumo_delete, name='itensConsumo_delete'),
+
+    path('itensConsumo/check_description/', itensConsumo_check_description, name='itensConsumo_check_description'),
 
 
 ]

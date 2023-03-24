@@ -11,6 +11,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 import json
 
+from django.http import JsonResponse
+
 from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo
 
 from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm
@@ -75,13 +77,7 @@ def hospedes_add(request):
                 cpf = form.cleaned_data.get('cpf')
                 empresa = request.user.perfilusuario.empresa
 
-                hospede_existente = hospedes.objects.filter(nome=nome, empresa=empresa).first()
-
-                if hospede_existente:
-                    # Se o hóspede já existe com o nome informado, define a instância do formulário para a instância do hóspede encontrado e redireciona para a página de edição
-                    form = HospedesForm(instance=hospede_existente)
-                    return redirect('hospedes_edit', hospede_pk=hospede_existente.pk)
-                elif cpf != '':
+                if cpf != '':
                     # Verifica se o CPF já foi cadastrado com outro nome
                     cpf_existente = hospedes.objects.filter(cpf=cpf, empresa=empresa).exclude(nome=nome).first()
 
@@ -128,6 +124,20 @@ def hospedes_add(request):
     }
 
     return render(request, 'home/hospedes/hospedes_add.html', context)
+
+################### Localizar hospede já cadastrado ###################
+
+@login_required
+def verificaSeHospedeExite(request):
+    nome = request.POST.get('nome')
+
+    nome_existente = hospedes.objects.filter(nome__iexact=nome).exists()
+
+    if nome_existente:
+        id_hospede = hospedes.objects.filter(nome__iexact=nome).values('id')[0]['id']
+        return JsonResponse({'nome_existente': True, 'id': id_hospede})
+    else:
+        return JsonResponse({'nome_existente': False})
 
 
 ################### Editar Hospedes ###################
@@ -296,24 +306,31 @@ def apartamentos_add(request):
                 form.add_error('descricao', 'O campo descrição é obrigatório.')
             else:
                 empresa = request.user.perfilusuario.empresa
-                apart_existente = apartamentos.objects.filter(descricao=descricao, empresa=empresa).first()
-
-                if apart_existente:
-                    # Se o apartamento já existe com o nome informado, define a instância do formulário para a instância do hóspede encontrado e redireciona para a página de edição
-                    form = ApartamentosForm(instance=apart_existente)
-                    return redirect('apartamentos_edit', apartamento_pk=apart_existente.pk)
-                else:
-                    # Se o hóspede não existe e o CPF não foi informado ou não foi encontrado com outro nome, salva o novo registro
-                    apartamento = form.save(commit=False)
-                    apartamento.empresa = empresa
-                    apartamento.save()
-                    action = request.POST.get('action')
-                    if action == 'save_exit':
-                       return redirect('apartamentos')
-                    elif action == 'save_add':
-                       return redirect('apartamentos_add')
+                # Se o hóspede não existe e o CPF não foi informado ou não foi encontrado com outro nome, salva o novo registro
+                apartamento = form.save(commit=False)
+                apartamento.empresa = empresa
+                apartamento.save()
+                action = request.POST.get('action')
+                if action == 'save_exit':
+                   return redirect('apartamentos')
+                elif action == 'save_add':
+                   return redirect('apartamentos_add')
 
     return render(request, 'home/apartamentos/apartamentos_add.html', context)
+
+################### Localizar apartamento já cadastrado ###################
+
+@login_required
+def verificaSeApartamentoExite(request):
+    descricao = request.POST.get('descricao')
+
+    descricao_existente = apartamentos.objects.filter(descricao__iexact=descricao).exists()
+
+    if descricao_existente:
+        id_apartamento = apartamentos.objects.filter(descricao__iexact=descricao).values('id')[0]['id']
+        return JsonResponse({'descricao_existente': True, 'id': id_apartamento})
+    else:
+        return JsonResponse({'descricao_existente': False})
 
 ################### Editar Apartamentos ###################
 
@@ -479,24 +496,33 @@ def itensConsumo_add(request):
                 form.add_error('descricao', 'O campo descrição é obrigatório.')
             else:
                 empresa = request.user.perfilusuario.empresa
-                item_existente = ItensConsumo.objects.filter(descricao=descricao, empresa=empresa).first()
-
-                if item_existente:
-                    # Se o apartamento já existe com o nome informado, define a instância do formulário para a instância do hóspede encontrado e redireciona para a página de edição
-                    form = ItensConsumoForm(instance=item_existente)
-                    return redirect('itensConsumo_edit', itenConsumo_pk=item_existente.pk)
-                else:
-                    # Se o hóspede não existe e o CPF não foi informado ou não foi encontrado com outro nome, salva o novo registro
-                    itemconsumo = form.save(commit=False)
-                    itemconsumo.empresa = empresa
-                    itemconsumo.save()
-                    action = request.POST.get('action')
-                    if action == 'save_exit':
-                       return redirect('itensConsumo')
-                    elif action == 'save_add':
-                       return redirect('itensConsumo_add')
+#                item_existente = ItensConsumo.objects.filter(descricao=descricao, empresa=empresa).first()
+                # Se o hóspede não existe e o CPF não foi informado ou não foi encontrado com outro nome, salva o novo registro
+                itemconsumo = form.save(commit=False)
+                itemconsumo.empresa = empresa
+                itemconsumo.save()
+                action = request.POST.get('action')
+                if action == 'save_exit':
+                   return redirect('itensConsumo')
+                elif action == 'save_add':
+                   return redirect('itensConsumo_add')
 
     return render(request, 'home/itensConsumo/itensConsumo_add.html', context)
+
+
+################### Localizar itens já cadastrados ###################
+
+@login_required
+def itensConsumo_check_description(request):
+    descricao = request.POST.get('descricao')
+
+    item_existente = ItensConsumo.objects.filter(descricao__iexact=descricao).exists()
+
+    if item_existente:
+        id_item = ItensConsumo.objects.filter(descricao__iexact=descricao).values('id')[0]['id']
+        return JsonResponse({'item_existente': True, 'id': id_item})
+    else:
+        return JsonResponse({'item_existente': False})
 
 ################### Editar Apartamentos ###################
 

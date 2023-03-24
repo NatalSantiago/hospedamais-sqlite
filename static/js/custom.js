@@ -199,4 +199,41 @@ $(document).ready(function () {
 
 // =============  Data Table - (End) ================= //
 
+// =======  Função para mudar de campo com a tecla ENTER ========== //
 
+function enableFormTabbing() {
+  document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('form');
+
+    var fields = form.querySelectorAll('input[type="text"], input[type="number"], select');
+    for (var i = 0; i < fields.length; i++) {
+      fields[i].addEventListener('keydown', function(e) {
+        if (e.keyCode === 13) {
+          e.preventDefault();
+          var nextField = getNextVisibleField(this);
+          if (nextField) {
+            nextField.focus();
+          }
+        }
+      });
+    }
+
+    function getNextVisibleField(currentField) {
+      var fields = Array.from(form.querySelectorAll('input[type="text"], input[type="number"], select'));
+      var currentIndex = fields.indexOf(currentField);
+      for (var i = currentIndex + 1; i < fields.length; i++) {
+        if (isElementVisible(fields[i])) {
+          return fields[i];
+        }
+      }
+      return null;
+    }
+
+    function isElementVisible(el) {
+      return (el.offsetWidth > 0 || el.offsetHeight > 0);
+    }
+  });
+}
+
+// =======  Função para mudar de campo com a tecla ENTER - (End) ================= //
+ 

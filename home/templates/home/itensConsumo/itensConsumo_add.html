@@ -6,6 +6,16 @@
 
 {% load widget_tweaks %}
 
+{% load static %}
+
+{% csrf_token %}
+
+{% block extrahead %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+{% endblock %}
+
+
 <div class="card">
     <div class="card-body">
         <h4>NOVO ITEM<h4>
@@ -52,13 +62,24 @@
     </div>
 </div>    
 
+
+<!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
+<script src="{% static 'js/custom.js' %}"></script>
+<script>
+  enableFormTabbing();
+</script>
+<!-- ########################## FIM ################################# -->
+
+
+<!-- ########### Colocar o foco no campo descricao ##################  -->
 <script>
    document.addEventListener('DOMContentLoaded', function() {
    document.getElementById('{{ form.descricao.id_for_label }}').focus();
    });
 </script>
+<!-- ########################## FIM ################################# -->
 
-
+<!-- ############# Efetua o calculo do precoVenda ##################  -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const precoCompra = document.getElementById('precoCompra');
@@ -73,6 +94,58 @@
         }
     });
 </script>
+<!-- ########################## FIM ################################# -->
+
+{% block extrascripts %}
+<script>
+
+$(document).ready(function() {
+  var descricaoField = $('#{{ form.descricao.id_for_label }}');
+
+  descricaoField.blur(function() {
+    var descricaoValue = descricaoField.val().trim().toUpperCase();
+
+    if (descricaoValue === '') {
+      return;
+    }
+
+    $.ajax({
+      url: '{% url "itensConsumo_check_description" %}',
+      method: 'POST',
+      data: {
+        'descricao': descricaoValue,
+        'csrfmiddlewaretoken': '{{ csrf_token }}',
+      },
+      success: function(data) {
+        if (data.item_existente) {
+          descricaoField.val(''); // Limpa o valor do campo de descrição
+          descricaoField.focus(); // Volta o foco para o campo de descrição
+          Swal.fire({
+            title: descricaoValue,
+            text: "Este item já esta cadastrado  ! !",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            cancelButtonText: 'Cancelar',
+            confirmButtonText: 'Editar este item',
+
+          }).then((result) => {
+             if (result.isConfirmed) {
+               var itemId = data.id;
+               var url = "/itensConsumo/edit/" + itemId;
+               window.location.href = url;
+             }
+          })
+          $(this).focus();
+        }
+      },
+    });
+  });
+});
+</script>
+
+{% endblock %}
 
 
 
