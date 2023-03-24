@@ -62,11 +62,21 @@ def hospedes_list(request):
 
 @login_required
 def hospedes_add(request):
-
-    action = '' # Inicializa a variável action com um valor padrão
-
     form = HospedesForm(request.POST or None)
-
+    action = '' # Inicializa a variável action com um valor padrão
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = perfil_usuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       context = {
+            'form': form,
+            'nome_empresa': nome_empresa,
+            'empresa_iduser': empresa_iduser
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('hospedes')
+    ###############################################################
     if request.POST:
         if form.is_valid():
             # Verifica se o hóspede já existe
@@ -76,7 +86,6 @@ def hospedes_add(request):
             else:
                 cpf = form.cleaned_data.get('cpf')
                 empresa = request.user.perfilusuario.empresa
-
                 if cpf != '':
                     # Verifica se o CPF já foi cadastrado com outro nome
                     cpf_existente = hospedes.objects.filter(cpf=cpf, empresa=empresa).exclude(nome=nome).first()
@@ -105,24 +114,7 @@ def hospedes_add(request):
                        return redirect('hospedes')
                     elif action == 'save_add':
                        return redirect('hospedes_add')
-
-    nome_empresa = None
-    empresa_iduser = None
-
-    try:
-        perfil_usuario = request.user.perfilusuario
-        empresa = perfil_usuario.empresa
-        nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
-    except PerfilUsuario.DoesNotExist:
-        pass
-
-    context = {
-        'form': form,
-        'nome_empresa': nome_empresa,
-        'empresa_iduser': empresa_iduser
-    }
-
+                    
     return render(request, 'home/hospedes/hospedes_add.html', context)
 
 ################### Localizar hospede já cadastrado ###################
