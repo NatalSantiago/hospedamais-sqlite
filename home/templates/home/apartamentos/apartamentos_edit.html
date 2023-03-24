@@ -1,9 +1,12 @@
-
 {% extends "home/base.html" %}
 
 {% load crispy_forms_tags %}
 
 {% block content %}
+
+{% load widget_tweaks %}
+
+{% load static %}
 
 <div class "card">
     <div class="card-body">
@@ -49,11 +52,22 @@
     </div>
 </div>    
 
+<!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
+<script src="{% static 'js/custom.js' %}"></script>
+
+<script>
+  enableFormTabbing();
+</script>
+<!-- ########################## FIM ################################# -->
+
+
+<!-- ########### Colocar o foco no campo descricao ##################  -->
 <script>
    document.addEventListener('DOMContentLoaded', function() {
    document.getElementById('{{ form.descricao.id_for_label }}').focus();
    });
 </script>
+<!-- ########################## FIM ################################# -->
 
 
 {% endblock %}

@@ -136,7 +136,6 @@ class apartamentos(models.Model):
 
     TIPOSTATUS = ( ("Livre", "Livre"), ("Ocupado", "Ocupado"), ("Reservado", "Reservado"), ("Em manutenção", "Em manutenção"), ("Outro", "Outro") )    
 
-
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
     descricao = models.CharField("Descrição", max_length=50, blank=True, null=False )
     tipoapart = models.CharField(("Tipo"), max_length=50, choices=TIPOAPART)
@@ -151,3 +150,50 @@ class apartamentos(models.Model):
     def __str__(self):
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         return f"{self.descricao} - Valor da diário R$ {locale.currency(self.valordiaria, grouping=True)}"
+
+
+
+class MovimentosAparts(models.Model):
+
+    TIPO_PAGAMENTO = (
+        ('dinheiro', 'Dinheiro'),
+        ('pix', 'PIX'),
+        ('cartao_credito', 'Cartão de crédito'),
+        ('cartao_debito', 'Cartão de débito'),
+        ('transferencia_bancaria', 'Transferência bancária'),
+        ('boleto_bancario', 'Boleto bancário'),
+        ('cheque', 'Cheque'),
+        ('paypal', 'PayPal'),
+        ('cartao_refeicao', 'Cartão Refeição'),
+        ('deposito', 'Depósito em conta'),
+        ('credito_consumo', 'Crédito de Consumo'),
+        ('voucher', 'Voucher'),
+        ('outro', 'Outro')        
+    )
+
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
+    apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=False )
+    hospede = models.ForeignKey(hospedes, on_delete=models.CASCADE, blank=True, null=False )
+    data_checkin = models.DateField(("Data de CheckIn"), null=True, blank=True)
+    hora_checkin = models.TimeField(("Hora de CheckIn"), null=True, blank=True)
+    data_checkout = models.DateField(("Data de CheckOut"), null=True, blank=True)
+    hora_checkout = models.TimeField(("Hora de CheckOut"), null=True, blank=True)
+    qtd_hospedes = models.IntegerField(("Nº. hóspedes"))
+    qtd_excedentes = models.IntegerField(("Excedentes"), null=True, blank=True)
+    valor_adiantamento = models.DecimalField(("Valor Adiantamento"), max_digits=10, decimal_places=2, null=True, blank=True)
+    valor_pago_excedente = models.DecimalField(("Valor por excedentes"), max_digits=10, decimal_places=2, null=True, blank=True)
+    valor_consumo = models.DecimalField(("Valor consumo"), max_digits=10, decimal_places=2, null=True, blank=True)
+    forma_pagamento = models.CharField(("Forma Pgto."), max_length=25, choices=TIPO_PAGAMENTO, null=True, blank=True)
+    data_fechamento = models.DateField(("Data fechamento"), null=True, blank=True)
+    hora_fechamento = models.TimeField(("Hora fechamento"), null=True, blank=True)
+    valor_total_conta = models.DecimalField(("Valor Total"), max_digits=10, decimal_places=2, null=True, blank=True)
+    valor_desconto = models.DecimalField(("Valor Desconto"), max_digits=10, decimal_places=2, null=True, blank=True)
+    valor_total_pago = models.DecimalField(("Valor Líquido"), max_digits=10, decimal_places=2, null=True, blank=True)
+    observacao = models.CharField(max_length=255, null=True, blank=True)
+    pago_sn = models.CharField(max_length=1, null=True, blank=True, default='N',)
+
+    def __str__(self):
+      return f"{self.hospede.nome} - Apart: {self.apartamento.descricao}"
+
+
+
