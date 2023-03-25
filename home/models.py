@@ -48,7 +48,8 @@ class Empresa(models.Model):
 
     def __str__(self):
         return f"{self.nome} - {self.tipoplano}"
-
+    
+#########################################################################################
 
 class PerfilUsuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -57,6 +58,7 @@ class PerfilUsuario(models.Model):
     def __str__(self):
         return f"{self.user.get_username()} - {self.empresa.nome}"
 
+#########################################################################################
 
 class ItensConsumo(models.Model):
 
@@ -82,13 +84,14 @@ class ItensConsumo(models.Model):
     def __str__(self):
         return f"{self.descricao} - {self.unidade}"
 
-
+#########################################################################################
 
 class hospedes(models.Model):
 
     SEXOHOSPEDE = ( ("Masculino", "Masculino"), ("Femenino", "Femenino") )    
 
     TIPODOCINDENT = (("Carteira de indentidade", "Carteira de indentidade"),
+                     ("Carteira de motorista", "Carteira de motorista"),
                      ("Carteira de ind. Estrangeira", "Carteira de ind. Estrangeira"),
                      ("Passaporte", "Passaporte"), 
                      ("Certidção de Nascimento", "Certidção de Nascimento"))
@@ -128,13 +131,13 @@ class hospedes(models.Model):
     def __str__(self):
       return self.nome
     
-
+#########################################################################################
 
 class apartamentos(models.Model):
 
     TIPOAPART = ( ("Simples", "Simples"), ("Stander", "Stander"), ("Luxo", "Luxo"), ("Super Luxo", "Super Luxo"), ("Duplex", "Duplex"), ("Cobertura", "Cobertura"), ("Loft", "Loft"), ("Rústico", "Rústico"))    
 
-    TIPOSTATUS = ( ("Livre", "Livre"), ("Ocupado", "Ocupado"), ("Reservado", "Reservado"), ("Em manutenção", "Em manutenção"), ("Outro", "Outro") )    
+    TIPOSTATUS = ( ("Livre", "Livre"), ("Ocupado", "Ocupado"), ("Reservado", "Reservado"), ("Em manutenção", "Em manutenção"), ("Em limpeza", "Em limpeza"), ("Outro", "Outro") )    
 
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
     descricao = models.CharField("Descrição", max_length=50, blank=True, null=False )
@@ -146,12 +149,11 @@ class apartamentos(models.Model):
     observacao = models.CharField(("Observação"), max_length=255, blank=True, null=False )
     tipostatus = models.CharField(("Status"), max_length=50, choices=TIPOSTATUS)
 
-
     def __str__(self):
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
         return f"{self.descricao} - Valor da diário R$ {locale.currency(self.valordiaria, grouping=True)}"
 
-
+#########################################################################################
 
 class MovimentosAparts(models.Model):
 
@@ -195,5 +197,22 @@ class MovimentosAparts(models.Model):
     def __str__(self):
       return f"{self.hospede.nome} - Apart: {self.apartamento.descricao}"
 
+#########################################################################################
 
+class ItensConsumoAparts(models.Model):
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
+    apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=False )
+    hospede = models.ForeignKey(hospedes, on_delete=models.CASCADE, blank=True, null=False )
+    movimento = models.ForeignKey(MovimentosAparts, on_delete=models.CASCADE, blank=True, null=False )
+    data_lancamento = models.DateField(("Data lançamento"), null=True, blank=True)
+    hora_lancamento = models.TimeField(("Hora lançamento"), null=True, blank=True)
+    item_lancamento = models.ForeignKey(ItensConsumo, on_delete=models.CASCADE, blank=True, null=False )
+    preco_item = models.DecimalField(("Preço"), max_digits=10, decimal_places=2, null=True, blank=True)
+    qtd_lancamento = models.IntegerField(("Qtd."))
+    valor_total = models.DecimalField(("Total"), max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def __str__(self):
+      return f"{self.item_lancamento.descricao} - Apart: {self.valor_total}"
+
+#########################################################################################
 

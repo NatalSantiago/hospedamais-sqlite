@@ -17,6 +17,11 @@ from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo
 
 from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm
 
+
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+
+
 class PaginaInicial(LoginRequiredMixin, TemplateView):
     template_name = 'home/base.html'
 
@@ -572,4 +577,7 @@ def itensConsumo_delete(request, itenConsumo_pk):
         return redirect('itensConsumo')
 
     return render(request, 'home/itensConsumo/itensConsumo_delete.html', context )
+
+
+################### Exemplo Modal ###################
 

@@ -1,6 +1,6 @@
 from django import forms
 
-from home.models import hospedes,apartamentos,ItensConsumo
+from home.models import hospedes,apartamentos,ItensConsumo,MovimentosAparts
 
 from bootstrap_datepicker_plus.widgets import DatePickerInput
 
