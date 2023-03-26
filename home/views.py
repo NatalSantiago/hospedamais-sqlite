@@ -13,10 +13,9 @@ import json
 
 from django.http import JsonResponse
 
-from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo
+from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo,MovimentosAparts
 
 from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm
-
 
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
@@ -412,33 +411,6 @@ def apartamentos_erro(request):
     }            
     return render(request, 'home/apartamentos/apartamentos_erro.html', context )
 
-
-################### Listagem de Apartamentos ###################
-
-@login_required
-def ApartHome_list(request):
-    try:
-        perfil_usuario = request.user.perfilusuario
-        empresa = perfil_usuario.empresa
-        nome_empresa = empresa.nome
-        empresa_iduser = perfil_usuario.empresa.pk
-        apartList = apartamentos.objects.filter(empresa=empresa)
-    except PerfilUsuario.DoesNotExist:
-        empresa = None
-        empresa_iduser = None
-        nome_empresa = 'Mostrando os apartamentos de todas a empresas'
-        apartList = apartamentos.objects.all()
-
-    context = {
-        'apartamentos': apartList,
-        'empresa': empresa,
-        'empresa_iduser': empresa_iduser,
-        'nome_empresa': nome_empresa
-    }
-
-    return render(request, 'home/apartamentos/apartsHome.html', context)
-
-
 ################### Listagem de Itens de Consumo ###################
 
 @login_required
@@ -579,5 +551,49 @@ def itensConsumo_delete(request, itenConsumo_pk):
     return render(request, 'home/itensConsumo/itensConsumo_delete.html', context )
 
 
-################### Exemplo Modal ###################
+################### ApartsHome ###################
+
+from .models import MovimentosAparts, ItensConsumoAparts
+
+@login_required
+def ApartHome_list(request):
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = perfil_usuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       movimentos_aparts_nao_pagos = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N')
+       apartamentos_com_movimentos = apartamentos.objects.filter(empresa=empresa).prefetch_related('movimentosaparts_set')
+
+       context = {
+           'apartamentos': apartamentos_com_movimentos,
+           'empresa': empresa,
+           'empresa_iduser': empresa_iduser,
+           'nome_empresa': nome_empresa,
+           'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos,
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('inicio')
+
+    return render(request, 'home/movimentoAparts/apartsHome.html', context)
+
+
+def itens_consumo_aparts_apartamento(request, apartamento_id):
+    perfil_usuario = request.user.perfilusuario
+    empresa = perfil_usuario.empresa
+
+    MovAparts = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N', apartamento_id=apartamento_id)
+
+    itens_consumo_aparts = ItensConsumoAparts.objects.filter(empresa=empresa, apartamento_id=apartamento_id, movimento_id__in=MovAparts.values_list('id', flat=True))
+
+    perfil_usuario = request.user.perfilusuario
+    empresa = perfil_usuario.empresa
+    nome_empresa = empresa.nome
+    context = {
+        'empresa': empresa,
+        'nome_empresa': nome_empresa,
+        'itens_consumo_aparts': itens_consumo_aparts,
+    }
+
+    return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
 

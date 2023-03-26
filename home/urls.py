@@ -54,4 +54,7 @@ urlpatterns = [
 
     path('itensConsumo/check_description/', itensConsumo_check_description, name='itensConsumo_check_description'),
 
+    path('itens_consumo_aparts/<int:apartamento_id>/', views.itens_consumo_aparts_apartamento, name='itens_consumo_aparts_apartamento'),
+
+
 ]

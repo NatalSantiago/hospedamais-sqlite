@@ -3,7 +3,6 @@
 {% load static %}
 
 {% block content %}
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>    
     <!-- =======  Data-Table  = Start  ========================== -->
     <br>
@@ -21,12 +20,14 @@
               {% if apartamento.tipostatus == 'Livre' %}
                  <i class="card-title" style="font-size: 15px;">Tipo: {{ apartamento.tipoapart }}</i><br>
                  <i class="card-title" style="font-size: 15px;">Status: {{ apartamento.tipostatus }}</i><br>
-              {% elif apartamento.tipostatus == 'Reservado' %}                 
-                 <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
-                 <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: 20/10/2023</i><br>
-              {% elif apartamento.tipostatus == 'Ocupado' %}
-                 <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
-                 <i class="card-title fa fa-calendar-check-o text-center" style="font-size: 15px;"> 20/10/2023  -  22/10/2023</i><br>
+                 {% elif apartamento.tipostatus == 'Reservado' %}                 
+                    <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
+                    <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: 20/10/2023</i><br>
+                 {% elif apartamento.tipostatus == 'Ocupado' %}
+                    {% for movimento in apartamento.movimentosaparts_set.all %}
+                      <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
+                      <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
+                    {% endfor %}
               {% elif apartamento.tipostatus == 'Em manutenção' %}
                  <i>Tipo: {{ apartamento.tipoapart }}</i><br>
                  <i>Status: {{ apartamento.tipostatus }}</i>
@@ -40,21 +41,24 @@
                 <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In</button>
               {% elif apartamento.tipostatus == 'Ocupado' %}
                 <div class="icons">
-                  <i class="fas fa-shopping-basket icon-spacing" data-toggle="modal" data-target="#ModalLancamentoItens" title="Lançar consumo"></i>
-
-
-<!--
-                  <i class="fas fa-shopping-basket icon-spacing" data-toggle="modal" data-target="#myModal" title="Lançar consumo"></i>
-<button type="button" class="as fa-shopping-basket icon-spacing" data-toggle="modal" data-target="#myModal"></button>                  
-
--->
-
-
-                  <i class="fas fa-light fa-envelope icon-spacing" title="Enviar mensagem"></i>
-                  <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ver dados do hospede"></i>
-                  <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual"></i>
-                  <i class="fa fa-exchange icon-spacing" aria-hidden="true" title="Mudar de acomodação"></i>
-                  <i class="fa fa-sign-out" aria-hidden="true" title="Efetuar Check-Out"></i>
+                  <a class="icon-spacing"  href="{% url 'itens_consumo_aparts_apartamento' apartamento.id %}">
+                    <i class="fas fa-shopping-basket icon-spacing" title="Lançar consumo"></i>
+                  </a>
+                  <a class="icon-spacing" href="#">
+                    <i class="fas fa-light fa-envelope icon-spacing" title="Enviar mensagem"></i>
+                  </a>
+                  <a class="icon-spacing" href="#">
+                    <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ver dados do hospede"></i>
+                  </a>
+                  <a class="icon-spacing" href="#">
+                    <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual"></i>
+                  </a>
+                  <a class="icon-spacing" href="#">
+                    <i class="fa fa-exchange icon-spacing" aria-hidden="true" title="Mudar de acomodação"></i>
+                  </a>
+                  <a class="icon-spacing" href="#">
+                    <i class="fa fa-sign-out icon-spacing" aria-hidden="true" title="Efetuar Check-Out"></i>
+                  </a>
                 </div>
               {% elif apartamento.tipostatus == 'Em manutenção' %}                 
                  <button type="button" class="btn btn-outline-success fa fa-wrench btn-short"> Liberar</button>
@@ -67,10 +71,32 @@
               <td colspan="4">Não existe apartamentos cadastrados</td>
             </tr>
         {% endfor %}
-
       </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+      {% for apartamento in apartamentos %}
+        <!-- Modal for the "Lançar consumo" button -->
+        <div class="modal fade" id="exampleModalCenter{{ apartamento.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                 <h5 class="modal-title" id="exampleModalLongTitle">Lançamento de consumo - Apartamento {{ apartamento.numero }}</h5>
+                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <div class="modal-body">
+                {% for intem in itens_consumo_aparts %}
+                   <i class="card-title" style="font-size: 15px;">Item: {{ intem.item_lancamento.descricao }}  -  Preço: {{ intem.preco_item }}  -  Qtd: {{ intem.qtd_lancamento }}  -  Valor total: {{ intem.valor_total }}</i><br>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-
     <!-- =======  Data-Table  = End  ===================== -->
     <style>
       .bg-success {background-color: #28a745;}
@@ -93,27 +119,4 @@
       }
 
     </style>
-
-
-<!-- Modal -->
-<div class="modal fade" id="ModalLancamentoItens" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="TituloModalCentralizado">Lançamento de produtos/serviços</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-        <button type="button" class="btn btn-primary">Salvar mudanças</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 {% endblock %}
