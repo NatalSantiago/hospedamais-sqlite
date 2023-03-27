@@ -1,19 +1,95 @@
 {% extends "home/base.html" %}
 
+{% load crispy_forms_tags %}
+
+{% load widget_tweaks %}
+
+{% load static %}
+
+{% csrf_token %}
+
+{% block extrahead %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+{% endblock %}
+
+
 {% block content %}
 
-<br>
-<div class="container mt-5" style="max-width: 550px;">
-    <div class="card p-3 border-dark">
-       <h6 class="modal-title">
-           <i class="fas fa-trash-alt"></i> Consumo apartamento
-       </h6>
-   </div>
-   <hr>
-   <hr>
-        {% for intem in itens_consumo_aparts %}
-           <i class="card-title" style="font-size: 15px;">Item: {{ intem.item_lancamento.descricao }}  -  Preço: {{ intem.preco_item }}  -  Qtd: {{ intem.qtd_lancamento }}  -  Valor total: {{ intem.valor_total }}</i><br>
-        {% endfor %}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
 
+<br>
+<div class="container mt-5" style="max-width: 800px;">
+    <div class="card p-3 border-dark">
+      <div style="background-color: #ADD8E6; padding: 10px;">
+          <i class="fas fa-shopping-basket"></i> 
+          <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços - [ {{ nomeApartamento }} ]</span>
+          <div style="display: inline-block; float: right;">
+              <a href="#" class="btn btn-success btn-sm">Inserir</a>
+              <a href="{% url "apartHome" %}" class="btn btn-danger btn-sm">Sair</a>
+          </div>
+      </div>
+      <div class="text-right text-danger">
+       <div class="text-dark mt-2 mb-2 ">
+          <!-- Tabela atual -->
+          <div style="height: 263px; overflow-y: auto;">
+            <table class="table">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col">Item</th>
+                  <th scope="col">V.unitário</th>
+                  <th scope="col">Qtd.</th>
+                  <th scope="col">V.Total</th>
+                  <th scope="col">OP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in itens_consumo_aparts %}
+                <tr>
+                  <td style="text-align: left;">{{ item.item_lancamento }}</td>
+                  <td style="text-align: right;">R$: {{ item.preco_item|floatformat:2 }}</td>
+                  <td>{{ item.qtd_lancamento }}</td>
+                  <td style="text-align: right;">R$: {{ item.valor_total|floatformat:2 }}</td>
+                  <td>
+                    <form id="excluir-form-{{ item.pk }}" method="POST" action="{% url 'delete_item_consumo_apart' item_pk=item.pk %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="item_id" value="{{ item.pk }}">
+                      <button type="button" onclick="confirmarExclusao({{ item.pk }})" class="btn btn-danger btn-sm">
+                        <i class="fa fa-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}    
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <hr>
+        <!-- Exemplo para formatar um valor de 1238.45 -->
+        <span style="font-weight:bold; font-size:larger; color:black">Total R$: {{ Somavalor_total|floatformat:2 }}</span>
+    </div>
+   </div>
 </div>
+
+<script>
+function confirmarExclusao(itemId) {
+    Swal.fire({
+        title: 'Tem certeza que deseja excluir o item? ID: ' + itemId,
+        text: "Essa ação não pode ser desfeita!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sim, excluir!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('excluir-form-' + itemId).submit();
+        }
+    });
+}
+</script>
+
 {% endblock %}
+

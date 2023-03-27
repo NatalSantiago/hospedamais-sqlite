@@ -15,7 +15,7 @@ from django.http import JsonResponse
 
 from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo,MovimentosAparts
 
-from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm
+from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm,InserirItensConsumoApartForm
 
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
@@ -577,23 +577,95 @@ def ApartHome_list(request):
 
     return render(request, 'home/movimentoAparts/apartsHome.html', context)
 
+################### Listar itens por apartamento ###################
+
+from django.db.models import Sum
 
 def itens_consumo_aparts_apartamento(request, apartamento_id):
     perfil_usuario = request.user.perfilusuario
     empresa = perfil_usuario.empresa
 
     MovAparts = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N', apartamento_id=apartamento_id)
-
     itens_consumo_aparts = ItensConsumoAparts.objects.filter(empresa=empresa, apartamento_id=apartamento_id, movimento_id__in=MovAparts.values_list('id', flat=True))
+
+    Somavalor_total = itens_consumo_aparts.aggregate(total=Sum('valor_total'))['total'] or 0
+
+    # Filtra o apartamento
+    apartamento = apartamentos.objects.filter(empresa=empresa, id=apartamento_id).first()
+
+    # Armazena a descrição do apartamento
+    descricao = apartamento.descricao
+
+    
+
 
     perfil_usuario = request.user.perfilusuario
     empresa = perfil_usuario.empresa
     nome_empresa = empresa.nome
     context = {
+        'nomeApartamento': descricao,
         'empresa': empresa,
         'nome_empresa': nome_empresa,
         'itens_consumo_aparts': itens_consumo_aparts,
+        'Somavalor_total': Somavalor_total,
     }
 
     return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
 
+################### Lançar novo item no apartamento ###################
+
+@login_required
+def LancarNovoItemHospede(request):
+    form = InserirItensConsumoApartForm(request.POST or None)
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = request.user.perfilusuario.empresa
+       nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       context = {
+            'form': form,
+            'perfil_usuario': perfil_usuario,
+            'nome_empresa': nome_empresa,
+            'empresa_iduser': empresa_iduser,
+       }
+    except PerfilUsuario.DoesNotExist:
+        return redirect('itens_consumo_aparts_apartamento')
+    #####################################################
+    if request.POST:
+        if form.is_valid():
+            empresa = request.user.perfilusuario.empresa
+            itemconsumo = form.save(commit=False)
+            itemconsumo.empresa = empresa
+            itemconsumo.save()
+            return redirect('itens_consumo_aparts_apartamento')
+        
+    return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
+
+
+
+################### Exclusão de Itens de Consumo ###################
+
+from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+
+from .models import ItensConsumoAparts
+
+@login_required
+def delete_item_consumo_apart(request, item_pk):
+    item = get_object_or_404(ItensConsumoAparts, pk=item_pk)
+    apartamento = item.apartamento
+    empresa = request.user.perfilusuario.empresa
+    
+    if request.method == 'POST':
+        item.delete()
+        return redirect(reverse('itens_consumo_aparts_apartamento', args=[apartamento.id])) 
+#        return redirect('itens_consumo_aparts_apartamento', apartamento.pk)
+    
+    context = {
+        'item': item,
+        'nome_empresa': empresa.nome,
+        'empresa_iduser': empresa.pk
+    }
+    
+    return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
