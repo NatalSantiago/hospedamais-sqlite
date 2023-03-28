@@ -8,14 +8,12 @@
     <br>
     <div class="container">
       <div class="row m-0">
-
         {% for apartamento in apartamentos %}
         <div class="col-xl-3 col-lg-6 col-md-6 col-12 mb-6">
           <div class="card text-center">
             <div class="card-header {% if apartamento.tipostatus == 'Livre' %}bg-success{% elif apartamento.tipostatus == 'Reservado' %}bg-warning{% elif apartamento.tipostatus == 'Ocupado' %}bg-danger{% elif apartamento.tipostatus == 'Em manutenção' %}bg-purple{% endif %}">
               {{ apartamento.descricao }}
             </div>
-
             <div class="card-body text-center">
               {% if apartamento.tipostatus == 'Livre' %}
                  <i class="card-title" style="font-size: 15px;">Tipo: {{ apartamento.tipoapart }}</i><br>
@@ -24,25 +22,20 @@
                     <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
                     <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: 20/10/2023</i><br>
                  {% elif apartamento.tipostatus == 'Ocupado' %}
-
-{% for movimento in apartamento.movimentosaparts_set.all %}
-    {% if movimento.pago_sn != 'S' %}
-        <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
-        <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
-    {% endif %}
-{% endfor %}
-
-
-
+                    {% for movimento in apartamento.movimentosaparts_set.all %}
+                        {% if movimento.pago_sn != 'S' %}
+                            <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
+                            <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
+                        {% endif %}
+                    {% endfor %}
                  {% elif apartamento.tipostatus == 'Em manutenção' %}
                    <i>Tipo: {{ apartamento.tipoapart }}</i><br>
                    <i>Status: {{ apartamento.tipostatus }}</i>
               {% endif %}
             </div>
-
             <div class="card-footer text-muted">
               {% if apartamento.tipostatus == 'Livre' %}
-                <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In</button>
+                <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In / Reservar</button>
               {% elif apartamento.tipostatus == 'Reservado' %}                 
                 <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In</button>
               {% elif apartamento.tipostatus == 'Ocupado' %}

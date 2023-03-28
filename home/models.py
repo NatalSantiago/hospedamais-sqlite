@@ -199,6 +199,32 @@ class MovimentosAparts(models.Model):
 
 #########################################################################################
 
+class MovimentoReservas(models.Model):
+    STATUS_RESERVA = (
+        ('Confirmada', 'Confirmada'),
+        ('Cancelada', 'Cancelada'),
+        ('Pendente', 'Pendente')        
+    )
+
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
+    apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=False )
+    hospede = models.ForeignKey(hospedes, on_delete=models.CASCADE, blank=True, null=False )
+    qtd_hospedes = models.IntegerField(("Nº. hóspedes"))
+    data_reserva = models.DateField(("Data da reserva"), null=True, blank=True)
+    data_confirmacao = models.DateField(("Data da confirmação"), null=True, blank=True)
+    entrada_prevista = models.DateField(("Entrada prevista"), null=True, blank=True)
+    saida_prevista = models.DateField(("Saída prevista"), null=True, blank=True)
+    entrada_efetivada = models.DateField(("Entrada efetivada"), null=True, blank=True)
+    valor_da_reserva = models.DecimalField(("Valor da reserva"), max_digits=10, decimal_places=2, null=True, blank=True)
+    valor_antecipado = models.DecimalField(("Antecipação"), max_digits=10, decimal_places=2, null=True, blank=True)
+    observacao = models.CharField(max_length=255, null=True, blank=True)
+    status_reserva = models.CharField(("Status Reserva"), max_length=15, choices=STATUS_RESERVA, null=True, blank=True)
+    def __str__(self):
+      return f"{self.hospede.nome} - Apart: {self.apartamento.descricao} / CheckIn: {self.data_checkin} / Status: {self.status_reserva}"
+
+#########################################################################################
+
+
 class ItensConsumoAparts(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
     apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=False )
