@@ -562,21 +562,55 @@ def ApartHome_list(request):
        empresa = perfil_usuario.empresa
        nome_empresa = empresa.nome
        empresa_iduser = perfil_usuario.empresa.pk
-       movimentos_aparts_nao_pagos = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N')
-       apartamentos_com_movimentos = apartamentos.objects.filter(empresa=empresa).prefetch_related('movimentosaparts_set')
+
+       apartamentos_com_movimentos_nao_pagos_fechados = apartamentos.objects.filter(empresa=empresa, movimentosaparts__pago_sn='N').distinct()
+       apartamentos_sem_movimentos_nao_pagos = apartamentos.objects.filter(empresa=empresa).exclude(id__in=apartamentos_com_movimentos_nao_pagos_fechados.values('id'))
+
+       movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
 
        context = {
-           'apartamentos': apartamentos_com_movimentos,
+           'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
            'empresa': empresa,
            'empresa_iduser': empresa_iduser,
            'nome_empresa': nome_empresa,
-           'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos,
-       }
+           'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
+        }
+
     except PerfilUsuario.DoesNotExist:
-        return redirect('inicio')
+       return redirect('inicio')
 
     return render(request, 'home/movimentoAparts/apartsHome.html', context)
 
+
+
+""" 
+@login_required
+def ApartHome_list(request):
+    try:
+       perfil_usuario = request.user.perfilusuario
+       empresa = perfil_usuario.empresa
+        nome_empresa = empresa.nome
+       empresa_iduser = perfil_usuario.empresa.pk
+       apartamentos_com_movimentos = apartamentos.objects.filter(empresa=empresa).prefetch_related('movimentosaparts_set')
+       context = {
+           'apartamentos': [],
+           'empresa': empresa,
+           'empresa_iduser': empresa_iduser,
+           'nome_empresa': nome_empresa,
+       }
+    
+       for apartamento in apartamentos_com_movimentos:
+           movimentos_abertos = apartamento.movimentosaparts_set.filter(pago_sn='N')
+           context['apartamentos'].append({
+               'descricao': apartamento.descricao,
+               'movimentos': movimentos_abertos
+           })
+
+    except PerfilUsuario.DoesNotExist:
+       return redirect('inicio')
+
+    return render(request, 'home/movimentoAparts/apartsHome.html', context)
+"""
 ################### Listar itens por apartamento ###################
 
 from django.db.models import Sum

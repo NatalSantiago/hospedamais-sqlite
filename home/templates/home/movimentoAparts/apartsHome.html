@@ -24,13 +24,19 @@
                     <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
                     <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: 20/10/2023</i><br>
                  {% elif apartamento.tipostatus == 'Ocupado' %}
-                    {% for movimento in apartamento.movimentosaparts_set.all %}
-                      <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
-                      <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
-                    {% endfor %}
-              {% elif apartamento.tipostatus == 'Em manutenção' %}
-                 <i>Tipo: {{ apartamento.tipoapart }}</i><br>
-                 <i>Status: {{ apartamento.tipostatus }}</i>
+
+{% for movimento in apartamento.movimentosaparts_set.all %}
+    {% if movimento.pago_sn != 'S' %}
+        <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
+        <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
+    {% endif %}
+{% endfor %}
+
+
+
+                 {% elif apartamento.tipostatus == 'Em manutenção' %}
+                   <i>Tipo: {{ apartamento.tipoapart }}</i><br>
+                   <i>Status: {{ apartamento.tipostatus }}</i>
               {% endif %}
             </div>
 
@@ -72,30 +78,6 @@
             </tr>
         {% endfor %}
       </div>
-      <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-      {% for apartamento in apartamentos %}
-        <!-- Modal for the "Lançar consumo" button -->
-        <div class="modal fade" id="exampleModalCenter{{ apartamento.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                 <h5 class="modal-title" id="exampleModalLongTitle">Lançamento de consumo - Apartamento {{ apartamento.numero }}</h5>
-                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-              </div>
-              <div class="modal-body">
-                {% for intem in itens_consumo_aparts %}
-                   <i class="card-title" style="font-size: 15px;">Item: {{ intem.item_lancamento.descricao }}  -  Preço: {{ intem.preco_item }}  -  Qtd: {{ intem.qtd_lancamento }}  -  Valor total: {{ intem.valor_total }}</i><br>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-        </div>
-      {% endfor %}
     </div>
     <!-- =======  Data-Table  = End  ===================== -->
     <style>

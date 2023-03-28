@@ -195,7 +195,7 @@ class MovimentosAparts(models.Model):
     pago_sn = models.CharField(max_length=1, null=True, blank=True, default='N',)
 
     def __str__(self):
-      return f"{self.hospede.nome} - Apart: {self.apartamento.descricao}"
+      return f"{self.hospede.nome} - Apart: {self.apartamento.descricao} / CheckIn: {self.data_checkin} / Pgto: {self.pago_sn}"
 
 #########################################################################################
 
