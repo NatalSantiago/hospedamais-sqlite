@@ -652,6 +652,7 @@ def LancarNovoItemHospede(request, movID):
        empresa = request.user.perfilusuario.empresa
        nome_empresa = empresa.nome
        apartID = request.GET.get('apartID')
+       nomeApartamento =request.GET.get('nomeApartamento')
        movimento_apart = MovimentosAparts.objects.get(id=movID)
        apartamento = movimento_apart.apartamento
        hospede = movimento_apart.hospede
@@ -676,7 +677,16 @@ def LancarNovoItemHospede(request, movID):
           itemconsumo.hospede = hospede
           itemconsumo.movimento_id = movID
           itemconsumo.save()
-          return redirect('apartHome')
+          action = request.POST.get('action')
+          if action == 'save_exit':
+             return redirect('apartHome')
+          elif action == 'save_voltar':
+              return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
+          elif action == 'save_add':
+               url = reverse('LancarNovoItemHospede', kwargs={'movID': movID})
+               url += f"?nomeApartamento={nomeApartamento}&apartID={apartID}&movID={movID}"
+               return redirect(url)
+         
           
     return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
 

@@ -232,7 +232,7 @@ class ItensConsumoAparts(models.Model):
     movimento = models.ForeignKey(MovimentosAparts, on_delete=models.CASCADE, blank=True, null=True )
     data_lancamento = models.DateField(("Data lançamento"), null=True, blank=True)
     hora_lancamento = models.TimeField(("Hora lançamento"), null=True, blank=True)
-    item_lancamento = models.ForeignKey(ItensConsumo, on_delete=models.CASCADE, blank=True, null=False )
+    item_lancamento = models.ForeignKey(ItensConsumo, on_delete=models.CASCADE)
     preco_item = models.DecimalField(("Preço"), max_digits=10, decimal_places=2, null=True, blank=True)
     qtd_lancamento = models.IntegerField(("Qtd."))
     valor_total = models.DecimalField(("Total"), max_digits=10, decimal_places=2, null=True, blank=True)

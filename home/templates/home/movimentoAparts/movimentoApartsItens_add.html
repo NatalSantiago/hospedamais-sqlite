@@ -2,8 +2,6 @@
 
 {% load crispy_forms_tags %}
 
-{% block content %}
-
 {% load widget_tweaks %}
 
 {% load static %}
@@ -16,38 +14,63 @@
 {% endblock %}
 
 
-<div class="card">
-    <div class="card-body">
-        <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços - [ Apartamento: {{ nomeApartamento }} / apartID: {{ apartID }} / movID: {{ movID }}]</span>
-        <hr>
-        {{ form.media }}        
-        <form action="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" method='POST'>
-            {% csrf_token %}
-            <div class="form-row">
-              <div class="form-group col-md-6 mb-0">
-                {{ form.item_lancamento|as_crispy_field }}
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-2 mb-0">
-                  {{ form.preco_item|attr:"type:number"|attr:"id:preco_item"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-2 mb-0">
-                  {{ form.qtd_lancamento|attr:"type:number"|attr:"id:qtd_lancamento"|as_crispy_field }}
-              </div>
-              <div class="form-group col-md-2 mb-0">
-                  {{ form.valor_total|attr:"type:number"|attr:"id:valor_total"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
-              </div>
-            </div>
-            <!-- ###########################################################  -->
-            <br>
-            <button id="btn-save" class="btn btn-primary" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
-            <button class="btn btn-success" type="submit" name="action" value="save_exit">Salvar e sair</button>
-            <a href="{% url 'apartHome' %}" class="btn btn-danger">Cancelar</a>
-        </form>
-    </div>
-</div>    
+{% block content %}
 
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+
+<br>
+<!-- container inicial -->
+<div id="contenirInicial" class="container mt-5" style="max-width: 800px; overflow-y: auto;">
+    <div class="card p-3 border-dark">
+      <div style="background-color: #ADD8E6; padding: 10px;">
+          <i class="fas fa-shopping-basket"></i> 
+          <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços</span>
+          <div style="display: inline-block; float: right;">
+            <a href="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" class="btn btn-success btn-sm">Inserir</a>
+            <a href="{% url "apartHome" %}" class="btn btn-danger btn-sm">Sair</a>
+          </div>
+      </div>
+      <div class="text-right text-danger">
+       <div class="text-dark mt-2 mb-2 ">
+          <!-- Tabela atual -->
+          <div style="height: 263px; overflow-y: auto;">
+            <table class="table">
+              <thead class="thead-dark">
+                  <th style="text-align: center;">[ Apartamento: {{ nomeApartamento }} ]</th>
+                </tr>
+              </thead>
+            </table>
+            <hr>
+            {{ form.media }}        
+            <form action="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" method='POST' style="overflow-x: hidden;">
+                {% csrf_token %}
+                <div class="form-row"  style="text-align: center;">
+                  <div class="form-group col-md-6 mb-0">
+                    {{ form.item_lancamento|as_crispy_field }}
+                  </div>
+                  <div class="form-group col-md-2 mb-0">
+                      {{ form.preco_item|attr:"type:number"|attr:"id:preco_item"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
+                  </div>
+                  <div class="form-group col-md-2 mb-0">
+                      {{ form.qtd_lancamento|attr:"type:number"|attr:"id:qtd_lancamento"|as_crispy_field }}
+                  </div>
+                  <div class="form-group col-md-2 mb-0">
+                      {{ form.valor_total|attr:"type:number"|attr:"id:valor_total"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
+                  </div>
+                </div>
+                <hr>
+                <br>
+                <button id="btn-save" class="btn btn-primary" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
+                <button id="btn-save" class="btn btn-primary" type="submit" name="action" value="save_voltar">Salvar e voltar</button>
+                <button class="btn btn-success" type="submit" name="action" value="save_exit">Salvar e sair</button>
+                <a href="{% url 'itens_consumo_aparts_apartamento' apartID %}" class="btn btn-danger">Cancelar</a>
+            </form>
+          </div>
+        </div>
+    </div>
+   </div>
+</div>
+<!-- fim container inicial -->
 
 <!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
 <script src="{% static 'js/custom.js' %}"></script>
@@ -60,7 +83,7 @@
 <!-- ########### Colocar o foco no campo descricao ##################  -->
 <script>
    document.addEventListener('DOMContentLoaded', function() {
-   document.getElementById('{{ form.descricao.id_for_label }}').focus();
+   document.getElementById('{{ form.item_lancamento.id_for_label }}').focus();
    });
 </script>
 <!-- ########################## FIM ################################# -->
@@ -75,6 +98,7 @@
     // Obtém o campo de item_lancamento e o campo de preço
     const item_lancamento_field = document.getElementById('id_item_lancamento');
     const preco_item_field = document.querySelector('.form-control#preco_item');
+    const qtd_lancamento_field = document.querySelector('.form-control#qtd_lancamento');
 
     
     // Define um manipulador de eventos para o campo de item_lancamento
@@ -88,6 +112,7 @@
         .then(data => {
           // Atualiza o campo de preço com o novo valor
           preco_item_field.value = data.preco_venda;
+          qtd_lancamento_field.value = '';
         })
         .catch(error => {
           console.error('Erro ao obter o preço do item de consumo', error);
@@ -123,5 +148,3 @@
 </script>
 
 {% endblock %}
-
-
