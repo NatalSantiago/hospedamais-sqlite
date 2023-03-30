@@ -562,10 +562,8 @@ def ApartHome_list(request):
        empresa = perfil_usuario.empresa
        nome_empresa = empresa.nome
        empresa_iduser = perfil_usuario.empresa.pk
-
        apartamentos_com_movimentos_nao_pagos_fechados = apartamentos.objects.filter(empresa=empresa, movimentosaparts__pago_sn='N').distinct()
        apartamentos_sem_movimentos_nao_pagos = apartamentos.objects.filter(empresa=empresa).exclude(id__in=apartamentos_com_movimentos_nao_pagos_fechados.values('id'))
-
        movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
 
        context = {
@@ -588,26 +586,27 @@ from django.db.models import Sum
 def itens_consumo_aparts_apartamento(request, apartamento_id):
     perfil_usuario = request.user.perfilusuario
     empresa = perfil_usuario.empresa
-
     MovAparts = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N', apartamento_id=apartamento_id)
     itens_consumo_aparts = ItensConsumoAparts.objects.filter(empresa=empresa, apartamento_id=apartamento_id, movimento_id__in=MovAparts.values_list('id', flat=True))
-
     Somavalor_total = itens_consumo_aparts.aggregate(total=Sum('valor_total'))['total'] or 0
-
     # Filtra o apartamento
     apartamento = apartamentos.objects.filter(empresa=empresa, id=apartamento_id).first()
 
+
+    movimento = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N', apartamento_id=apartamento_id).first()
+
     # Armazena a descrição do apartamento
-    descricao = apartamento.descricao
-
-    
-
-
+    nomeApartamento = apartamento.descricao
+    apartID = apartamento.pk
+    movID = movimento.pk
     perfil_usuario = request.user.perfilusuario
     empresa = perfil_usuario.empresa
     nome_empresa = empresa.nome
+
     context = {
-        'nomeApartamento': descricao,
+        'movID': movID,
+        'apartID': apartID,
+        'nomeApartamento': nomeApartamento,
         'empresa': empresa,
         'nome_empresa': nome_empresa,
         'itens_consumo_aparts': itens_consumo_aparts,
@@ -617,34 +616,69 @@ def itens_consumo_aparts_apartamento(request, apartamento_id):
     return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
 
 ################### Lançar novo item no apartamento ###################
-
+"""""
 @login_required
 def LancarNovoItemHospede(request):
     form = InserirItensConsumoApartForm(request.POST or None)
     try:
-       perfil_usuario = request.user.perfilusuario
-       empresa = request.user.perfilusuario.empresa
-       nome_empresa = empresa.nome
-       empresa_iduser = perfil_usuario.empresa.pk
-       context = {
-            'form': form,
-            'perfil_usuario': perfil_usuario,
-            'nome_empresa': nome_empresa,
-            'empresa_iduser': empresa_iduser,
-       }
-    except PerfilUsuario.DoesNotExist:
+        empresa = request.user.perfilusuario.empresa
+        nome_empresa = empresa.nome
+        apartID = request.GET.get('apartID')
+    except (PerfilUsuario.DoesNotExist):
         return redirect('itens_consumo_aparts_apartamento')
-    #####################################################
+    context = {
+        'form': form,
+        'empresa': empresa,
+        'nome_empresa': nome_empresa,
+        'nomeApartamento': request.GET.get('nomeApartamento'),
+        'apartID': apartID,
+    }
     if request.POST:
         if form.is_valid():
-            empresa = request.user.perfilusuario.empresa
             itemconsumo = form.save(commit=False)
             itemconsumo.empresa = empresa
+            itemconsumo.apartamento = apartID
             itemconsumo.save()
-            return redirect('itens_consumo_aparts_apartamento')
-        
-    return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
+            return redirect('apartHome')
+    return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
+"""""
 
+from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo,MovimentosAparts
+
+@login_required
+def LancarNovoItemHospede(request, movID):
+    form = InserirItensConsumoApartForm(request.POST or None)
+    try:
+       empresa = request.user.perfilusuario.empresa
+       nome_empresa = empresa.nome
+       apartID = request.GET.get('apartID')
+       movimento_apart = MovimentosAparts.objects.get(id=movID)
+       apartamento = movimento_apart.apartamento
+       hospede = movimento_apart.hospede
+    except (PerfilUsuario.DoesNotExist):
+       return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
+
+    context = {
+       'form': form,
+       'empresa': empresa,
+       'nome_empresa': nome_empresa,
+       'nomeApartamento': request.GET.get('nomeApartamento'),
+       'apartID': request.GET.get('apartID'),
+       'movID': request.GET.get('movID'),
+
+       }
+    
+    if request.POST:
+       if form.is_valid():
+          itemconsumo = form.save(commit=False)
+          itemconsumo.empresa = empresa
+          itemconsumo.apartamento = apartamento
+          itemconsumo.hospede = hospede
+          itemconsumo.movimento_id = movID
+          itemconsumo.save()
+          return redirect('apartHome')
+          
+    return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
 
 
 ################### Exclusão de Itens de Consumo ###################
@@ -664,7 +698,6 @@ def delete_item_consumo_apart(request, item_pk):
     if request.method == 'POST':
         item.delete()
         return redirect(reverse('itens_consumo_aparts_apartamento', args=[apartamento.id])) 
-#        return redirect('itens_consumo_aparts_apartamento', apartamento.pk)
     
     context = {
         'item': item,
@@ -673,3 +706,52 @@ def delete_item_consumo_apart(request, item_pk):
     }
     
     return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
+
+######################################
+
+from django.http import JsonResponse
+from .models import ItensConsumo
+
+def get_preco_itemconsumo(request, item_lancamento_id):
+    try:
+        # Obtém o item de consumo correspondente ao ID fornecido
+        itemconsumo = ItensConsumo.objects.get(pk=item_lancamento_id)
+
+        # Retorna o preço de venda do item de consumo em um objeto JSON
+        return JsonResponse({'preco_venda': itemconsumo.precoVenda})
+    except ItensConsumo.DoesNotExist:
+        return JsonResponse({'error': 'Item de consumo não encontrado'}, status=404)
+
+##################################################################################
+
+@login_required
+def salvar_variaveis(request):
+    try:
+        perfil_usuario = request.user.perfilusuario
+        empresa = perfil_usuario.empresa
+        nome_empresa = empresa.nome
+        empresa_iduser = perfil_usuario.empresa.pk
+        apartamentos_com_movimentos_nao_pagos_fechados = apartamentos.objects.filter(empresa=empresa, movimentosaparts__pago_sn='N').distinct()
+        apartamentos_sem_movimentos_nao_pagos = apartamentos.objects.filter(empresa=empresa).exclude(id__in=apartamentos_com_movimentos_nao_pagos_fechados.values('id'))
+        movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
+
+        apartID = MovimentosAparts.apartamento,
+        hospID = MovimentosAparts.hospede,
+        movID = MovimentosAparts.pk,
+
+        context = {
+            'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
+            'empresa': empresa,
+            'empresa_iduser': empresa_iduser,
+            'nome_empresa': nome_empresa,
+            'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
+            'apartID': MovimentosAparts.apartamento,
+            'hospID': MovimentosAparts.hospede,
+            'movID': MovimentosAparts.pk,
+            
+        }
+
+        return {'apartID': apartID, 'hospID': hospID, 'movID': movID}
+
+    except PerfilUsuario.DoesNotExist:
+        return redirect('inicio')

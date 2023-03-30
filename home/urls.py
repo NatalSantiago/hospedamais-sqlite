@@ -56,10 +56,17 @@ urlpatterns = [
 
     path('itensConsumo/check_description/', itensConsumo_check_description, name='itensConsumo_check_description'),
 
+    
+    path('salvar_variaveis/', views.salvar_variaveis, name='salvar_variaveis'),    
+    
     path('itens_consumo_aparts/<int:apartamento_id>/', views.itens_consumo_aparts_apartamento, name='itens_consumo_aparts_apartamento'),
 
-    path('LancarNovoItemHospede/', views.LancarNovoItemHospede, name='LancarNovoItemHospede'),
+#    path('LancarNovoItemHospede/<int:mov_pk>/', views.LancarNovoItemHospede, name='LancarNovoItemHospede'),
+
+    path('LancarNovoItemHospede/<int:movID>/', views.LancarNovoItemHospede, name='LancarNovoItemHospede'),
 
     path('delete_item_consumo_apart/<int:item_pk>/', delete_item_consumo_apart, name='delete_item_consumo_apart'),
+
+    path('caminho/para/itemconsumo/<int:item_lancamento_id>/preco/', views.get_preco_itemconsumo, name='get_preco_itemconsumo'),
 
 ]

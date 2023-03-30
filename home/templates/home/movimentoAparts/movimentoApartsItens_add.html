@@ -1,0 +1,127 @@
+{% extends "home/base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% load widget_tweaks %}
+
+{% load static %}
+
+{% csrf_token %}
+
+{% block extrahead %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+{% endblock %}
+
+
+<div class="card">
+    <div class="card-body">
+        <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços - [ Apartamento: {{ nomeApartamento }} / apartID: {{ apartID }} / movID: {{ movID }}]</span>
+        <hr>
+        {{ form.media }}        
+        <form action="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" method='POST'>
+            {% csrf_token %}
+            <div class="form-row">
+              <div class="form-group col-md-6 mb-0">
+                {{ form.item_lancamento|as_crispy_field }}
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-2 mb-0">
+                  {{ form.preco_item|attr:"type:number"|attr:"id:preco_item"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-2 mb-0">
+                  {{ form.qtd_lancamento|attr:"type:number"|attr:"id:qtd_lancamento"|as_crispy_field }}
+              </div>
+              <div class="form-group col-md-2 mb-0">
+                  {{ form.valor_total|attr:"type:number"|attr:"id:valor_total"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
+              </div>
+            </div>
+            <!-- ###########################################################  -->
+            <br>
+            <button id="btn-save" class="btn btn-primary" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
+            <button class="btn btn-success" type="submit" name="action" value="save_exit">Salvar e sair</button>
+            <a href="{% url 'apartHome' %}" class="btn btn-danger">Cancelar</a>
+        </form>
+    </div>
+</div>    
+
+
+<!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
+<script src="{% static 'js/custom.js' %}"></script>
+<script>
+  enableFormTabbing();
+</script>
+<!-- ########################## FIM ################################# -->
+
+
+<!-- ########### Colocar o foco no campo descricao ##################  -->
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+   document.getElementById('{{ form.descricao.id_for_label }}').focus();
+   });
+</script>
+<!-- ########################## FIM ################################# -->
+
+<!-- ############# Efetua o calculo do precoVenda ##################  -->
+
+
+<!-- ########################## Buscar o Preço do item ################################# -->
+<script>
+  // Espera que o DOM termine de carregar
+  document.addEventListener('DOMContentLoaded', function() {
+    // Obtém o campo de item_lancamento e o campo de preço
+    const item_lancamento_field = document.getElementById('id_item_lancamento');
+    const preco_item_field = document.querySelector('.form-control#preco_item');
+
+    
+    // Define um manipulador de eventos para o campo de item_lancamento
+    item_lancamento_field.addEventListener('change', function() {
+      // Obtém o valor do campo de item_lancamento
+      const item_lancamento_id = this.value;
+
+      // Faz uma solicitação AJAX para obter o preço do item de consumo
+      fetch(`/caminho/para/itemconsumo/${item_lancamento_id}/preco/`)
+        .then(response => response.json())
+        .then(data => {
+          // Atualiza o campo de preço com o novo valor
+          preco_item_field.value = data.preco_venda;
+        })
+        .catch(error => {
+          console.error('Erro ao obter o preço do item de consumo', error);
+        });
+    });
+  });
+</script>
+
+<!-- ########################## Atualizar preço Total ################################# -->
+<script>
+  // Espera que o DOM termine de carregar
+  document.addEventListener('DOMContentLoaded', function() {
+    // Obtém os campos de preco_item, qtd_lancamento e valor_total
+    const preco_item_field = document.getElementById('preco_item');
+    const qtd_lancamento_field = document.getElementById('qtd_lancamento');
+    const valor_total_field = document.getElementById('valor_total');
+
+    // Define um manipulador de eventos para o campo de qtd_lancamento
+    qtd_lancamento_field.addEventListener('input', function() {
+      // Obtém o valor do campo de qtd_lancamento
+      const qtd_lancamento = parseFloat(this.value);
+
+      // Obtém o valor do campo de preco_item
+      const preco_item = parseFloat(preco_item_field.value);
+
+      // Calcula o valor total
+      const valor_total = qtd_lancamento * preco_item;
+
+      // Atualiza o campo de valor_total com o novo valor
+      valor_total_field.value = valor_total.toFixed(2);
+    });
+  });
+</script>
+
+{% endblock %}
+
+

@@ -19,14 +19,15 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
 
 <br>
-<div class="container mt-5" style="max-width: 800px;">
+<!-- container inicial -->
+<div id="contenirInicial" class="container mt-5" style="max-width: 800px; overflow-y: auto;">
     <div class="card p-3 border-dark">
       <div style="background-color: #ADD8E6; padding: 10px;">
           <i class="fas fa-shopping-basket"></i> 
-          <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços - [ {{ nomeApartamento }} ]</span>
+          <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços - [ Apart: {{ nomeApartamento }} / apartID: {{ apartID }} / movID: {{ movID }}]</span>
           <div style="display: inline-block; float: right;">
-              <a href="#" class="btn btn-success btn-sm">Inserir</a>
-              <a href="{% url "apartHome" %}" class="btn btn-danger btn-sm">Sair</a>
+            <a href="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" class="btn btn-success btn-sm">Inserir</a>
+            <a href="{% url "apartHome" %}" class="btn btn-danger btn-sm">Sair</a>
           </div>
       </div>
       <div class="text-right text-danger">
@@ -71,6 +72,7 @@
     </div>
    </div>
 </div>
+<!-- fim container inicial -->
 
 <script>
 function confirmarExclusao(itemId) {

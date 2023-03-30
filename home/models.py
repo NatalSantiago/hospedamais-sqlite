@@ -226,10 +226,10 @@ class MovimentoReservas(models.Model):
 
 
 class ItensConsumoAparts(models.Model):
-    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=False )
-    apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=False )
-    hospede = models.ForeignKey(hospedes, on_delete=models.CASCADE, blank=True, null=False )
-    movimento = models.ForeignKey(MovimentosAparts, on_delete=models.CASCADE, blank=True, null=False )
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=True )
+    apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=True )
+    hospede = models.ForeignKey(hospedes, on_delete=models.CASCADE, blank=True, null=True )
+    movimento = models.ForeignKey(MovimentosAparts, on_delete=models.CASCADE, blank=True, null=True )
     data_lancamento = models.DateField(("Data lançamento"), null=True, blank=True)
     hora_lancamento = models.TimeField(("Hora lançamento"), null=True, blank=True)
     item_lancamento = models.ForeignKey(ItensConsumo, on_delete=models.CASCADE, blank=True, null=False )
