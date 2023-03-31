@@ -81,8 +81,15 @@ class ItensConsumo(models.Model):
     precoVenda = models.DecimalField(("Preço Venda"), max_digits=10, decimal_places=2)
     observacao = models.CharField("Observação", max_length=100, blank=True, null=False)
 
+    @staticmethod
+    def get_id_by_descricao(descricao):
+        item = ItensConsumo.objects.get(descricao=descricao)
+        return item.id
+    
     def __str__(self):
         return f"{self.descricao} - {self.unidade}"
+
+
 
 #########################################################################################
 

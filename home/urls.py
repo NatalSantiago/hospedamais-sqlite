@@ -7,7 +7,6 @@ from django.views.generic.base import RedirectView
 
 from .views import PaginaInicial
 
-
 from .views import itensConsumo_check_description,verificaSeHospedeExite,verificaSeApartamentoExite
 
 from .views import delete_item_consumo_apart
@@ -67,6 +66,9 @@ urlpatterns = [
 
     path('delete_item_consumo_apart/<int:item_pk>/', delete_item_consumo_apart, name='delete_item_consumo_apart'),
 
-    path('caminho/para/itemconsumo/<int:item_lancamento_id>/preco/', views.get_preco_itemconsumo, name='get_preco_itemconsumo'),
+    path('caminho/para/get_preco_itemconsumo/<str:descricao>/', views.get_preco_itemconsumo_by_descricao, name='get_preco_itemconsumo_by_descricao'),
+
+
+
 
 ]

@@ -656,6 +656,12 @@ def LancarNovoItemHospede(request, movID):
        movimento_apart = MovimentosAparts.objects.get(id=movID)
        apartamento = movimento_apart.apartamento
        hospede = movimento_apart.hospede
+
+
+       itens = ItensConsumo.objects.filter(empresa=empresa)
+       intensConsumoList = [item.descricao for item in itens]
+
+
     except (PerfilUsuario.DoesNotExist):
        return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
 
@@ -666,7 +672,7 @@ def LancarNovoItemHospede(request, movID):
        'nomeApartamento': request.GET.get('nomeApartamento'),
        'apartID': request.GET.get('apartID'),
        'movID': request.GET.get('movID'),
-
+       'intensConsumoList': intensConsumoList
        }
     
     if request.POST:
@@ -765,3 +771,16 @@ def salvar_variaveis(request):
 
     except PerfilUsuario.DoesNotExist:
         return redirect('inicio')
+
+#########################################################################
+
+from django.http import JsonResponse
+from .models import ItensConsumo
+
+def get_preco_itemconsumo_by_descricao(request, descricao):
+    try:
+        item_id = ItensConsumo.get_id_by_descricao(descricao)
+        item_consumo = ItensConsumo.objects.get(pk=item_id)
+        return JsonResponse({'preco_venda': item_consumo.precoVenda})
+    except ItensConsumo.DoesNotExist:
+        return JsonResponse({'error': 'Item de consumo não encontrado'}, status=404)

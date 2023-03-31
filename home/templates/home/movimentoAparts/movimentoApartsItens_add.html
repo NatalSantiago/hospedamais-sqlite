@@ -9,8 +9,9 @@
 {% csrf_token %}
 
 {% block extrahead %}
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 {% endblock %}
 
 
@@ -19,54 +20,127 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
 
 <br>
+<style>
+   /*the container must be positioned relative:*/
+   .autocomplete {
+   position: relative;
+   display: inline-block;
+  }
+
+  input {
+    border: 1px solid transparent;
+    background-color: #f1f1f1;
+    padding: 8px;
+    font-size: 16px;
+  }
+
+  input[type=text] {
+    background-color: #f1f1f1;
+    width: 100%;
+  }
+
+  input[type=number] {
+    background-color: #f1f1f1;
+    width: 100%;
+  }
+
+  input[type=submit] {
+    background-color: DodgerBlue;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .autocomplete-items {
+    position: absolute;
+    border: 1px solid #d4d4d4;
+    border-bottom: none;
+    border-top: none;
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+  }
+
+  .autocomplete-items div {
+    padding: 10px;
+    cursor: pointer;
+    background-color: #fff;
+    border-bottom: 1px solid #d4d4d4;
+  }
+
+  /*when hovering an item:*/
+  .autocomplete-items div:hover {
+    background-color: #e9e9e9;
+  }
+
+  /*when navigating through the items using the arrow keys:*/
+  .autocomplete-active {
+    background-color: DodgerBlue !important;
+    color: #ffffff;
+  }
+
+
+  .container-centralizado {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+.autocomplete {
+    margin-right: 10px;
+    position: relative;
+    display: inline-block;
+}  
+
+</style>
+
+
+<br>
 <!-- container inicial -->
 <div id="contenirInicial" class="container mt-5" style="max-width: 800px; overflow-y: auto;">
     <div class="card p-3 border-dark">
-      <div style="background-color: #ADD8E6; padding: 10px;">
+      <div style="background-color: #ADD8E6; padding: 10px; text-align: center;">
           <i class="fas fa-shopping-basket"></i> 
-          <span style="display: inline-block; vertical-align: middle;">Lançamento Produtos/Serviços</span>
+          <span style="text-align: center; display: inline-block;">Lançamento Produtos/Serviços - [ Apartamento: {{ nomeApartamento }} ]</span>
       </div>
+      <hr>
       <div class="text-right text-danger">
        <div class="text-dark mt-2 mb-2 ">
-          <!-- Tabela atual -->
-          <div style="height: 263px; overflow-y: auto;">
-            <table class="table">
-              <thead class="thead-dark">
-                  <th style="text-align: center;">[ Apartamento: {{ nomeApartamento }} ]</th>
-                </tr>
-              </thead>
-            </table>
-            <hr>
-            {{ form.media }}        
-            <form action="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" method='POST' style="overflow-x: hidden;">
-                {% csrf_token %}
-                <div class="form-row"  style="text-align: center;">
-                  <div class="form-group col-md-6 mb-0">
-                    {{ form.item_lancamento|as_crispy_field }}
-                  </div>
-                  <div class="form-group col-md-2 mb-0">
-                      {{ form.preco_item|attr:"type:number"|attr:"id:preco_item"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
-                  </div>
-                  <div class="form-group col-md-2 mb-0">
-                      {{ form.qtd_lancamento|attr:"type:number"|attr:"id:qtd_lancamento"|as_crispy_field }}
-                  </div>
-                  <div class="form-group col-md-2 mb-0">
-                      {{ form.valor_total|attr:"type:number"|attr:"id:valor_total"|attr:"readonly:readonly"|attr:"class:form-control"|as_crispy_field }}
-                  </div>
-                </div>
-                <hr>
-                <br>
-                <button id="btn-save" class="btn btn-success" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
-                <button id="btn-save" class="btn btn-success" type="submit" name="action" value="save_voltar">Salvar e voltar</button>
-                <button class="btn btn-success" type="submit" name="action" value="save_exit">Salvar e sair</button>
-                <a href="{% url 'itens_consumo_aparts_apartamento' apartID %}" class="btn btn-danger">Cancelar</a>
+         <div style="height: 270px; overflow-y: auto;">
+            <form autocomplete="off" style="text-align: left;">
+              <br>
+              <div class="autocomplete" style="width:330px; text-align: left; margin-top: -10px;">
+                <p class="inline">Descrição</p>
+                <input id="myInput" type="text" name="myInput" placeholder="Descrição" class="inline" onblur="verificarValor()">
+              </div>
+              <div class="autocomplete" style="width:135px; margin-top: -10px;">
+                <p class="inline" style="text-align: right">Preço:</p>
+                <input id="precoItem" type="text" name="precoItem" placeholder="Preço" class="inline" readonly style="text-align: right">
+              </div>
+              <div class="autocomplete" style="width:100px; text-align: left; margin-top: -10px;">
+                <p class="inline" style="text-align: center">Qtd.</p>
+                <input id="qtdItem" type="number" name="qtdItem" placeholder="Qtd." class="inline" style="text-align: center">
+              </div>
+              <div class="autocomplete" style="width:135px; text-align: left; margin-top: -10px;">
+                <p class="inline" style="text-align: right">Preço Total</p>
+                <input id="precoTotal" type="text" name="precoTotal" placeholder="Preço toal" class="inline" readonly style="text-align: right">
+              </div>
+              <hr>
+              <br>
+              <div class="text-right" style="margin-top: -10px;">
+                <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
+                <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_voltar">Salvar e voltar</button>
+                <button class="btn btn-primary btn-sm" type="submit" name="action" value="save_exit">Salvar e sair</button>
+                <a href="{% url 'itens_consumo_aparts_apartamento' apartID %}" class="btn btn-danger btn-sm">Cancelar</a>
+              </div>
             </form>
           </div>
         </div>
     </div>
    </div>
 </div>
-<!-- fim container inicial -->
 
 <!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
 <script src="{% static 'js/custom.js' %}"></script>
@@ -75,56 +149,71 @@
 </script>
 <!-- ########################## FIM ################################# -->
 
-
-<!-- ########### Colocar o foco no campo descricao ##################  -->
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
-   document.getElementById('{{ form.item_lancamento.id_for_label }}').focus();
-   });
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("myInput").focus();
+});
 </script>
-<!-- ########################## FIM ################################# -->
 
-<!-- ############# Efetua o calculo do precoVenda ##################  -->
-
-
-<!-- ########################## Buscar o Preço do item ################################# -->
+<!-- ###### Verifica se o item digitado existe ##################  -->
 <script>
-  // Espera que o DOM termine de carregar
-  document.addEventListener('DOMContentLoaded', function() {
-    // Obtém o campo de item_lancamento e o campo de preço
-    const item_lancamento_field = document.getElementById('id_item_lancamento');
-    const preco_item_field = document.querySelector('.form-control#preco_item');
-    const qtd_lancamento_field = document.querySelector('.form-control#qtd_lancamento');
+function verificarValor() {
+  var intensConsumoList = {{ intensConsumoList|safe }};
+  var valorDigitado = document.getElementById("myInput").value; // obter o valor digitado
 
-    
-    // Define um manipulador de eventos para o campo de item_lancamento
-    item_lancamento_field.addEventListener('change', function() {
-      // Obtém o valor do campo de item_lancamento
-      const item_lancamento_id = this.value;
+  if (valorDigitado !== "" && intensConsumoList.indexOf(valorDigitado) === -1) { // verificar se o valor digitado não está em branco e se existe na lista
+      Swal.fire({
+        icon: "error",
+        title: "Erro!",
+        text: "Item não cadastrado!",
+        confirmButtonText: "OK"
+      }).then(function(result) {
+        // Coloca o foco de volta no campo "myInput"
+        document.getElementById("myInput").focus();
+      });
+  }
+}
+</script>
 
-      // Faz uma solicitação AJAX para obter o preço do item de consumo
-      fetch(`/caminho/para/itemconsumo/${item_lancamento_id}/preco/`)
-        .then(response => response.json())
-        .then(data => {
-          // Atualiza o campo de preço com o novo valor
-          preco_item_field.value = data.preco_venda;
-          qtd_lancamento_field.value = '';
-        })
-        .catch(error => {
-          console.error('Erro ao obter o preço do item de consumo', error);
-        });
-    });
+
+<!-- ###### Não permitir o campo qtdItem em branco ou negativo ##################  -->
+<script>
+  // Seleciona o campo "qtdItem"
+  var qtdItem = document.getElementById("qtdItem");
+
+  // Adiciona um ouvinte de evento para verificar o valor do campo quando o foco sair dele
+  qtdItem.addEventListener("blur", function() {
+    // Obtém o valor atual do campo
+    var valor = parseInt(this.value);
+
+    // Verifica se o valor é menor do que zero ou está vazio
+    if (valor <= 0 || this.value === "") {
+      // Exibe uma mensagem de erro personalizada usando SweetAlert2
+      Swal.fire({
+        icon: "error",
+        title: "Erro!",
+        text: "A quantidade tem que ser maior que 0 ! !",
+        confirmButtonText: "OK"
+      }).then(function(result) {
+        // Coloca o foco de volta no campo "qtdItem"
+        qtdItem.focus();
+      });
+
+    }
   });
 </script>
+
+
+<!-- ###### FIM Não permitir o campo qtdItem em branco ou negativo ##################  -->
 
 <!-- ########################## Atualizar preço Total ################################# -->
 <script>
   // Espera que o DOM termine de carregar
   document.addEventListener('DOMContentLoaded', function() {
     // Obtém os campos de preco_item, qtd_lancamento e valor_total
-    const preco_item_field = document.getElementById('preco_item');
-    const qtd_lancamento_field = document.getElementById('qtd_lancamento');
-    const valor_total_field = document.getElementById('valor_total');
+    const preco_item_field = document.getElementById('precoItem');
+    const qtd_lancamento_field = document.getElementById('qtdItem');
+    const valor_total_field = document.getElementById('precoTotal');
 
     // Define um manipulador de eventos para o campo de qtd_lancamento
     qtd_lancamento_field.addEventListener('input', function() {
@@ -133,6 +222,13 @@
 
       // Obtém o valor do campo de preco_item
       const preco_item = parseFloat(preco_item_field.value);
+
+      // Verifica se o valor de qtd_lancamento é vazio
+      if (!qtd_lancamento) {
+        // Define o valor do campo de precoTotal como vazio
+        valor_total_field.value = "";
+        return;
+      }
 
       // Calcula o valor total
       const valor_total = qtd_lancamento * preco_item;
@@ -143,4 +239,169 @@
   });
 </script>
 
+
+<!-- ################## Busca o preço do item selecionado ########################### -->
+<script>
+$(document).ready(function() {
+  $('#myInput').on('change', function() {
+    var descricao = $(this).val();
+    if (descricao !== "") {
+      $.ajax({
+        url: '/caminho/para/get_preco_itemconsumo/' + descricao + '/',
+        type: 'GET',
+        success: function(data) {
+          $('#precoItem').val(data.preco_venda);
+        },
+        error: function(xhr, status, error) {
+          console.log('Erro ao obter preço de venda do item de consumo');
+        }
+      });
+    }
+  });
+});
+</script>
+
+
+<!-- ################### Formatar preço do item ##################################### -->
+<script>
+  var precoInput = document.getElementById("precoItem");
+  precoInput.addEventListener("blur", formatarPreco);
+
+  function formatarPreco() {
+    var preco = parseFloat(precoInput.value.replace(",", "."));
+    if (!isNaN(preco)) {
+      precoInput.value = preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  }
+</script>
+
+<!-- ################### Formatar preço total ##################################### -->
+<script>
+  var precoInput = document.getElementById("precoTotal");
+  precoInput.addEventListener("blur", formatarPreco);
+
+  function formatarPreco() {
+    var preco = parseFloat(precoInput.value.replace(",", "."));
+    if (!isNaN(preco)) {
+      precoInput.value = preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  }
+</script>
+
+
+<!-- ########################## autocomplete descricao ################################# -->
+<script>
+function autocomplete(inp, arr) {
+  /*the autocomplete function takes two arguments,
+  the text field element and an array of possible autocompleted values:*/
+  var currentFocus;
+  /*execute a function when someone writes in the text field:*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*close any already open lists of autocompleted values*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*create a DIV element that will contain the items (values):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*append the DIV element as a child of the autocomplete container:*/
+      this.parentNode.appendChild(a);
+      /*for each item in the array...*/
+      for (i = 0; i < arr.length; i++) {
+        /*check if the item starts with the same letters as the text field value:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*create a DIV element for each matching element:*/
+          b = document.createElement("DIV");
+          /*make the matching letters bold:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*insert a input field that will hold the current array item's value:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*execute a function when someone clicks on the item value (DIV element):*/
+          b.addEventListener("click", function(e) {
+              /*insert the value for the autocomplete text field:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*close the list of autocompleted values,
+              (or any other open lists of autocompleted values:*/
+              closeAllLists();
+              /*clear the qtdItem field:*/
+              document.getElementById('qtdItem').value = '';
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*execute a function presses a key on the keyboard:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*If the arrow DOWN key is pressed,
+        increase the currentFocus variable:*/
+        currentFocus++;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*If the arrow UP key is pressed,
+        decrease the currentFocus variable:*/
+        currentFocus--;
+        /*and and make the current item more visible:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*If the ENTER key is pressed, prevent the form from being submitted,*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*and simulate a click on the "active" item:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*a function to classify an item as "active":*/
+    if (!x) return false;
+    /*start by removing the "active" class on all items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*add class "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*a function to remove the "active" class from all autocomplete items:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*close all autocomplete lists in the document,
+    except the one passed as an argument:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
+  /*execute a function when someone clicks in the document:*/
+  document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+  });
+}
+
+/*An array containing all the country names in the world:*/
+/*
+var countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua & Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia & Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre & Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts & Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad & Tobago","Tunisia","Turkey","Turkmenistan","Turks & Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
+
+*/
+
+var intensConsumoList = {{ intensConsumoList|safe }};
+
+/*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
+autocomplete(document.getElementById("myInput"), intensConsumoList);
+</script>
+
+
 {% endblock %}
+

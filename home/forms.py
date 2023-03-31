@@ -57,10 +57,8 @@ class ItensConsumoForm(forms.ModelForm):
         nome = self.cleaned_data['descricao']
         return nome.upper()
 
-
 class InserirItensConsumoApartForm(forms.ModelForm):
     class Meta:
       model = ItensConsumoAparts
       fields = '__all__'
-
 
