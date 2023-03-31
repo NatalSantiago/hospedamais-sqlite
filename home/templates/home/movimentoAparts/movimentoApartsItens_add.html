@@ -6,8 +6,6 @@
 
 {% load static %}
 
-{% csrf_token %}
-
 {% block extrahead %}
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -109,7 +107,9 @@
       <div class="text-right text-danger">
        <div class="text-dark mt-2 mb-2 ">
          <div style="height: 270px; overflow-y: auto;">
-            <form autocomplete="off" style="text-align: left;">
+            {{ form.media }}        
+            <form action="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" method='POST'>
+               {% csrf_token %}
               <br>
               <div class="autocomplete" style="width:330px; text-align: left; margin-top: -10px;">
                 <p class="inline">Descrição</p>
@@ -121,7 +121,7 @@
               </div>
               <div class="autocomplete" style="width:100px; text-align: left; margin-top: -10px;">
                 <p class="inline" style="text-align: center">Qtd.</p>
-                <input id="qtdItem" type="number" name="qtdItem" placeholder="Qtd." class="inline" style="text-align: center">
+                <input id="qtdItem" type="text" name="qtdItem" placeholder="Qtd." class="inline" style="text-align: center">
               </div>
               <div class="autocomplete" style="width:135px; text-align: left; margin-top: -10px;">
                 <p class="inline" style="text-align: right">Preço Total</p>
@@ -132,7 +132,7 @@
               <div class="text-right" style="margin-top: -10px;">
                 <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
                 <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_voltar">Salvar e voltar</button>
-                <button class="btn btn-primary btn-sm" type="submit" name="action" value="save_exit">Salvar e sair</button>
+                <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_exit">Salvar e sair</button>
                 <a href="{% url 'itens_consumo_aparts_apartamento' apartID %}" class="btn btn-danger btn-sm">Cancelar</a>
               </div>
             </form>
@@ -263,30 +263,8 @@ $(document).ready(function() {
 
 
 <!-- ################### Formatar preço do item ##################################### -->
-<script>
-  var precoInput = document.getElementById("precoItem");
-  precoInput.addEventListener("blur", formatarPreco);
-
-  function formatarPreco() {
-    var preco = parseFloat(precoInput.value.replace(",", "."));
-    if (!isNaN(preco)) {
-      precoInput.value = preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-  }
-</script>
 
 <!-- ################### Formatar preço total ##################################### -->
-<script>
-  var precoInput = document.getElementById("precoTotal");
-  precoInput.addEventListener("blur", formatarPreco);
-
-  function formatarPreco() {
-    var preco = parseFloat(precoInput.value.replace(",", "."));
-    if (!isNaN(preco)) {
-      precoInput.value = preco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-  }
-</script>
 
 
 <!-- ########################## autocomplete descricao ################################# -->

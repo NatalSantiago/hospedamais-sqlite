@@ -20,6 +20,7 @@ from django.core.exceptions import ValidationError
 
 import locale
 
+
 # Create your models here.
 class Empresa(models.Model):
 
@@ -231,7 +232,6 @@ class MovimentoReservas(models.Model):
 
 #########################################################################################
 
-
 class ItensConsumoAparts(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, blank=True, null=True )
     apartamento = models.ForeignKey(apartamentos, on_delete=models.CASCADE, blank=True, null=True )
@@ -239,9 +239,9 @@ class ItensConsumoAparts(models.Model):
     movimento = models.ForeignKey(MovimentosAparts, on_delete=models.CASCADE, blank=True, null=True )
     data_lancamento = models.DateField(("Data lançamento"), null=True, blank=True)
     hora_lancamento = models.TimeField(("Hora lançamento"), null=True, blank=True)
-    item_lancamento = models.ForeignKey(ItensConsumo, on_delete=models.CASCADE)
+    item_lancamento = models.ForeignKey(ItensConsumo, on_delete=models.CASCADE, null=True, blank=True)
     preco_item = models.DecimalField(("Preço"), max_digits=10, decimal_places=2, null=True, blank=True)
-    qtd_lancamento = models.IntegerField(("Qtd."))
+    qtd_lancamento = models.IntegerField(("Qtd."), null=True, blank=True)
     valor_total = models.DecimalField(("Total"), max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):

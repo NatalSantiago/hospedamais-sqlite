@@ -641,9 +641,15 @@ def LancarNovoItemHospede(request):
             itemconsumo.save()
             return redirect('apartHome')
     return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
-"""""
+
 
 from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo,MovimentosAparts
+
+
+##############################################################################
+
+"""""
+from decimal import Decimal
 
 @login_required
 def LancarNovoItemHospede(request, movID):
@@ -657,10 +663,8 @@ def LancarNovoItemHospede(request, movID):
        apartamento = movimento_apart.apartamento
        hospede = movimento_apart.hospede
 
-
        itens = ItensConsumo.objects.filter(empresa=empresa)
        intensConsumoList = [item.descricao for item in itens]
-
 
     except (PerfilUsuario.DoesNotExist):
        return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
@@ -674,28 +678,91 @@ def LancarNovoItemHospede(request, movID):
        'movID': request.GET.get('movID'),
        'intensConsumoList': intensConsumoList
        }
-    
-    if request.POST:
+
+    print("Antes da verificação")
+
+    if request.method == 'POST':
        if form.is_valid():
           itemconsumo = form.save(commit=False)
           itemconsumo.empresa = empresa
           itemconsumo.apartamento = apartamento
           itemconsumo.hospede = hospede
           itemconsumo.movimento_id = movID
+          ##########################################
+          item_id = ItensConsumo.get_id_by_descricao(request.POST.get('myInput'))
+          itemconsumo.item_lancamento_id = item_id
+          itemconsumo.preco_item = request.POST.get('precoItem')
+          itemconsumo.qtd_lancamento = request.POST.get('qtdItem')
+          itemconsumo.valor_total = request.POST.get('precoTotal')
           itemconsumo.save()
+
           action = request.POST.get('action')
-          if action == 'save_exit':
-             return redirect('apartHome')
+          if action == 'save_add':
+              return redirect(reverse('LancarNovoItemHospede', kwargs={'movID': movID}) + f"?nomeApartamento={nomeApartamento}&apartID={apartID}&movID={movID}")
           elif action == 'save_voltar':
-              return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
-          elif action == 'save_add':
-               url = reverse('LancarNovoItemHospede', kwargs={'movID': movID})
-               url += f"?nomeApartamento={nomeApartamento}&apartID={apartID}&movID={movID}"
-               return redirect(url)
-         
+              return redirect('itens_consumo_aparts_apartamento', apartID)
+          else:
+              return redirect('itens_consumo_aparts_apartamento', apartID)
           
     return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
 
+
+"""""
+
+from django.shortcuts import render, redirect
+from django.urls import reverse
+
+
+@login_required
+def LancarNovoItemHospede(request, movID):
+    form = InserirItensConsumoApartForm(request.POST or None)
+    empresa = request.user.perfilusuario.empresa
+    itens = ItensConsumo.objects.filter(empresa=empresa)
+    intensConsumoList = [item.descricao for item in itens]
+    nomeApartamento = request.GET.get('nomeApartamento')
+    apartID = request.GET.get('apartID')
+
+    context = {
+       'form': form,
+       'empresa': empresa,
+       'nomeApartamento': nomeApartamento,
+       'apartID': apartID,
+       'movID': movID,
+       'intensConsumoList': intensConsumoList
+       }
+
+    print("Antes de tentar val")
+    if form.is_valid():
+        item = form.save(commit=False)
+        preco_item = request.POST.get('precoItem')
+        qtd_lancamento = request.POST.get('qtdItem')
+        valor_total = request.POST.get('precoTotal')
+
+#        preco_item = form.cleaned_data['precoItem']
+#        qtd_lancamento = form.cleaned_data['qtdItem']
+#        valor_total = form.cleaned_data['precoTotal']
+        item = ItensConsumoAparts(
+            preco_item=preco_item,
+            qtd_lancamento=qtd_lancamento,
+            valor_total=valor_total,
+        )
+        print("Antes de tentar salvar")
+        item.save()
+        action = request.POST.get('action')
+        if action == 'save_add':
+            return redirect(reverse('LancarNovoItemHospede', kwargs={'movID': movID}) + f"?nomeApartamento={nomeApartamento}&apartID={apartID}&movID={movID}")
+        elif action == 'save_voltar':
+            return redirect('itens_consumo_aparts_apartamento', apartID)
+        else:
+            return redirect('itens_consumo_aparts_apartamento', apartID)
+    else:
+        # Exibir mensagens de erro
+        print("O formulário é inválido!")
+        print(form.errors)        
+
+    return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
+
+"""""
 
 ################### Exclusão de Itens de Consumo ###################
 
