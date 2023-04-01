@@ -117,7 +117,7 @@
               </div>
               <div class="autocomplete" style="width:135px; margin-top: -10px;">
                 <p class="inline" style="text-align: right">Preço:</p>
-                <input id="precoItem" type="text" name="precoItem" placeholder="Preço" class="inline" readonly style="text-align: right">
+                <input id="precoItem" type="number" name="precoItem" placeholder="Preço" class="inline" readonly style="text-align: right">
               </div>
               <div class="autocomplete" style="width:100px; text-align: left; margin-top: -10px;">
                 <p class="inline" style="text-align: center">Qtd.</p>
@@ -125,14 +125,14 @@
               </div>
               <div class="autocomplete" style="width:135px; text-align: left; margin-top: -10px;">
                 <p class="inline" style="text-align: right">Preço Total</p>
-                <input id="precoTotal" type="text" name="precoTotal" placeholder="Preço toal" class="inline" readonly style="text-align: right">
+                <input id="precoTotal" type="number" name="precoTotal" placeholder="Preço toal" class="inline" readonly style="text-align: right">
               </div>
               <hr>
               <br>
               <div class="text-right" style="margin-top: -10px;">
-                <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_add">Salvar e adicionar outro</button>
-                <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_voltar">Salvar e voltar</button>
-                <button id="btn-save" class="btn btn-primary btn-sm" type="submit" name="action" value="save_exit">Salvar e sair</button>
+                <button id="btn-add" class="btn btn-primary btn-sm" name="action" value="save_add" disabled>Salvar e adicionar outro</button>
+                <button id="btn-voltar" class="btn btn-primary btn-sm" name="action" value="save_voltar" disabled>Salvar e voltar</button>
+                <button id="btn-exit" class="btn btn-primary btn-sm" name="action" value="save_exit" disabled>Salvar e sair</button>
                 <a href="{% url 'itens_consumo_aparts_apartamento' apartID %}" class="btn btn-danger btn-sm">Cancelar</a>
               </div>
             </form>
@@ -155,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<!-- ###### Verifica se o item digitado existe ##################  -->
 <script>
 function verificarValor() {
   var intensConsumoList = {{ intensConsumoList|safe }};
@@ -171,9 +170,22 @@ function verificarValor() {
         // Coloca o foco de volta no campo "myInput"
         document.getElementById("myInput").focus();
       });
+
+  } else if (valorDigitado !== "") { // verifica se o campo "myInput" não está em branco
+      document.getElementById("btn-add").disabled = false; // habilita o botão "submit"
+      document.getElementById("btn-voltar").disabled = false; // habilita o botão "submit"
+      document.getElementById("btn-exit").disabled = false; // habilita o botão "submit"
+      document.getElementById("qtdItem").focus(); // coloca o foco no campo "qtdItem"
+  } else {
+      document.getElementById("btn-add").disabled = true; // habilita o botão "submit"
+      document.getElementById("btn-voltar").disabled = true; // habilita o botão "submit"
+      document.getElementById("btn-exit").disabled = true; // habilita o botão "submit"
+
   }
 }
 </script>
+
+
 
 
 <!-- ###### Não permitir o campo qtdItem em branco ou negativo ##################  -->
