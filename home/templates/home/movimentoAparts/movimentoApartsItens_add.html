@@ -78,7 +78,6 @@
     color: #ffffff;
   }
 
-
   .container-centralizado {
     display: flex;
     align-items: center;
@@ -90,6 +89,7 @@
     margin-right: 10px;
     position: relative;
     display: inline-block;
+    
 }  
 
 </style>
@@ -106,26 +106,28 @@
       <hr>
       <div class="text-right text-danger">
        <div class="text-dark mt-2 mb-2 ">
-         <div style="height: 270px; overflow-y: auto;">
+         <div style="height: 270px; overflow-y: auto; overflow-x: hidden;">
             {{ form.media }}        
             <form action="{% url 'LancarNovoItemHospede' movID=movID %}?nomeApartamento={{ nomeApartamento }}&apartID={{ apartID }}&movID={{ movID }}" method='POST'>
                {% csrf_token %}
               <br>
-              <div class="autocomplete" style="width:330px; text-align: left; margin-top: -10px;">
-                <p class="inline">Descrição</p>
-                <input id="myInput" type="text" name="myInput" placeholder="Descrição" class="inline" onblur="verificarValor()">
-              </div>
-              <div class="autocomplete" style="width:135px; margin-top: -10px;">
-                <p class="inline" style="text-align: right">Preço:</p>
-                <input id="precoItem" type="number" name="precoItem" placeholder="Preço" class="inline" readonly style="text-align: right">
-              </div>
-              <div class="autocomplete" style="width:100px; text-align: left; margin-top: -10px;">
-                <p class="inline" style="text-align: center">Qtd.</p>
-                <input id="qtdItem" type="text" name="qtdItem" placeholder="Qtd." class="inline" style="text-align: center">
-              </div>
-              <div class="autocomplete" style="width:135px; text-align: left; margin-top: -10px;">
-                <p class="inline" style="text-align: right">Preço Total</p>
-                <input id="precoTotal" type="number" name="precoTotal" placeholder="Preço toal" class="inline" readonly style="text-align: right">
+              <div class="form-row">
+                <div class="form-group col-md-6 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Descrição</p>
+                  <input id="myInput" type="text" name="myInput" placeholder="Descrição" class="inline" onblur="verificarValor()">
+                </div>
+                <div class="form-group col-md-2 mb-0">
+                  <p class="inline" style="text-align: right">Preço:</p>
+                  <input id="precoItem" type="number" name="precoItem" placeholder="Preço" class="inline" readonly style="text-align: right">
+                </div>
+                <div class="form-group col-md-2 mb-0">
+                  <p class="inline" style="text-align: center">Qtd.</p>
+                  <input id="qtdItem" type="text" name="qtdItem" placeholder="Qtd." class="inline" style="text-align: center">
+                </div>
+                <div class="form-group col-md-2 mb-0">
+                  <p class="inline" style="text-align: right">Preço Total</p>
+                  <input id="precoTotal" type="number" name="precoTotal" placeholder="Preço toal" class="inline" readonly style="text-align: right">
+                </div>
               </div>
               <hr>
               <br>

@@ -645,8 +645,6 @@ def LancarNovoItemHospede(request, movID):
        'intensConsumoList': intensConsumoList
        }
 
-    print("Antes da verificação")
-
     if request.method == 'POST':
        if form.is_valid():
           itemconsumo = form.save(commit=False)
