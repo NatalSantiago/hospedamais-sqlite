@@ -566,12 +566,18 @@ def ApartHome_list(request):
        apartamentos_sem_movimentos_nao_pagos = apartamentos.objects.filter(empresa=empresa).exclude(id__in=apartamentos_com_movimentos_nao_pagos_fechados.values('id'))
        movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
 
+       hospLTs = hospedes.objects.filter(empresa=empresa)
+       
+       lista_hospedes = [{'id': hospLT.id, 'text': hospLT.nome} for hospLT in hospLTs]
+
+
        context = {
            'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
            'empresa': empresa,
            'empresa_iduser': empresa_iduser,
            'nome_empresa': nome_empresa,
            'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
+           'lista_hospedes': lista_hospedes
         }
 
     except PerfilUsuario.DoesNotExist:
