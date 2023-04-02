@@ -568,7 +568,7 @@ def ApartHome_list(request):
 
        hospLTs = hospedes.objects.filter(empresa=empresa)
        
-       lista_hospedes = [{'id': hospLT.id, 'text': hospLT.nome} for hospLT in hospLTs]
+       lista_hospedes = [{'idHospede': hospLT.id, 'text': hospLT.nome} for hospLT in hospLTs]
 
 
        context = {
