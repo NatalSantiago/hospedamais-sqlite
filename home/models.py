@@ -228,7 +228,8 @@ class MovimentoReservas(models.Model):
     observacao = models.CharField(max_length=255, null=True, blank=True)
     status_reserva = models.CharField(("Status Reserva"), max_length=15, choices=STATUS_RESERVA, null=True, blank=True)
     def __str__(self):
-      return f"{self.hospede.nome} - Apart: {self.apartamento.descricao} / CheckIn: {self.data_checkin} / Status: {self.status_reserva}"
+      return f"{self.hospede.nome} - Apart: {self.apartamento.descricao} / Data: {self.data_reserva} / Status: {self.status_reserva}"
+
 
 #########################################################################################
 

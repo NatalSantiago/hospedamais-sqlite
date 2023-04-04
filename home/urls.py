@@ -68,7 +68,8 @@ urlpatterns = [
 
     path('caminho/para/get_preco_itemconsumo/<str:descricao>/', views.get_preco_itemconsumo_by_descricao, name='get_preco_itemconsumo_by_descricao'),
 
+    path('buscar_apartamento/', views.buscar_apartamento, name='buscar_apartamento'),
 
-
+    path('buscar_reservas/', views.buscar_reservas, name='buscar_reservas'),
 
 ]

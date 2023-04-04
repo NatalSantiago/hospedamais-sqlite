@@ -4,6 +4,8 @@
 
 {% block content %}
 
+{% csrf_token %}
+
 <!-- Bootstrap CSS -->
 
 <!-- Select2 CSS -->
@@ -34,15 +36,17 @@
                  <i class="card-title" style="font-size: 15px;">Tipo: {{ apartamento.tipoapart }}</i><br>
                  <i class="card-title" style="font-size: 15px;">Status: {{ apartamento.tipostatus }}</i><br>
                  {% elif apartamento.tipostatus == 'Reservado' %}                 
-                    <i class="card-title fa fa-user-o" style="font-size: 15px;"> Colocar o nome do hospede aqui</i><br>
-                    <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: 20/10/2023</i><br>
-                 {% elif apartamento.tipostatus == 'Ocupado' %}
-                    {% for movimento in apartamento.movimentosaparts_set.all %}
-                        {% if movimento.pago_sn != 'S' %}
-                            <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
-                            <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
-                        {% endif %}
-                    {% endfor %}
+                     {% with reserva=apartamento.movimentoreservas_set.all.first %}
+                         <i class="card-title" style="font-size: 13px;">{{ reserva.hospede.nome }}</i><br>
+                         <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: {{ reserva.data_reserva|date:'d/m/Y' }}</i><br>
+                     {% endwith %}
+                   {% elif apartamento.tipostatus == 'Ocupado' %}
+                   {% for movimento in apartamento.movimentosaparts_set.all %}
+                       {% if movimento.pago_sn != 'S' %}
+                           <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
+                           <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br>
+                       {% endif %}
+                   {% endfor %}
                  {% elif apartamento.tipostatus == 'Em manutenção' %}
                    <i>Tipo: {{ apartamento.tipoapart }}</i><br>
                    <i>Status: {{ apartamento.tipostatus }}</i>
@@ -50,9 +54,19 @@
             </div>
             <div class="card-footer text-muted">
               {% if apartamento.tipostatus == 'Livre' %}
-                <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalCheckinReserva"> Check-In / Reservar</button>
+                <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalCheckinReserva" onclick="setApartamento('{{ apartamento.descricao }}', {{ apartamento.qtdpessoas }})"> Check-In / Reservar</button>
+                
               {% elif apartamento.tipostatus == 'Reservado' %}                 
-                <button type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short"> Check-In</button>
+
+
+{% with reserva=apartamento.movimentoreservas_set.first %}
+
+  <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalConfirmarCheckinReservado" data-reserva-id="{{ reserva.id }}" onclick="setApartamentoReserva('{{ reserva.id }}', '{{ reserva.hospede.nome }}', '{{ reserva.qtd_hospedes }}', '{{ apartamento.descricao }}', '{{ apartamento.qtdpessoas }}')"> Check-In</button>
+
+{% endwith %}
+
+
+
               {% elif apartamento.tipostatus == 'Ocupado' %}
                 <div class="icons">
                   <a class="icon-spacing"  href="{% url 'itens_consumo_aparts_apartamento' apartamento.id %}">
@@ -112,7 +126,7 @@
 
 <!-- ################### Modal CheckIn / Reserva - ( Start ) ######################### -->
 
-<div class="modal fade" id="ModalCheckinReserva" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" >
+<div class="modal fade" id="ModalCheckinReserva" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -128,87 +142,84 @@
               <a class="nav-link active" data-toggle="tab" href="#checkin" onclick="limparCamposCheckin()">Check-In</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-toggle="tab" href="#reserva" onclick="limparCamposReserva()">Reserva</a>
+              <a class="nav-link" data-toggle="tab" href="#reserva">Reserva</a>
             </li>
           </ul>
+          <br>
+          <div class="form-group col-md-12 mb-0" style="text-align: left;">
+            <div class="input-group-prepend">
+              <span class="input-group-text d-flex align-items-center"><i class="fa fa-check-circle-o"></i></span>
+                <select type="text" id="myHospede" name="myHospede" class="form-control select2">
+                  <option value=""></option>
+                  {% for hospede in lista_hospedes %}
+                    <option value="{{ hospede.idHospede }}">{{ hospede.text }}</option>
+                  {% endfor %}
+                </select>
+              <a href="{% url 'apartHome' %}" class="input-group-text d-flex align-items-center fa fa-user-plus" aria-hidden="true"></a>
+            </div>
+          </div>
           <div class="tab-content">
             <!--************************************************************************-->
             <br>
             <div id="checkin" class="tab-pane fade show active">
               <div class="form-row">
-                <div class="form-group col-md-12 mb-0" style="text-align: left;">
-                  <div class="input-group-prepend">
-                    <span class="input-group-text d-flex align-items-center"><i class="fa fa-check-circle-o"></i></span>
-                      <select type="text" id="myHospedeCheckin" name="myHospedeCheckin" class="form-control select2">
-                      <option value=""></option>
-                      {% for hospede in lista_hospedes %}
-                        <option value="{{ hospede.idHospede }}" style="font-size: 8px">{{ hospede.text }}</option>
-                      {% endfor %}
-                    </select>
-                    <a href="{% url 'apartHome' %}" class="input-group-text d-flex align-items-center fa fa-user-plus" aria-hidden="true"></a>
-                  </div>
+                <div class="form-group col-md-10 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Apartamento:</p>
+                  <input id="myApartCheckin" type="text" name="myApartCheckin" placeholder="Apartamento" class="inline" readonly>
                 </div>
-              </div>  
-              <div class="form-row">
-                <div class="form-group col-md-6 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; margin-top: 5px;">Dt.Entrada</p>
-                  <input id="myDataEntradaCheckin" type="date" name="myDataEntradaCheckin" placeholder="Data entrada" class="inline">
-                </div>
-                <div class="form-group col-md-6 mb-2" style="text-align: right;">
-                  <p class="inline" style="text-align: right; margin-top: 5px;">Dt.Saída</p>
-                  <input id="myDataSaidaCheckin" type="date" name="myDataSaidaCheckin" placeholder="Data saida" class="inline">
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hóspedes:</p>
+                  <input style="text-align: center" id="myQtdHospdesCheckin" type="number" name="myQtdHospdesCheckin" placeholder="Qtd. hóspedes" class="inline" readonly>
                 </div>
               </div>
               <div class="form-row">
-                <div class="form-group col-md-6 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartCheckin" type="text" name="myApartCheckin" placeholder="Apartamento" class="inline">
-                </div>
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspedes:</p>
-                  <input style="text-align: center" id="myQtdHospdesCheckin" type="number" name="myQtdHospdesCheckin" placeholder="Qtd. hóspedes" class="inline">
+                  <p class="inline" style="text-align: left">Hospedado(s):</p>
+                  <input style="text-align: center" id="myQtdHospedadosCheckin" type="number" name="myQtdHospedadosCheckin" placeholder="hospedados" class="inline">
                 </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Excedentes:</p>
-                  <input style="text-align: center" id="myQtdExcedentesCheckin" type="number" name="myQtdExcedentesCheckin" placeholder="Qtd. excedentes" class="inline">
+                <div class="form-group col-md-5 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data/Hora Entrada</p>
+                  <input id="myDataEntradaCheckin" type="datetime-local" name="myDataEntradaCheckin" placeholder="Data entrada" class="inline" onchange="preencherDataSaida()">
+                </div>
+                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                  <input id="myDataSaidaCheckin" type="date" name="myDataSaidaCheckin" placeholder="Data saída" class="inline">
                 </div>
               </div>
               <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger btn-sm">Sair</a>
-                <button type="button" class="btn btn-success btn-sm">Confirmar Check-In</button>
+                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                <button type="button" class="btn btn-success">Confirmar Check-In</button>
               </div>                
             </div>  
             <!--************************************************************************-->
             <div id="reserva" class="tab-pane fade">
               <div class="form-row">
-                <div class="form-group col-md-12 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspede</p>
-                  <input id="myHospedeReserva" type="text" name="myHospedeReserva" placeholder="Hóspede" class="inline">
-                </div>
-              </div>  
-              <div class="form-row">
-                <div class="form-group col-md-6 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Dt.Entrada</p>
-                  <input id="myDataEntradaReserva" type="date" name="myDataEntradaReserva" placeholder="Data entrada reserva" class="inline">
-                </div>
-                <div class="form-group col-md-6 mb-2" style="text-align: right;">
-                  <p class="inline" style="text-align: right">Dt.Saída</p>
-                  <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saida reserva" class="inline">
-                </div>
-              </div>  
-              <div class="form-row">
-                <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                <div class="form-group col-md-10 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartReserva" type="text" name="myApartReserva" placeholder="Apartamento reserva" class="inline">
+                  <input id="myApartReserva" type="text" name="myApartReserva" placeholder="Apartamento reserva" class="inline" readonly>
                 </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Qtd.Hóspedes:</p>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hóspedes:</p>
                   <input style="text-align: center" id="myQtdHospdesReserva" type="number" name="myQtdHospdesReserva" placeholder="Qtd. hóspedes" class="inline">
                 </div>
               </div>
+              <div class="form-row">
+                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data Reserva</p>
+                  <input id="myDataDaReserva" type="date" name="myDataDaReserva" placeholder="Data reserva" class="inline">
+                </div>
+                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                  <input id="myDataEntradaReserva" type="date" name="myDataEntradaReserva" placeholder="Data entrada" class="inline">
+                </div>
+                <div class="form-group col-md-4 mb-0" style="text-align: right;">
+                  <p class="inline" style="text-align: right; line-height: 38px;">Data Saída</p>
+                  <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saída" class="inline">
+                </div>
+              </div>  
               <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger btn-sm">Sair</a>
-                <button type="button" class="btn btn-success btn-sm">Confirmar reserva</button>
+                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                <button type="button" class="btn btn-success">Reservar</button>
               </div>                
             </div>  
           </div>
@@ -218,18 +229,25 @@
   </div>
 </div>
 
-
 <!-- Formatação Style do Select2 dentro do modal  - ( Start ) -->
 <style>
+
+.form-group p {
+  line-height: 38px; /* ajuste este valor de acordo com a altura dos campos de entrada */
+}
+
+.modal-dialog {
+  max-width: 550px; /* ajuste este valor de acordo com a largura desejada */
+  width: 100%; /* ajuste este valor de acordo com a largura desejada */
+}
 
   /* Diminui o altura entre a descrição do campo */
 .inline { display: inline-block; margin-right: 10px; margin-bottom: 5px; }
 
-.modal#ModalCheckinReserva .nav-link.active {
+#ModalCheckinReserva .nav-link.active {
   background-color: #ADD8E6; /* azul claro */
   color: #000; /* preto */  
   }
-
 
 .select2-selection--single { background-color: #f2f2f2 !important; }
 .select2-container { height: auto !important; }
@@ -237,69 +255,195 @@
 .select2-selection__rendered { height: auto !important; }
 .select2 { height: auto !important; }
 </style>
-<!-- Formatação Style do Select2 dentro do modal  - ( End ) -->
 
-
-
-<!-- Inicia o Select2 dentro do modal  - ( Start ) -->
+<!-- Atualiza da data de saída dependendo da data de entrada  - ( Start ) -->
 
 <script>
-function formatHospedeSelection (hospede) {
-  if (!hospede.idHospede) {
-    return hospede.text;
+  function preencherDataSaida() {
+    // Obter valor do campo de entrada
+    let dataEntrada = new Date(document.getElementById("myDataEntradaCheckin").value);
+    // Adicionar um dia à data de entrada
+    let dataSaida = new Date(dataEntrada.getTime());
+    dataSaida.setDate(dataEntrada.getDate() + 1);
+    // Formatar a data de saída para exibir apenas a parte da data
+    let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
+    // Definir o valor do campo de saída
+    document.getElementById("myDataSaidaCheckin").value = dataSaidaFormatada;
+  }
+</script>
+<!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
+
+
+<!-- Inicia o Select2 myHospede dentro do modal  - ( Start ) -->
+<script>
+$(document).ready(function() {
+  $('#ModalCheckinReserva').on('shown.bs.modal', function() {
+    $('#myHospede').select2({
+      placeholder: "Selecione o hóspede",
+      dropdownParent: $('#ModalCheckinReserva'),
+    });
+    $('#myHospede').on('keyup click', function(e) {
+      if (e.keyCode === 13 || e.type === 'click') {
+        $('#myHospede').select2('open');
+      }
+    });
+    $('#myHospede').select2('focus');
+  });
+});
+</script>
+<!-- Inicia o Select2 myHospede dentro do modal  - ( End ) -->
+<style>
+.disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+</style>
+
+<script>
+function setApartamento(descricao) {
+  // Faz uma requisição AJAX ao servidor para buscar o apartamento
+  $.ajax({
+    url: '/buscar_apartamento/',
+    method: 'POST',
+    data: {
+      descricao: descricao,
+      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+    },
+    success: function(apartamento) {
+    },
+    error: function() {
+      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+      Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: 'Ocorreu um erro ao buscar o apartamento.'
+      });
+    }
+  });
+  document.querySelector("#reserva").classList.remove("disabled"); // Remove a classe "disabled" do botão "Reserva"
+}  
+</script>
+
+
+<!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( Start ) -->
+<script>
+  let apartamentoSelecionado = "";
+  let qtdhospededoapartamento = "";
+
+  function setApartamento(descricao, qtdpessoas) {
+  apartamentoSelecionado = descricao;
+  qtdhospededoapartamento = qtdpessoas;
   }
 
-  var $hospede = $(
-    '<span><i class="fa fa-user"></i> ' + hospede.idHospede + ' / ' + hospede.text + '</span>'
-  );
+  $('#ModalCheckinReserva').on('shown.bs.modal', function () {
+    document.getElementById("myApartCheckin").value = apartamentoSelecionado;
+    document.getElementById("myQtdHospdesCheckin").value = qtdhospededoapartamento;
+    document.getElementById("myApartReserva").value = apartamentoSelecionado;
+    document.getElementById("myQtdHospdesReserva").value = qtdhospededoapartamento;
 
-  return $hospede;
+
+  });
+</script>
+<!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( End ) -->
+
+<!-- #################### Modal CheckIn / Reserva - ( End ) ######################### -->
+
+<!-- ################### Modal Confirmar reserva - ( Start ) ######################### -->
+
+<div class="modal fade" id="ModalConfirmarCheckinReservado" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Confirmar Check-In</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="tab-content">
+            <!--************************************************************************-->
+            <div id="checkin" class="tab-pane fade show active">
+              <div class="form-row">
+                <div class="form-group col-md-12 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hóspede:</p>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    </div>
+                    <input id="myHospedeReservado" type="text" name="myHospedeReservado" class="form-control" readonly>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-10 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Apartamento:</p>
+                  <input id="myApartamentoReservado" type="text" name="myApartamentoReservado" placeholder="Apartamento" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hóspedes:</p>
+                  <input style="text-align: center" id="myQtdHospedesApartReservado" type="number" name="myQtdHospedesApartReservado" placeholder="Qtd. hóspedes" class="inline" readonly>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hospedado(s):</p>
+                  <input style="text-align: center" id="myQtdHospedadosReservado" type="number" name="myQtdHospedadosReservado" placeholder="hospedados" class="inline">
+                </div>
+                <div class="form-group col-md-5 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data/Hora Entrada</p>
+                  <input id="myDataEntradaApartReservado" type="datetime-local" name="myDataEntradaApartReservado" placeholder="Data entrada" class="inline" onchange="preencherDataSaida()">
+                </div>
+                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                  <input id="myDataSaidaCheckin" type="date" name="myDataSaidaCheckin" placeholder="Data saída" class="inline">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                <button type="button" class="btn btn-success">Confirmar Check-In</button>
+              </div>                
+            </div>  
+          </div>
+         </div>
+       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ################### Modal Confirmar reserva - ( End ) ######################### -->
+<script>
+function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApartamento, qtdHospedesApartamento) {
+  // Faz uma requisição AJAX ao servidor para buscar a reserva
+  $.ajax({
+    url: '/buscar_reservas/',
+    method: 'POST',
+    data: {
+      reserva_id: reserva_id,
+      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+    },
+    success: function(reserva) {
+      document.getElementById("myHospedeReservado").value = reserva.hospede;
+      document.getElementById("myApartamentoReservado").value = descricaoApartamento;
+      document.getElementById("myQtdHospedesApartReservado").value = qtdHospedesApartamento;
+      document.getElementById("myQtdHospedadosReservado").value = reserva.qtd_hospedes;
+    },
+    error: function() {
+      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+      Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: 'Ocorreu um erro ao buscar a reserva.'
+      });
+    }
+  });
 }
 </script>
 
 
-<script>
-$(document).ready(function() {
-  $('#ModalCheckinReserva').on('shown.bs.modal', function() {
-    $('#myHospedeCheckin').select2({
-      placeholder: "Selecione o hóspede",
-      dropdownParent: $('#ModalCheckinReserva'),
-    });
-    $('#myHospedeCheckin').on('keyup click', function(e) {
-      if (e.keyCode === 13 || e.type === 'click') {
-        $('#myHospedeCheckin').select2('open');
-      }
-    });
-    $('#myHospedeCheckin').select2('focus');
-  });
-});
-</script>
-
-<!-- Inicia o Select2 dentro do modal  - ( End ) -->
-
-<script>
-$('#ModalCheckinReserva').on('shown.bs.modal', function () {
-  document.getElementById("myHospedeCheckin").value = "";
-  document.getElementById("myDataEntradaCheckin").value = new Date().toISOString().slice(0, 10);
-  let dataSaida = new Date();
-  dataSaida.setDate(dataSaida.getDate() + 1);
-  document.getElementById("myDataSaidaCheckin").value = dataSaida.toISOString().slice(0, 10);
-});
-
-</script>
+<!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( Start ) -->
+<!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( End ) -->
 
 
-<script>
-
-$('#ModalCheckinReserva').on('shown.bs.modal', function () {
-  document.getElementById("myHospedeReserva").value = "";
-  document.getElementById("myDataEntradaReserva").value = new Date().toISOString().slice(0, 10);
-  let dataSaida = new Date();
-  dataSaida.setDate(dataSaida.getDate() + 1);
-  document.getElementById("myDataSaidaReserva").value = dataSaida.toISOString().slice(0, 10);
-});
-
-</script>
-<!-- #################### Modal CheckIn / Reserva - ( End ) ######################### -->
 
 {% endblock %}

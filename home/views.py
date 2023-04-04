@@ -553,6 +553,8 @@ def itensConsumo_delete(request, itenConsumo_pk):
 
 ################### ApartsHome ###################
 
+
+""""
 from .models import MovimentosAparts, ItensConsumoAparts
 
 @login_required
@@ -582,6 +584,53 @@ def ApartHome_list(request):
 
     except PerfilUsuario.DoesNotExist:
        return redirect('inicio')
+
+    return render(request, 'home/movimentoAparts/apartsHome.html', context)
+"""
+
+
+from .models import MovimentosAparts, ItensConsumoAparts, MovimentoReservas
+
+@login_required
+def ApartHome_list(request):
+    try:
+        perfil_usuario = request.user.perfilusuario
+        empresa = perfil_usuario.empresa
+        nome_empresa = empresa.nome
+        empresa_iduser = perfil_usuario.empresa.pk
+
+        hospLTs = hospedes.objects.filter(empresa=empresa)
+       
+        # Cria uma lista de dicionários com os dados dos hóspedes
+        lista_hospedes = [{'idHospede': hospLT.id, 'text': hospLT.nome} for hospLT in hospLTs]
+
+        # Filtra os movimentos de apartamentos não pagos e fechados
+        apartamentos_com_movimentos_nao_pagos_fechados = apartamentos.objects.filter(
+            empresa=empresa, movimentosaparts__pago_sn='N').distinct()
+
+        # Filtra os apartamentos sem movimentos não pagos
+        apartamentos_sem_movimentos_nao_pagos = apartamentos.objects.filter(
+            empresa=empresa).exclude(id__in=apartamentos_com_movimentos_nao_pagos_fechados.values('id'))
+
+        # Filtra os movimentos de apartamentos não pagos e fechados
+        movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(
+            apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
+
+        # Filtra os dados da tabela MovimentoReservas pelos campos empresa, apartamento e hóspede
+#        movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa)
+
+        context = {
+            'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
+            'empresa': empresa,
+            'empresa_iduser': empresa_iduser,
+            'nome_empresa': nome_empresa,
+            'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
+            'lista_hospedes': lista_hospedes,
+#            'movimentos_reservas': movimentos_reservas  # Adiciona os dados da tabela MovimentoReservas ao contexto
+        }
+
+    except PerfilUsuario.DoesNotExist:
+        return redirect('inicio')
 
     return render(request, 'home/movimentoAparts/apartsHome.html', context)
 
@@ -764,3 +813,64 @@ def get_preco_itemconsumo_by_descricao(request, descricao):
         return JsonResponse({'preco_venda': item_consumo.precoVenda})
     except ItensConsumo.DoesNotExist:
         return JsonResponse({'error': 'Item de consumo não encontrado'}, status=404)
+
+
+############################################################################
+
+from django.http import JsonResponse
+from .models import apartamentos
+
+from django.http import JsonResponse
+from .models import apartamentos
+
+@login_required
+def buscar_apartamento(request):
+  perfil_usuario = request.user.perfilusuario
+  empresa = perfil_usuario.empresa
+  if request.method == 'POST':
+    descricao = request.POST.get('descricao')
+    apartamento = apartamentos.objects.filter(empresa=empresa, descricao=descricao).first()
+    if apartamento:
+      return JsonResponse({
+        'descricao': apartamento.descricao,
+        'qtdpessoas': apartamento.qtdpessoas,
+        'tipostatus': apartamento.tipostatus
+      })
+    else:
+      return JsonResponse({}, status=404)
+  else:
+    return JsonResponse({}, status=400)
+
+###############################################################################
+
+@login_required
+def buscar_reservas(request):
+    perfil_usuario = request.user.perfilusuario
+    empresa = perfil_usuario.empresa
+    if request.method == 'POST':
+        reserva_id = request.POST.get('reserva_id')
+        reserva = MovimentoReservas.objects.filter(
+            empresa=empresa, 
+            id=reserva_id
+        ).select_related('apartamento').values(
+            'hospede__nome', 
+            'qtd_hospedes', 
+            'data_reserva', 
+            'apartamento__descricao', 
+            'apartamento__qtdpessoas',
+        ).first()
+
+        if reserva:
+            apartamento = reserva['apartamento__descricao']
+            qtdpessoas = int(reserva['apartamento__qtdpessoas'])
+            return JsonResponse({
+                'apartamento': apartamento,
+                'qtdpessoas': qtdpessoas,
+                'hospede': reserva['hospede__nome'],
+                'qtd_hospedes': reserva['qtd_hospedes'],
+                'data_reserva': reserva['data_reserva'],
+            })
+        else:
+            return JsonResponse({}, status=404)
+    else:
+        return JsonResponse({}, status=400)
