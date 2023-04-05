@@ -856,6 +856,7 @@ def buscar_reservas(request):
             'hospede__nome', 
             'qtd_hospedes', 
             'data_reserva', 
+            'entrada_prevista',
             'apartamento__descricao', 
             'apartamento__qtdpessoas',
         ).first()
@@ -869,6 +870,7 @@ def buscar_reservas(request):
                 'hospede': reserva['hospede__nome'],
                 'qtd_hospedes': reserva['qtd_hospedes'],
                 'data_reserva': reserva['data_reserva'],
+                'entrada_prevista': reserva['entrada_prevista'],
             })
         else:
             return JsonResponse({}, status=404)
