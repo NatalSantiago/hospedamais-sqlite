@@ -14,6 +14,7 @@
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
@@ -117,7 +118,12 @@
     </style>
 
 <!-- ################### Modal CheckIn / Reserva - ( Start ) ######################### -->
+{{ form.media }}        
 
+
+<form method="POST" action="{% url 'SalvarCheckIn' %}" >
+
+{% csrf_token %}
 <div class="modal fade" id="ModalCheckinReserva" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
@@ -171,7 +177,7 @@
                 </div>
                 <div class="form-group col-md-4 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaCheckin" type="date" name="myDataEntradaCheckin" placeholder="Data entrada" class="inline" onchange="preencherDataSaida()">
+                  <input type="date" id="myDataEntradaCheckin" name="myDataEntradaCheckin" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaida()">
                 </div>
                 <div class="form-group col-md-2 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left;">Hora:</p>
@@ -179,12 +185,27 @@
                 </div>
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaCheckin" type="date" name="myDataSaidaCheckin" placeholder="Data saída" class="inline">
+                  <input type="date" id="myDataSaidaCheckin" name="myDataSaidaCheckin" value="{{ data_saida|date:'Y-m-d' }}" class="form-control">
                 </div>
               </div>
+              <div class="form-row">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Valor haver:</p>
+                     <input style="text-align: right" id="myHaverCheckin" type="text" name="myHaverCheckin" placeholder="Valor haver" class="inline">
+                     <script>
+                         $(document).ready(function(){
+                             $('#myHaverCheckin').mask('000.000.000,00', {reverse: true});
+                         });
+                     </script>
+                </div>
+                <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Observação:</p>
+                  <input id="myOBSCheckin" type="text" name="myOBSCheckin" placeholder="Observação" class="inline">
+                </div>
+              </div>  
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <a href="#" id="btn-confirmar-check-in" class="btn btn-success">Confirmar Check-In</a>
+                <button id="btn-exit" class="btn btn-success" name="action" value="save_exit" method="POST">Confirmar Check-In</button>
               </div>                
             </div>  
             <!--************************************************************************-->
@@ -213,6 +234,22 @@
                   <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saída" class="inline">
                 </div>
               </div>  
+              <div class="form-row">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
+                     <input style="text-align: right" id="myAntecipadoReserva" type="text" name="myAntecipadoReserva" placeholder="Valor antecipado" class="inline">
+                     <script>
+                         $(document).ready(function(){
+                             $('#myAntecipadoReserva').mask('000.000.000,00', {reverse: true});
+                         });
+                     </script>
+                </div>
+                <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Observação:</p>
+                  <input id="myOBSReserva" type="text" name="myOBSReserva" placeholder="Observação" class="inline">
+                </div>
+              </div>  
+
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
                 <button type="button" class="btn btn-success">Reservar</button>
@@ -224,6 +261,7 @@
     </div>
   </div>
 </div>
+</form>
 
 <!-- Formatação Style do Select2 dentro do modal  - ( Start ) -->
 <style>
@@ -253,7 +291,6 @@
 </style>
 
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( Start ) -->
-
 <script>
   function preencherDataSaida() {
     // Obter valor do campo de entrada
@@ -320,7 +357,6 @@ function setApartamento(descricao) {
 }  
 </script>
 
-
 <!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( Start ) -->
 <script>
   let apartamentoSelecionado = "";
@@ -334,13 +370,18 @@ function setApartamento(descricao) {
   $('#ModalCheckinReserva').on('shown.bs.modal', function () {
     document.getElementById("myApartCheckin").value = apartamentoSelecionado;
     document.getElementById("myQtdHospdesCheckin").value = qtdhospededoapartamento;
+    document.getElementById("myQtdHospedadosCheckin").value = qtdhospededoapartamento;
     document.getElementById("myApartReserva").value = apartamentoSelecionado;
     document.getElementById("myQtdHospdesReserva").value = qtdhospededoapartamento;
+    // Obtenha a hora atual
+    let horaAtual = new Date();
+    // Formate a hora como uma string no formato HH:mm
+    let horaFormatada = horaAtual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    // Preencha o campo de hora com a hora formatada
+    document.getElementById("myHoraEntradaCheckin").value = horaFormatada;
   });
 </script>
 <!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( End ) -->
-
-
 
 
 <!-- #################### Modal CheckIn / Reserva - ( End ) ######################### -->

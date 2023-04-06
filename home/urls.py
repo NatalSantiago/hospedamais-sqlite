@@ -72,4 +72,6 @@ urlpatterns = [
 
     path('buscar_reservas/', views.buscar_reservas, name='buscar_reservas'),
 
+    path('SalvarCheckIn/', views.SalvarCheckIn, name='SalvarCheckIn'),
+
 ]

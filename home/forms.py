@@ -1,6 +1,6 @@
 from django import forms
 
-from home.models import hospedes,apartamentos,ItensConsumo,MovimentosAparts,ItensConsumoAparts
+from home.models import hospedes,apartamentos,ItensConsumo,MovimentosAparts,ItensConsumoAparts,MovimentosAparts
 
 from bootstrap_datepicker_plus.widgets import DatePickerInput
 
@@ -62,3 +62,9 @@ class InserirItensConsumoApartForm(forms.ModelForm):
       model = ItensConsumoAparts
       fields = '__all__'
 
+
+
+class MovimentosApartsForm(forms.ModelForm):
+    class Meta:
+      model = MovimentosAparts
+      fields = '__all__'

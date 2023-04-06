@@ -17,6 +17,8 @@ from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo,Movimen
 
 from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm,InserirItensConsumoApartForm
 
+from home.forms import MovimentosApartsForm
+
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 
@@ -587,9 +589,12 @@ def ApartHome_list(request):
 
     return render(request, 'home/movimentoAparts/apartsHome.html', context)
 """
-
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.template import RequestContext
 
 from .models import MovimentosAparts, ItensConsumoAparts, MovimentoReservas
+from datetime import date, timedelta
 
 @login_required
 def ApartHome_list(request):
@@ -618,6 +623,11 @@ def ApartHome_list(request):
 
         # Filtra os dados da tabela MovimentoReservas pelos campos empresa, apartamento e hóspede
 #        movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa)
+       
+        # Pegar a data_checkin e data_saida
+        data_atual = date.today()
+        data_saida = data_saida = data_atual + timedelta(days=1)
+
 
         context = {
             'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
@@ -626,6 +636,8 @@ def ApartHome_list(request):
             'nome_empresa': nome_empresa,
             'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
             'lista_hospedes': lista_hospedes,
+            'data_atual': data_atual,
+            'data_saida': data_saida,
 #            'movimentos_reservas': movimentos_reservas  # Adiciona os dados da tabela MovimentoReservas ao contexto
         }
 
@@ -876,3 +888,51 @@ def buscar_reservas(request):
             return JsonResponse({}, status=404)
     else:
         return JsonResponse({}, status=400)
+
+
+######################################################################################
+from .models import apartamentos, hospedes
+from django.contrib import messages
+from decimal import Decimal
+
+@login_required
+def SalvarCheckIn(request):
+    empresa = request.user.perfilusuario.empresa
+    apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartCheckin')).first()
+    if request.POST.get('myHospede') == '':
+       return redirect('apartHome')
+    if request.POST.get('myQtdHospedadosCheckin') == '':    
+       return redirect('apartHome')
+
+    hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
+
+    if request.method == 'POST':
+        form = MovimentosApartsForm(request.POST or None)
+        if form.is_valid():
+            movimentApart = form.save(commit=False)
+            movimentApart.empresa = empresa
+            movimentApart.apartamento_id = apartamento.id
+            movimentApart.hospede_id = hospede.id
+            movimentApart.data_checkin = request.POST.get('myDataEntradaCheckin')
+            movimentApart.hora_checkin = request.POST.get('myHoraEntradaCheckin')
+            movimentApart.data_checkout = request.POST.get('myDataSaidaCheckin')
+            movimentApart.qtd_hospedes = request.POST.get('myQtdHospedadosCheckin')
+            # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
+            qtd_hospedes = int(request.POST.get('myQtdHospdesCheckin'))
+            qtd_hospedados = int(request.POST.get('myQtdHospedadosCheckin'))
+            movimentApart.qtd_excedentes = qtd_hospedados - qtd_hospedes
+            # converte o valor do haver do template em Decimal
+            valor_adiantamento_str = request.POST.get('myHaverCheckin')
+            if valor_adiantamento_str:
+               valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+               movimentApart.valor_adiantamento = valor_adiantamento_decimal            
+            movimentApart.observacao = request.POST.get('myOBSCheckin')
+            movimentApart.save()
+
+            # atualiza o campo tipostatus do apartamento para "Ocupado"
+            apartamento.tipostatus = 'Ocupado'
+            apartamento.save()
+
+            return redirect('apartHome')
+
+    return redirect('apartHome')
