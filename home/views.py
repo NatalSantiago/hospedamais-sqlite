@@ -878,7 +878,6 @@ def buscar_reservas(request):
     empresa = perfil_usuario.empresa
     if request.method == 'POST':
        reserva_id = request.POST.get('reserva_id')
-       print(reserva_id)
        reserva = MovimentoReservas.objects.filter(
        empresa=empresa,
        id=reserva_id,
@@ -891,10 +890,14 @@ def buscar_reservas(request):
           'saida_prevista',
           'apartamento__descricao',
           'apartamento__qtdpessoas',
+          'valor_antecipado', # adicionando o campo valor_antecipado
+          'observacao', # adicionando o campo observacao
        ).last()
        if reserva:
            apartamento = reserva['apartamento__descricao']
            qtdpessoas = int(reserva['apartamento__qtdpessoas'])
+           valor_antecipado = reserva['valor_antecipado'] # recuperando o valor_antecipado
+           observacao = reserva['observacao'] # recuperando a observacao
            return JsonResponse({
                'apartamento': apartamento,
                'qtdpessoas': qtdpessoas,
@@ -903,6 +906,9 @@ def buscar_reservas(request):
                'data_reserva': reserva['data_reserva'],
                'entrada_prevista': reserva['entrada_prevista'],
                'saida_prevista': reserva['saida_prevista'],
+               'valor_antecipado': valor_antecipado, # retornando o valor_antecipado
+               'observacao': observacao, # retornando a observacao
+
            })
        else:
           return JsonResponse({}, status=404)
@@ -914,7 +920,8 @@ def buscar_reservas(request):
 
 ######################################################################################
 from .models import apartamentos, hospedes
-from decimal import Decimal
+
+from decimal import Decimal, Context
 
 @login_required
 def SalvarCheckIn(request):
@@ -945,12 +952,14 @@ def SalvarCheckIn(request):
                # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
                qtd_hospedes = int(request.POST.get('myQtdHospdesCheckin'))
                qtd_hospedados = int(request.POST.get('myQtdHospedadosCheckin'))
-               movimentApart.qtd_excedentes = qtd_hospedados - qtd_hospedes
+               if (qtd_hospedados - qtd_hospedes) > 0:
+                   movimentApart.qtd_excedentes = qtd_hospedados - qtd_hospedes
                # converte o valor do haver do template em Decimal
                valor_adiantamento_str = request.POST.get('myHaverCheckin')
                if valor_adiantamento_str:
                   valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
                   movimentApart.valor_adiantamento = valor_adiantamento_decimal            
+
                movimentApart.observacao = request.POST.get('myOBSCheckin')
                movimentApart.save()
 
@@ -1008,7 +1017,56 @@ def ConfirmarCancelarReserva(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'ConfirmarCheckin':
-            return redirect('apartHome')
+           apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartamentoReservado')).first()
+           if request.POST.get('myHospedeReservado') == '':
+              return redirect('apartHome')
+           if request.POST.get('myQtdHospedadosReservado') == '':    
+              return redirect('apartHome')
+
+           apartamento_descricao = request.POST.get('myApartamentoReservado')
+           hospede_nome = hospedes.objects.filter(empresa=empresa, nome=request.POST.get('myHospedeReservado')).first()
+        
+           reserva = MovimentoReservas.objects.filter(empresa=empresa, 
+               apartamento__descricao=apartamento_descricao, 
+               hospede__nome=hospede_nome
+           ).last()
+
+
+           if request.method == 'POST':
+               form = MovimentosApartsForm(request.POST or None)
+               if form.is_valid():
+                   movimentApart = form.save(commit=False)
+                   movimentApart.empresa = empresa
+                   movimentApart.apartamento_id = apartamento.id
+                   movimentApart.hospede_id = hospede_nome.id
+                   movimentApart.data_checkin = request.POST.get('myDataEntradaApartReservado')
+                   movimentApart.hora_checkin = request.POST.get('myHoraEntradaApartReservado')
+                   movimentApart.data_checkout = request.POST.get('myDataSaidaReservado')
+                   movimentApart.qtd_hospedes = request.POST.get('myQtdHospedadosReservado')
+                   # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
+                   qtd_hospedes = int(request.POST.get('myQtdHospedesApartReservado'))
+                   qtd_hospedados = int(request.POST.get('myQtdHospedadosReservado'))
+                   if (qtd_hospedados - qtd_hospedes) > 0:
+                      movimentApart.qtd_excedentes = qtd_hospedados - qtd_hospedes
+                   # converte o valor do haver do template em Decimal
+                   valor_adiantamento_str = request.POST.get('myAntecipadoReservado')
+                   if valor_adiantamento_str:
+                      valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+                      movimentApart.valor_adiantamento = valor_adiantamento_decimal            
+
+                   movimentApart.observacao = request.POST.get('myOBSReservado')
+                   movimentApart.save()
+
+                   # atualiza o campo status_reserva para "Confirmada"
+                   reserva.data_confirmacao = request.POST.get('myDataEntradaApartReservado')
+                   reserva.status_reserva = 'Confirmada'
+                   reserva.save()
+
+                   # atualiza o campo tipostatus do apartamento para "Ocupado"
+                   apartamento.tipostatus = 'Ocupado'
+                   apartamento.save()
+
+               return redirect('apartHome')
         elif action == 'CancelarReserva':
             apartamento_descricao = request.POST.get('myApartamentoReservado')
             hospede_nome = request.POST.get('myHospedeReservado')

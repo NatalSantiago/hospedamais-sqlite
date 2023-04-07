@@ -1,7 +1,9 @@
 asgiref==3.6.0
+Babel==2.12.1
 crispy-bootstrap4==2022.1
 distlib==0.3.6
 Django==4.1.7
+django-appconf==1.0.5
 django-bootstrap-datepicker-plus==5.0.3
 django-cpf==0.1.0
 django-crispy-forms==2.0
@@ -9,12 +11,11 @@ django-jazzmin==2.6.0
 django-user-agents==0.4.0
 django-widget-tweaks==1.4.12
 filelock==3.9.0
-humanize==4.6.0
 mysqlclient==2.1.1
 platformdirs==3.1.1
+py-moneyed==2.0
 pydantic==1.10.6
 sqlparse==0.4.3
-sweetify==2.3.1
 typing_extensions==4.5.0
 tzdata==2022.7
 ua-parser==0.16.1

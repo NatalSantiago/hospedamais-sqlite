@@ -198,7 +198,7 @@
                      <input style="text-align: right" id="myHaverCheckin" type="text" name="myHaverCheckin" placeholder="Valor haver" class="inline">
                      <script>
                          $(document).ready(function(){
-                             $('#myHaverCheckin').mask('000.000.000,00', {reverse: true});
+                             $('#myHaverCheckin').mask('000.000.000.000.000,00', {reverse: true});
                          });
                      </script>
                 </div>
@@ -245,7 +245,7 @@
                      <input style="text-align: right" id="myAntecipadoReserva" type="text" name="myAntecipadoReserva" placeholder="Valor antecipado" class="inline">
                      <script>
                          $(document).ready(function(){
-                             $('#myAntecipadoReserva').mask('000.000.000,00', {reverse: true});
+                             $('#myAntecipadoReserva').mask('#.##0,00', {reverse: true});
                          });
                      </script>
                 </div>
@@ -465,6 +465,21 @@ function setApartamento(descricao) {
                   <input id="myDataSaidaReservado" type="date" name="myDataSaidaReservado" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}">
                 </div>
               </div>
+              <div class="form-row">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
+                     <input style="text-align: right" id="myAntecipadoReservado" type="text" name="myAntecipadoReservado" placeholder="Valor antecipado" class="inline">
+                     <script>
+                         $(document).ready(function(){
+                             $('#myAntecipadoReservado').mask('000.000.000.000.000,00', {reverse: true});
+                         });
+                     </script>
+                </div>
+                <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Observação:</p>
+                  <input id="myOBSReservado" type="text" name="myOBSReservado" placeholder="Observação" class="inline">
+                </div>
+              </div>  
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
                 <button id="btn-exit" class="btn btn-warning" name="action" value="CancelarReserva" method="POST">Cancelar Reserva</button>
@@ -497,6 +512,8 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
       document.getElementById("myQtdHospedadosReservado").value = reserva.qtd_hospedes;
       document.getElementById("myDataEntradaApartReservado").value = reserva.entrada_prevista;
       document.getElementById("myDataSaidaReservado").value = reserva.saida_prevista;
+      document.getElementById("myAntecipadoReservado").value = reserva.valor_antecipado;
+      document.getElementById("myOBSReservado").value = reserva.observacao;
       // Obtenha a hora atual
       let horaAtual = new Date();
       // Formate a hora como uma string no formato HH:mm

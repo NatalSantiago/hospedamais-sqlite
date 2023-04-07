@@ -159,7 +159,7 @@ class apartamentos(models.Model):
 
     def __str__(self):
         locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-        return f"{self.descricao} - Valor da diário R$ {locale.currency(self.valordiaria, grouping=True)}"
+        return f"{self.descricao} - Valor da diário R$ {locale.currency(self.valordiaria, grouping=True)} - {self.tipostatus}"
 
 #########################################################################################
 
@@ -190,7 +190,7 @@ class MovimentosAparts(models.Model):
     hora_checkout = models.TimeField(("Hora de CheckOut"), null=True, blank=True)
     qtd_hospedes = models.IntegerField(("Nº. hóspedes"), blank=True, null=True )
     qtd_excedentes = models.IntegerField(("Excedentes"), null=True, blank=True)
-    valor_adiantamento = models.DecimalField(("Valor Adiantamento"), max_digits=10, decimal_places=2, null=True, blank=True)
+    valor_adiantamento = models.DecimalField(("Valor Adiantamento"), max_digits=15, decimal_places=2, null=True, blank=True)
     valor_pago_excedente = models.DecimalField(("Valor por excedentes"), max_digits=10, decimal_places=2, null=True, blank=True)
     valor_consumo = models.DecimalField(("Valor consumo"), max_digits=10, decimal_places=2, null=True, blank=True)
     forma_pagamento = models.CharField(("Forma Pgto."), max_length=25, choices=TIPO_PAGAMENTO, null=True, blank=True)

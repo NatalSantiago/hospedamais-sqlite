@@ -58,6 +58,8 @@ USE_L10N = True         # essa é padrão
 
 USE_THOUSAND_SEPARATOR = True
 
+DECIMAL_SEPARATOR = ','
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
