@@ -22,6 +22,9 @@
 <!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
+<link  rel= 'stylesheet'  href= 'https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.min.css' >
+<script src= "https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.all.min.js" ></script>
+
     <!-- =======  Data-Table  = Start  ========================== -->
     <br>
     <div class="container">
@@ -37,11 +40,11 @@
                  <i class="card-title" style="font-size: 15px;">Tipo: {{ apartamento.tipoapart }}</i><br>
                  <i class="card-title" style="font-size: 15px;">Status: {{ apartamento.tipostatus }}</i><br>
                  {% elif apartamento.tipostatus == 'Reservado' %}                 
-                     {% with reserva=apartamento.movimentoreservas_set.all.first %}
-                         <i class="card-title" style="font-size: 13px;">{{ reserva.hospede.nome }}</i><br>
-                         <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: {{ reserva.entrada_prevista|date:'d/m/Y' }}</i><br>
-                     {% endwith %}
-                   {% elif apartamento.tipostatus == 'Ocupado' %}
+                   {% with reserva=apartamento.movimentoreservas_set.all.last %}
+                       <i class="card-title" style="font-size: 13px;">{{ reserva.hospede.nome }}</i><br>
+                       <i class="card-title fa fa-calendar-check-o" style="font-size: 15px;"> Reservado para: {{ reserva.entrada_prevista|date:'d/m/Y' }}</i><br>
+                   {% endwith %}
+                 {% elif apartamento.tipostatus == 'Ocupado' %}
                    {% for movimento in apartamento.movimentosaparts_set.all %}
                        {% if movimento.pago_sn != 'S' %}
                            <i class="card-title" style="font-size: 13px;"> {{ movimento.hospede.nome }} / {{ movimento.id }}</i><br>
@@ -57,7 +60,7 @@
               {% if apartamento.tipostatus == 'Livre' %}
                 <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalCheckinReserva" onclick="setApartamento('{{ apartamento.descricao }}', {{ apartamento.qtdpessoas }})"> Check-In / Reservar</button>
               {% elif apartamento.tipostatus == 'Reservado' %}                 
-                {% with reserva=apartamento.movimentoreservas_set.first %}
+                {% with reserva=apartamento.movimentoreservas_set.last %}
                   <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalConfirmarCheckinReservado" data-reserva-id="{{ reserva.id }}" onclick="setApartamentoReserva('{{ reserva.id }}', '{{ reserva.hospede.nome }}', '{{ reserva.qtd_hospedes }}', '{{ apartamento.descricao }}', '{{ apartamento.qtdpessoas }}'), '{{ reserva.entrada_prevista }}' "> Check-In</button>
                 {% endwith %}
               {% elif apartamento.tipostatus == 'Ocupado' %}
@@ -158,6 +161,7 @@
           </div>
           <div class="tab-content">
             <!--************************************************************************-->
+            <!--******************* Modal TabLink Check-In *****************************-->
             <br>
             <div id="checkin" class="tab-pane fade show active">
               <div class="form-row">
@@ -205,10 +209,11 @@
               </div>  
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button id="btn-exit" class="btn btn-success" name="action" value="save_exit" method="POST">Confirmar Check-In</button>
+                <button id="btn-exit" class="btn btn-success" name="action" value="salva_checkin" method="POST">Confirmar Check-In</button>
               </div>                
             </div>  
             <!--************************************************************************-->
+            <!--******************* Modal TabLink Reserva ******************************-->
             <div id="reserva" class="tab-pane fade">
               <div class="form-row">
                 <div class="form-group col-md-10 mb-0" style="text-align: left;">
@@ -223,15 +228,15 @@
               <div class="form-row">
                 <div class="form-group col-md-4 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Reserva</p>
-                  <input id="myDataDaReserva" type="date" name="myDataDaReserva" placeholder="Data reserva" class="inline">
+                  <input id="myDataDaReserva" type="date" name="myDataDaReserva" placeholder="Data reserva" class="inline" value="{{ data_atual|date:'Y-m-d' }}">
                 </div>
                 <div class="form-group col-md-4 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaReserva" type="date" name="myDataEntradaReserva" placeholder="Data entrada" class="inline">
+                  <input id="myDataEntradaReserva" type="date" name="myDataEntradaReserva" placeholder="Data entrada" class="inline" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaidaReserva()">
                 </div>
                 <div class="form-group col-md-4 mb-0" style="text-align: right;">
                   <p class="inline" style="text-align: right; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saída" class="inline">
+                  <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}">
                 </div>
               </div>  
               <div class="form-row">
@@ -249,10 +254,9 @@
                   <input id="myOBSReserva" type="text" name="myOBSReserva" placeholder="Observação" class="inline">
                 </div>
               </div>  
-
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button type="button" class="btn btn-success">Reservar</button>
+                <button id="btn-exit" class="btn btn-success" name="action" value="salva_reserva" method="POST">Reservar</button>
               </div>                
             </div>  
           </div>
@@ -290,7 +294,7 @@
 .select2 { height: auto !important; }
 </style>
 
-<!-- Atualiza da data de saída dependendo da data de entrada  - ( Start ) -->
+<!-- Atualiza da data de saída dependendo da data de entrada  Check-in - ( Start ) -->
 <script>
   function preencherDataSaida() {
     // Obter valor do campo de entrada
@@ -302,6 +306,22 @@
     let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
     // Definir o valor do campo de saída
     document.getElementById("myDataSaidaCheckin").value = dataSaidaFormatada;
+  }
+</script>
+<!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
+
+<!-- Atualiza da data de saída dependendo da data de entrada  Reserva - ( Start ) -->
+<script>
+  function preencherDataSaidaReserva() {
+    // Obter valor do campo de entrada
+    let dataEntrada = new Date(document.getElementById("myDataEntradaReserva").value);
+    // Adicionar um dia à data de entrada
+    let dataSaida = new Date(dataEntrada.getTime());
+    dataSaida.setDate(dataEntrada.getDate() + 1);
+    // Formatar a data de saída para exibir apenas a parte da data
+    let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
+    // Definir o valor do campo de saída
+    document.getElementById("myDataSaidaReserva").value = dataSaidaFormatada;
   }
 </script>
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
@@ -388,6 +408,10 @@ function setApartamento(descricao) {
 
 <!-- ################### Modal Confirmar reserva - ( Start ) ######################### -->
 
+<form method="POST" action="{% url 'ConfirmarCancelarReserva' %}" >
+
+{% csrf_token %}
+
 <div class="modal fade" id="ModalConfirmarCheckinReservado" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
     <div class="modal-content">
@@ -430,7 +454,7 @@ function setApartamento(descricao) {
                 </div>
                 <div class="form-group col-md-4 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaApartReservado" type="date" name="myDataEntradaApartReservado" placeholder="Data entrada" class="inline">
+                  <input id="myDataEntradaApartReservado" type="date" name="myDataEntradaApartReservado" placeholder="Data entrada" class="inline" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaidaReservado()">
                 </div>
                 <div class="form-group col-md-2 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left;">Hora:</p>
@@ -438,12 +462,13 @@ function setApartamento(descricao) {
                 </div>
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaReservado" type="date" name="myDataSaidaReservado" placeholder="Data saída" class="inline">
+                  <input id="myDataSaidaReservado" type="date" name="myDataSaidaReservado" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}">
                 </div>
               </div>
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button type="button" class="btn btn-success">Confirmar Check-In</button>
+                <button id="btn-exit" class="btn btn-warning" name="action" value="CancelarReserva" method="POST">Cancelar Reserva</button>
+                <button id="btn-exit" class="btn btn-success" name="action" value="ConfirmarCheckin" method="POST">Confirmar Check-In</button>
               </div>                
             </div>  
           </div>
@@ -452,6 +477,7 @@ function setApartamento(descricao) {
     </div>
   </div>
 </div>
+</form>
 
 <!-- ################### Modal Confirmar reserva - ( End ) ######################### -->
 <script>
@@ -470,6 +496,13 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
       document.getElementById("myQtdHospedesApartReservado").value = qtdHospedesApartamento;
       document.getElementById("myQtdHospedadosReservado").value = reserva.qtd_hospedes;
       document.getElementById("myDataEntradaApartReservado").value = reserva.entrada_prevista;
+      document.getElementById("myDataSaidaReservado").value = reserva.saida_prevista;
+      // Obtenha a hora atual
+      let horaAtual = new Date();
+      // Formate a hora como uma string no formato HH:mm
+      let horaFormatada = horaAtual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      // Preencha o campo de hora com a hora formatada
+      document.getElementById("myHoraEntradaApartReservado").value = horaFormatada;
       $('#myDataEntradaApartReservado').focus();
     },
     error: function() {
@@ -483,6 +516,23 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
   });
 }
 </script>
+
+
+<!-- Atualiza da data de saída dependendo da data de entrada  Reservado - ( Start ) -->
+<script>
+  function preencherDataSaidaReservado() {
+    // Obter valor do campo de entrada
+    let dataEntrada = new Date(document.getElementById("myDataEntradaApartReservado").value);
+    // Adicionar um dia à data de entrada
+    let dataSaida = new Date(dataEntrada.getTime());
+    dataSaida.setDate(dataEntrada.getDate() + 1);
+    // Formatar a data de saída para exibir apenas a parte da data
+    let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
+    // Definir o valor do campo de saída
+    document.getElementById("myDataSaidaReservado").value = dataSaidaFormatada;
+  }
+</script>
+<!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
 
 
 <!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( Start ) -->

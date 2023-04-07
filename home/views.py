@@ -17,7 +17,7 @@ from home.models import PerfilUsuario,hospedes,apartamentos,ItensConsumo,Movimen
 
 from home.forms import HospedesForm,ApartamentosForm,ItensConsumoForm,InserirItensConsumoApartForm
 
-from home.forms import MovimentosApartsForm
+from home.forms import MovimentosApartsForm,MovimentosReservaForm
 
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
@@ -621,8 +621,25 @@ def ApartHome_list(request):
         movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(
             apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
 
-        # Filtra os dados da tabela MovimentoReservas pelos campos empresa, apartamento e hóspede
-#        movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa)
+
+#        movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa, status_reserva="Pendente")
+
+
+        movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa, status_reserva="Pendente")
+       
+        # Atualiza o campo reserva do apartamento caso exista uma reserva pendente para ele
+        for apartamento in apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos):
+            reservas_pendentes = movimentos_reservas.filter(apartamento=apartamento)
+            if reservas_pendentes.exists():
+                apartamento.reserva = reservas_pendentes.first()
+            else:
+                apartamento.reserva = None
+            apartamento.save()
+
+
+
+
+
        
         # Pegar a data_checkin e data_saida
         data_atual = date.today()
@@ -638,7 +655,7 @@ def ApartHome_list(request):
             'lista_hospedes': lista_hospedes,
             'data_atual': data_atual,
             'data_saida': data_saida,
-#            'movimentos_reservas': movimentos_reservas  # Adiciona os dados da tabela MovimentoReservas ao contexto
+            'movimentos_reservas': movimentos_reservas  # Adiciona os dados da tabela MovimentoReservas ao contexto
         }
 
     except PerfilUsuario.DoesNotExist:
@@ -860,79 +877,154 @@ def buscar_reservas(request):
     perfil_usuario = request.user.perfilusuario
     empresa = perfil_usuario.empresa
     if request.method == 'POST':
-        reserva_id = request.POST.get('reserva_id')
-        reserva = MovimentoReservas.objects.filter(
-            empresa=empresa, 
-            id=reserva_id
-        ).select_related('apartamento').values(
-            'hospede__nome', 
-            'qtd_hospedes', 
-            'data_reserva', 
-            'entrada_prevista',
-            'apartamento__descricao', 
-            'apartamento__qtdpessoas',
-        ).first()
-
-        if reserva:
-            apartamento = reserva['apartamento__descricao']
-            qtdpessoas = int(reserva['apartamento__qtdpessoas'])
-            return JsonResponse({
-                'apartamento': apartamento,
-                'qtdpessoas': qtdpessoas,
-                'hospede': reserva['hospede__nome'],
-                'qtd_hospedes': reserva['qtd_hospedes'],
-                'data_reserva': reserva['data_reserva'],
-                'entrada_prevista': reserva['entrada_prevista'],
-            })
-        else:
-            return JsonResponse({}, status=404)
+       reserva_id = request.POST.get('reserva_id')
+       print(reserva_id)
+       reserva = MovimentoReservas.objects.filter(
+       empresa=empresa,
+       id=reserva_id,
+       status_reserva='Pendente' # adicionando a condição para o status_reserva
+       ).select_related('apartamento').values(
+          'hospede__nome',
+          'qtd_hospedes',
+          'data_reserva',
+          'entrada_prevista',
+          'saida_prevista',
+          'apartamento__descricao',
+          'apartamento__qtdpessoas',
+       ).last()
+       if reserva:
+           apartamento = reserva['apartamento__descricao']
+           qtdpessoas = int(reserva['apartamento__qtdpessoas'])
+           return JsonResponse({
+               'apartamento': apartamento,
+               'qtdpessoas': qtdpessoas,
+               'hospede': reserva['hospede__nome'],
+               'qtd_hospedes': reserva['qtd_hospedes'],
+               'data_reserva': reserva['data_reserva'],
+               'entrada_prevista': reserva['entrada_prevista'],
+               'saida_prevista': reserva['saida_prevista'],
+           })
+       else:
+          return JsonResponse({}, status=404)
     else:
         return JsonResponse({}, status=400)
 
 
+
+
 ######################################################################################
 from .models import apartamentos, hospedes
-from django.contrib import messages
 from decimal import Decimal
 
 @login_required
 def SalvarCheckIn(request):
     empresa = request.user.perfilusuario.empresa
-    apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartCheckin')).first()
-    if request.POST.get('myHospede') == '':
-       return redirect('apartHome')
-    if request.POST.get('myQtdHospedadosCheckin') == '':    
-       return redirect('apartHome')
 
-    hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
+    action = request.POST.get('action')
+    ## Quando o usuario clicar no botão Confirmar Check-In no modal CheckIn/Reserva
+    if action == 'salva_checkin':
+       apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartCheckin')).first()
+       if request.POST.get('myHospede') == '':
+          return redirect('apartHome')
+       if request.POST.get('myQtdHospedadosCheckin') == '':    
+          return redirect('apartHome')
+
+       hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
+
+       if request.method == 'POST':
+           form = MovimentosApartsForm(request.POST or None)
+           if form.is_valid():
+               movimentApart = form.save(commit=False)
+               movimentApart.empresa = empresa
+               movimentApart.apartamento_id = apartamento.id
+               movimentApart.hospede_id = hospede.id
+               movimentApart.data_checkin = request.POST.get('myDataEntradaCheckin')
+               movimentApart.hora_checkin = request.POST.get('myHoraEntradaCheckin')
+               movimentApart.data_checkout = request.POST.get('myDataSaidaCheckin')
+               movimentApart.qtd_hospedes = request.POST.get('myQtdHospedadosCheckin')
+               # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
+               qtd_hospedes = int(request.POST.get('myQtdHospdesCheckin'))
+               qtd_hospedados = int(request.POST.get('myQtdHospedadosCheckin'))
+               movimentApart.qtd_excedentes = qtd_hospedados - qtd_hospedes
+               # converte o valor do haver do template em Decimal
+               valor_adiantamento_str = request.POST.get('myHaverCheckin')
+               if valor_adiantamento_str:
+                  valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+                  movimentApart.valor_adiantamento = valor_adiantamento_decimal            
+               movimentApart.observacao = request.POST.get('myOBSCheckin')
+               movimentApart.save()
+
+               # atualiza o campo tipostatus do apartamento para "Ocupado"
+               apartamento.tipostatus = 'Ocupado'
+               apartamento.save()
+
+               return redirect('apartHome')
+    ## Quando o usuario clicar no botão Reservar no modal CheckIn/Reserva
+    elif action == 'salva_reserva':
+       apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartReserva')).first()
+       if request.POST.get('myHospede') == '':
+          return redirect('apartHome')
+       if request.POST.get('myQtdHospdesReserva') == '':    
+          return redirect('apartHome')
+
+       hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
+
+       if request.method == 'POST':
+           form = MovimentosReservaForm(request.POST or None)
+           if form.is_valid():
+               movimentApart = form.save(commit=False)
+               movimentApart.empresa = empresa
+               movimentApart.apartamento_id = apartamento.id
+               movimentApart.hospede_id = hospede.id
+               movimentApart.qtd_hospedes = request.POST.get('myQtdHospdesReserva')
+               movimentApart.data_reserva = request.POST.get('myDataDaReserva')
+               movimentApart.entrada_prevista = request.POST.get('myDataEntradaReserva')
+               movimentApart.saida_prevista = request.POST.get('myDataSaidaReserva')
+               # converte o valor do haver do template em Decimal
+               valor_adiantamento_str = request.POST.get('myAntecipadoReserva')
+               if valor_adiantamento_str:
+                  valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+                  movimentApart.valor_antecipado = valor_adiantamento_decimal            
+               ################################################################   
+               movimentApart.observacao = request.POST.get('myOBSReserva')
+               movimentApart.status_reserva = 'Pendente'
+               movimentApart.save()
+               # atualiza o campo tipostatus do apartamento para "Ocupado"
+               apartamento.tipostatus = 'Reservado'
+               apartamento.save()
+
+               return redirect('apartHome')
+
+
+    return redirect('apartHome')
+
+
+#######################################################################################
+
+@login_required
+def ConfirmarCancelarReserva(request):
+    empresa = request.user.perfilusuario.empresa
 
     if request.method == 'POST':
-        form = MovimentosApartsForm(request.POST or None)
-        if form.is_valid():
-            movimentApart = form.save(commit=False)
-            movimentApart.empresa = empresa
-            movimentApart.apartamento_id = apartamento.id
-            movimentApart.hospede_id = hospede.id
-            movimentApart.data_checkin = request.POST.get('myDataEntradaCheckin')
-            movimentApart.hora_checkin = request.POST.get('myHoraEntradaCheckin')
-            movimentApart.data_checkout = request.POST.get('myDataSaidaCheckin')
-            movimentApart.qtd_hospedes = request.POST.get('myQtdHospedadosCheckin')
-            # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
-            qtd_hospedes = int(request.POST.get('myQtdHospdesCheckin'))
-            qtd_hospedados = int(request.POST.get('myQtdHospedadosCheckin'))
-            movimentApart.qtd_excedentes = qtd_hospedados - qtd_hospedes
-            # converte o valor do haver do template em Decimal
-            valor_adiantamento_str = request.POST.get('myHaverCheckin')
-            if valor_adiantamento_str:
-               valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
-               movimentApart.valor_adiantamento = valor_adiantamento_decimal            
-            movimentApart.observacao = request.POST.get('myOBSCheckin')
-            movimentApart.save()
-
-            # atualiza o campo tipostatus do apartamento para "Ocupado"
-            apartamento.tipostatus = 'Ocupado'
-            apartamento.save()
-
+        action = request.POST.get('action')
+        if action == 'ConfirmarCheckin':
+            return redirect('apartHome')
+        elif action == 'CancelarReserva':
+            apartamento_descricao = request.POST.get('myApartamentoReservado')
+            hospede_nome = request.POST.get('myHospedeReservado')
+        
+            reserva = MovimentoReservas.objects.filter(empresa=empresa, 
+                apartamento__descricao=apartamento_descricao, 
+                hospede__nome=hospede_nome
+            ).last()
+        
+            if reserva:
+                reserva.status_reserva = 'Cancelada'
+                reserva.save()
+                apartamento = reserva.apartamento
+                apartamento.tipostatus = 'Livre'
+                apartamento.save()
+            
             return redirect('apartHome')
 
     return redirect('apartHome')
