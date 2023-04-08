@@ -54,13 +54,10 @@ urlpatterns = [
     path('itensConsumo/delete/<int:itenConsumo_pk>',views.itensConsumo_delete, name='itensConsumo_delete'),
 
     path('itensConsumo/check_description/', itensConsumo_check_description, name='itensConsumo_check_description'),
-
     
     path('salvar_variaveis/', views.salvar_variaveis, name='salvar_variaveis'),    
     
     path('itens_consumo_aparts/<int:apartamento_id>/', views.itens_consumo_aparts_apartamento, name='itens_consumo_aparts_apartamento'),
-
-#    path('LancarNovoItemHospede/<int:mov_pk>/', views.LancarNovoItemHospede, name='LancarNovoItemHospede'),
 
     path('LancarNovoItemHospede/<int:movID>/', views.LancarNovoItemHospede, name='LancarNovoItemHospede'),
 
@@ -75,5 +72,7 @@ urlpatterns = [
     path('SalvarCheckIn/', views.SalvarCheckIn, name='SalvarCheckIn'),
 
     path('ConfirmarCancelarReserva/', views.ConfirmarCancelarReserva, name='ConfirmarCancelarReserva'),
+
+    path('apartamento/<int:pk>/liberar/', views.liberar_apartamento, name='liberar_apartamento'),
 
 ]

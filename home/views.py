@@ -1085,3 +1085,14 @@ def ConfirmarCancelarReserva(request):
             return redirect('apartHome')
 
     return redirect('apartHome')
+
+#########################################################################
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import apartamentos
+
+def liberar_apartamento(request, pk):
+    apartamento = get_object_or_404(apartamentos, pk=pk)
+    apartamento.tipostatus = "Livre"
+    apartamento.save()
+    return JsonResponse({'status': 'success'})

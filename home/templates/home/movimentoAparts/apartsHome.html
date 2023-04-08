@@ -85,7 +85,15 @@
                   </a>
                 </div>
               {% elif apartamento.tipostatus == 'Em manutenção' %}                 
+
+<!--
                  <button type="button" class="btn btn-outline-success fa fa-wrench btn-short"> Liberar</button>
+-->
+
+<button type="button" class="btn btn-outline-success fa fa-wrench btn-short" id="liberar-button" data-id="{{ apartamento.pk }}"> Liberar</button>
+
+
+
               {% endif %}
             </div>
           </div>
@@ -557,8 +565,66 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
 
 
-<!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( Start ) -->
-<!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( End ) -->
+<!-- Liberar apartamento em manutenção - ( Start ) -->
+<script>
+  const liberarButton = document.getElementById('liberar-button');
+  const apartamentoId = liberarButton.dataset.id;
+  document.getElementById('liberar-button').addEventListener('click', function() {
+    Swal.fire({
+      title: 'Você deseja liberar a acomodação?',
+      text: 'Essa ação não pode ser desfeita.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, liberar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+        let url = `/apartamento/${apartamentoId}/liberar/`;
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            Swal.fire('Acomodação liberada!', '', 'success').then(() => {
+              window.location.href = "{% url 'apartHome' %}";
+            });
+          } else {
+            Swal.fire('Oops...', 'Ocorreu um erro ao tentar liberar a acomodação.', 'error');
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire('Oops...', 'Ocorreu um erro ao tentar liberar a acomodação.', 'error');
+        });
+      }
+    })
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+
+
+<!-- Liberar apartamento em manutenção - ( End ) -->
 
 
 
