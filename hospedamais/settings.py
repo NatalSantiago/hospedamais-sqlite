@@ -54,11 +54,11 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 USER_AGENTS_CACHE = 'default'
 
-USE_L10N = True         # essa é padrão
-
 USE_THOUSAND_SEPARATOR = True
 
-DECIMAL_SEPARATOR = ','
+
+FORMAT_MODULE_PATH = 'home.formats'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -35,6 +35,8 @@
 
 .card {
   border-radius: 15px;
+
+ 
 }
 
   </style>
@@ -45,49 +47,46 @@
  
 {% block pageContent %}
 
-<!--
-<div class="row justify-content-center align-items-center" style="height: 100vh;">
-    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
-        <div class="card card-default rounded-10px shadow">
--->
-
 <div class="row justify-content-center align-items-center" style="height: 100vh;">
   <div class="col-lg-4 col-md-3 col-sm-12 col-xs-12">
     <div class="card card-default rounded-10px shadow">
-
-
-
-<div class="card-header d-flex flex-column align-items-center">
-  <img src="{% static 'img/MeuLogo.png' %}" class="mx-auto my-3" width="40%">
-  <h4 class="card-title"><b>Login</b></h4>
-</div>
-
-
-            <div class="card-body">
-                <div class="container-fluid">
-                    <form id="login-user">
-                        {% csrf_token %}
-                        <div class="mdc-layout-grid">
-                            <div class="mdc-layout-grid__inner">
-                                <div class="form-group mb-3">
-                                    <label for="username" class="control-label">Usuário</label>
-                                    <input type="text" class="form-control rounded-0" name="username" id="username" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <label for="password" class="control-label">Senha</label>
-                                    <input type="password" class="form-control rounded-0" name="password" id="password" required="required">
-                                </div>
-                                <div class="form-group mb-3">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <div class="col-md-4"></div>
-                                        <button class="btn btn-sm rounded-0 btn-primary">Login</button>
-                                    </div>
-                                </div>
+    <div class="card-header d-flex flex-column align-items-center">
+      <img src="{% static 'img/MeuLogo.png' %}" class="mx-auto my-3" width="40%">
+      <h4 class="card-title"><b>Login</b></h4>
+    </div>
+    <div class="card-body">
+        <div class="container-fluid">
+            <form id="login-user">
+                {% csrf_token %}
+                <div class="mdc-layout-grid">
+                    <div class="mdc-layout-grid__inner">
+                        <div class="form-group mb-3">
+                            <label for="username" class="control-label">Usuário</label>
+                            <input type="text" class="form-control rounded-0" name="username" id="username" required="required">
+                        </div>
+                        <div class="form-group col-md-12 mb-0" style="text-align: left;">
+                          <div class="input-group-prepend">
+                            <label for="password" class="control-label">Senha</label>
+                            <div class="input-group align-items-center">
+                              <input type="password" class="form-control rounded-0" name="password" id="password" required="required">
+                              <div class="input-group-append">
+                                <span class="input-group-text" id="show-password">
+                                  <i class="fa fa-eye" style="font-size: 24px; cursor: pointer " id="btn-senha" onclick="mostrarSenha()"></i>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <br>
+                        <div class="form-group mb-3">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div class="col-md-4"></div>
+                                <button class="btn btn-sm rounded-0 btn-primary">Login</button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
@@ -96,6 +95,24 @@
 {% endblock pageContent %} 
  
 {% block ScriptBlock %}
+
+<script>
+function mostrarSenha(){
+    var inputPass = document.getElementById('password')
+    var bntShowPass = document.getElementById('btn-senha')
+
+    if(inputPass.type === 'password'){
+        inputPass.setAttribute('type','text')
+        bntShowPass.classList.replace('fa-eye', 'fa-eye-slash')
+    }else{
+        inputPass.setAttribute('type','password')
+        bntShowPass.classList.replace('fa-eye-slash', 'fa-eye')
+    }
+}
+</script>
+
+<!--********************************************************************************-->
+
 <script>
     $(function() {
         $('#login-user').submit(function(e) {

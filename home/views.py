@@ -957,9 +957,8 @@ def SalvarCheckIn(request):
                # converte o valor do haver do template em Decimal
                valor_adiantamento_str = request.POST.get('myHaverCheckin')
                if valor_adiantamento_str:
-                  valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+                  valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(".", "").replace(",", "."))
                   movimentApart.valor_adiantamento = valor_adiantamento_decimal            
-
                movimentApart.observacao = request.POST.get('myOBSCheckin')
                movimentApart.save()
 
@@ -992,7 +991,7 @@ def SalvarCheckIn(request):
                # converte o valor do haver do template em Decimal
                valor_adiantamento_str = request.POST.get('myAntecipadoReserva')
                if valor_adiantamento_str:
-                  valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+                  valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(".", "").replace(",", "."))
                   movimentApart.valor_antecipado = valor_adiantamento_decimal            
                ################################################################   
                movimentApart.observacao = request.POST.get('myOBSReserva')
@@ -1051,7 +1050,7 @@ def ConfirmarCancelarReserva(request):
                    # converte o valor do haver do template em Decimal
                    valor_adiantamento_str = request.POST.get('myAntecipadoReservado')
                    if valor_adiantamento_str:
-                      valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(',', '.'))
+                      valor_adiantamento_decimal = Decimal(valor_adiantamento_str.replace(".", "").replace(",", "."))
                       movimentApart.valor_adiantamento = valor_adiantamento_decimal            
 
                    movimentApart.observacao = request.POST.get('myOBSReservado')

@@ -242,10 +242,10 @@
               <div class="form-row">
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Valor Antecipado:</p>
-                     <input style="text-align: right" id="myAntecipadoReserva" type="text" name="myAntecipadoReserva" placeholder="Valor antecipado" class="inline">
+                    <input style="text-align: right" id="myAntecipadoReserva" type="text" name="myAntecipadoReserva" placeholder="Valor antecipado" class="inline">
                      <script>
                          $(document).ready(function(){
-                             $('#myAntecipadoReserva').mask('#.##0,00', {reverse: true});
+                             $('#myAntecipadoReserva').mask('000.000.000.000.000,00', {reverse: true});
                          });
                      </script>
                 </div>
@@ -512,7 +512,12 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
       document.getElementById("myQtdHospedadosReservado").value = reserva.qtd_hospedes;
       document.getElementById("myDataEntradaApartReservado").value = reserva.entrada_prevista;
       document.getElementById("myDataSaidaReservado").value = reserva.saida_prevista;
-      document.getElementById("myAntecipadoReservado").value = reserva.valor_antecipado;
+      // Formatação do valor de haver na reserva
+      var numero = parseFloat(reserva.valor_antecipado);
+      var valor_formatado = numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', currencyDisplay: 'symbol' });
+      var valor_sem_moeda = valor_formatado.replace(/[^\d,.-]/g, ""); // aqui tira o R$
+      document.getElementById("myAntecipadoReservado").value = valor_sem_moeda;
+      /////////////////////////////////////////////////////////////////////////
       document.getElementById("myOBSReservado").value = reserva.observacao;
       // Obtenha a hora atual
       let horaAtual = new Date();
