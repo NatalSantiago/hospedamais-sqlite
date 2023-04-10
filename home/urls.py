@@ -75,4 +75,6 @@ urlpatterns = [
 
     path('apartamento/<int:pk>/liberar/', views.liberar_apartamento, name='liberar_apartamento'),
 
+    path('apartamento/<str:descApart>/cancelar_reserva/', views.cancelar_reserva, name='cancelar_reserva'),
+
 ]

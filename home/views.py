@@ -621,30 +621,11 @@ def ApartHome_list(request):
         movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(
             apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
 
-
-#        movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa, status_reserva="Pendente")
-
-
         movimentos_reservas = MovimentoReservas.objects.filter(empresa=empresa, status_reserva="Pendente")
-       
-        # Atualiza o campo reserva do apartamento caso exista uma reserva pendente para ele
-        for apartamento in apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos):
-            reservas_pendentes = movimentos_reservas.filter(apartamento=apartamento)
-            if reservas_pendentes.exists():
-                apartamento.reserva = reservas_pendentes.first()
-            else:
-                apartamento.reserva = None
-            apartamento.save()
-
-
-
-
-
-       
+      
         # Pegar a data_checkin e data_saida
         data_atual = date.today()
         data_saida = data_saida = data_atual + timedelta(days=1)
-
 
         context = {
             'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
@@ -1030,7 +1011,6 @@ def ConfirmarCancelarReserva(request):
                hospede__nome=hospede_nome
            ).last()
 
-
            if request.method == 'POST':
                form = MovimentosApartsForm(request.POST or None)
                if form.is_valid():
@@ -1066,25 +1046,47 @@ def ConfirmarCancelarReserva(request):
                    apartamento.save()
 
                return redirect('apartHome')
-        elif action == 'CancelarReserva':
-            apartamento_descricao = request.POST.get('myApartamentoReservado')
-            hospede_nome = request.POST.get('myHospedeReservado')
+#        elif action == 'CancelarReserva':
+#                   apartamento_descricao = request.POST.get('myApartamentoReservado')
+#                   hospede_nome = request.POST.get('myHospedeReservado')
+#                   reserva = MovimentoReservas.objects.filter(empresa=empresa, 
+#                       apartamento__descricao=apartamento_descricao, 
+#                       hospede__nome=hospede_nome
+#                   ).last()
         
-            reserva = MovimentoReservas.objects.filter(empresa=empresa, 
-                apartamento__descricao=apartamento_descricao, 
-                hospede__nome=hospede_nome
-            ).last()
-        
-            if reserva:
-                reserva.status_reserva = 'Cancelada'
-                reserva.save()
-                apartamento = reserva.apartamento
-                apartamento.tipostatus = 'Livre'
-                apartamento.save()
-            
-            return redirect('apartHome')
+#                   if reserva:
+#                       reserva.status_reserva = 'Cancelada'
+#                       reserva.save()
+#                       apartamento = reserva.apartamento
+#                       apartamento.tipostatus = 'Livre'
+#                       apartamento.save()
+#                   return redirect('apartHome')
 
     return redirect('apartHome')
+
+#########################################################################
+
+from django.shortcuts import get_object_or_404, redirect
+from .models import apartamentos
+
+
+
+@login_required
+def cancelar_reserva(request, descApart):
+    empresa = request.user.perfilusuario.empresa
+    apartamento = get_object_or_404(apartamentos, empresa=empresa, descricao=descApart)
+    if request.method == 'POST':
+       reserva = MovimentoReservas.objects.filter(empresa=empresa, 
+       apartamento__descricao=apartamento.descricao ).last()
+        
+    if reserva:
+        reserva.status_reserva = 'Cancelada'
+        reserva.save()
+        apartamento = reserva.apartamento
+        apartamento.tipostatus = 'Livre'
+        apartamento.save()
+        return JsonResponse({'status': 'success'})
+
 
 #########################################################################
 
