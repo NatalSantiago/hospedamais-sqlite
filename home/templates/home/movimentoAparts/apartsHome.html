@@ -71,8 +71,8 @@
                   <a class="icon-spacing" href="#">
                     <i class="fas fa-light fa-envelope icon-spacing" title="Enviar mensagem"></i>
                   </a>
-                  <a class="icon-spacing" href="#">
-                    <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ver dados do hospede"></i>
+                  <a class="icon-spacing" href="{% url 'FichaNacionalRegistroHospedes' apartamento.id %}">
+                    <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ficha Nacional de Registro de Hóspedes"></i>
                   </a>
                   <a class="icon-spacing" href="#">
                     <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual"></i>
@@ -85,15 +85,7 @@
                   </a>
                 </div>
               {% elif apartamento.tipostatus == 'Em manutenção' %}                 
-
-<!--
-                 <button type="button" class="btn btn-outline-success fa fa-wrench btn-short"> Liberar</button>
--->
-
-<button type="button" class="btn btn-outline-success fa fa-wrench btn-short" id="liberar-button" data-id="{{ apartamento.pk }}"> Liberar</button>
-
-
-
+                  <button type="button" class="btn btn-outline-success fa fa-wrench btn-short" id="liberar-button" data-id="{{ apartamento.pk }}"> Liberar</button>
               {% endif %}
             </div>
           </div>
@@ -183,11 +175,11 @@
                 </div>
               </div>
               <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Hospedado(s):</p>
                   <input style="text-align: center" id="myQtdHospedadosCheckin" type="number" name="myQtdHospedadosCheckin" placeholder="hospedados" class="inline">
                 </div>
-                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
                   <input type="date" id="myDataEntradaCheckin" name="myDataEntradaCheckin" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaida()">
                 </div>
@@ -198,6 +190,10 @@
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
                   <input type="date" id="myDataSaidaCheckin" name="myDataSaidaCheckin" value="{{ data_saida|date:'Y-m-d' }}" class="form-control">
+                </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left;">Hora:</p>
+                  <input id="myHoraSaidaCheckin" type="time" name="myHoraSaidaCheckin" placeholder="Hora saida" class="inline">
                 </div>
               </div>
               <div class="form-row">
@@ -407,6 +403,7 @@ function setApartamento(descricao) {
     let horaFormatada = horaAtual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     // Preencha o campo de hora com a hora formatada
     document.getElementById("myHoraEntradaCheckin").value = horaFormatada;
+    document.getElementById("myHoraSaidaCheckin").value = horaFormatada;
   });
 </script>
 <!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( End ) -->
@@ -516,11 +513,11 @@ function setApartamento(descricao) {
                 </div>
               </div>
               <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Hospedado(s):</p>
                   <input style="text-align: center" id="myQtdHospedadosReservado" type="number" name="myQtdHospedadosReservado" placeholder="hospedados" class="inline">
                 </div>
-                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
                   <input id="myDataEntradaApartReservado" type="date" name="myDataEntradaApartReservado" placeholder="Data entrada" class="inline" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaidaReservado()">
                 </div>
@@ -531,6 +528,10 @@ function setApartamento(descricao) {
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
                   <input id="myDataSaidaReservado" type="date" name="myDataSaidaReservado" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}">
+                </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left;">Hora:</p>
+                  <input id="myHoraSaidaApartReservado" type="time" name="myHoraSaidaApartReservado" placeholder="Hora saida" class="inline">
                 </div>
               </div>
               <div class="form-row">
@@ -550,12 +551,7 @@ function setApartamento(descricao) {
               </div>  
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-
-<!--                
-                <button type="submit" id="btn-cancelar-reserva" class="btn btn-warning" name="action" value="CancelarReserva" method="POST">Cancelar Reserva</button>
--->
-              <button type="button" class="btn btn-warning" id="CancelarReserva-button"> Cancelar Reserva</button>
-
+                <button type="button" class="btn btn-warning" id="CancelarReserva-button"> Cancelar Reserva</button>
                 <button id="btn-exit" class="btn btn-success" name="action" value="ConfirmarCheckin" method="POST">Confirmar Check-In</button>
               </div>                
             </div>  
@@ -629,12 +625,6 @@ function setApartamento(descricao) {
 <!-- Cancelar Reserva - ( End ) -->
 
 
-
-
-
-
-
-
 <script>
 function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApartamento, qtdHospedesApartamento, DataentradaPrevista) {
   // Faz uma requisição AJAX ao servidor para buscar a reserva
@@ -665,6 +655,7 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
       let horaFormatada = horaAtual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       // Preencha o campo de hora com a hora formatada
       document.getElementById("myHoraEntradaApartReservado").value = horaFormatada;
+      document.getElementById("myHoraSaidaApartReservado").value = horaFormatada;
       $('#myDataEntradaApartReservado').focus();
     },
     error: function() {
@@ -695,9 +686,5 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
   }
 </script>
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
-
-
-
-
 
 {% endblock %}

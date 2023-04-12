@@ -896,9 +896,6 @@ def buscar_reservas(request):
     else:
         return JsonResponse({}, status=400)
 
-
-
-
 ######################################################################################
 from .models import apartamentos, hospedes
 
@@ -929,6 +926,7 @@ def SalvarCheckIn(request):
                movimentApart.data_checkin = request.POST.get('myDataEntradaCheckin')
                movimentApart.hora_checkin = request.POST.get('myHoraEntradaCheckin')
                movimentApart.data_checkout = request.POST.get('myDataSaidaCheckin')
+               movimentApart.hora_checkout = request.POST.get('myHoraSaidaCheckin')
                movimentApart.qtd_hospedes = request.POST.get('myQtdHospedadosCheckin')
                # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
                qtd_hospedes = int(request.POST.get('myQtdHospdesCheckin'))
@@ -1021,6 +1019,7 @@ def ConfirmarCancelarReserva(request):
                    movimentApart.data_checkin = request.POST.get('myDataEntradaApartReservado')
                    movimentApart.hora_checkin = request.POST.get('myHoraEntradaApartReservado')
                    movimentApart.data_checkout = request.POST.get('myDataSaidaReservado')
+                   movimentApart.hora_checkout = request.POST.get('myHoraSaidaApartReservado')
                    movimentApart.qtd_hospedes = request.POST.get('myQtdHospedadosReservado')
                    # converte as variáveis de string para inteiro e calcula a variável movimentApart.qtd_excedentes
                    qtd_hospedes = int(request.POST.get('myQtdHospedesApartReservado'))
@@ -1069,12 +1068,11 @@ def ConfirmarCancelarReserva(request):
 from django.shortcuts import get_object_or_404, redirect
 from .models import apartamentos
 
-
-
 @login_required
 def cancelar_reserva(request, descApart):
     empresa = request.user.perfilusuario.empresa
     apartamento = get_object_or_404(apartamentos, empresa=empresa, descricao=descApart)
+
     if request.method == 'POST':
        reserva = MovimentoReservas.objects.filter(empresa=empresa, 
        apartamento__descricao=apartamento.descricao ).last()
@@ -1098,3 +1096,56 @@ def liberar_apartamento(request, pk):
     apartamento.tipostatus = "Livre"
     apartamento.save()
     return JsonResponse({'status': 'success'})
+
+################### Exclusão de Itens de Consumo ###################
+
+@login_required
+def FichaNacionalRegistroHospedes(request, apartamento_id):
+    empresa = request.user.perfilusuario.empresa
+
+    movAparts = MovimentosAparts.objects.get(empresa=empresa, pago_sn='N', apartamento_id=apartamento_id)
+
+    hospede = hospedes.objects.get(id=movAparts.hospede_id)
+
+    apartamento = apartamentos.objects.get(id=apartamento_id)
+
+    context = {
+        'nome_empresa': empresa.nome,
+        'empresa_iduser': empresa.pk,
+        'fone_empresa': empresa.fone,
+        'Whats_empresa': empresa.whatsApp,
+        'cnpj_empresa': empresa.cnpj,
+        'endereco_empresa': empresa.endereco,
+        'cidade_empresa': empresa.cidade,
+        'estado_empresa': empresa.estado,
+        'pais_empresa': empresa.Pais,
+        'email_empresa': empresa.email,
+        ###############################
+        'nome_hospede': hospede.nome,
+        'cpf_hospede': hospede.cpf,
+        'data_nascimento_hospede': hospede.datanascimento,
+        'genero_hospede': hospede.generohospede,
+        'email_hospede': hospede.email,
+        'fone_hospede': hospede.fone,
+        'profissao_hospede': hospede.profissao,
+        'nacionalidade_hospede': hospede.nacionalidade,
+        'endereco_hospede': hospede.endereco,
+        'cidade_hospede': hospede.cidade,
+        'estado_hospede': hospede.estado,
+        'pais_hospede': hospede.Pais,
+        'tipo_documento_hospede': hospede.tipodocindentificacao,
+        'numero_documento_hospede': hospede.numerodocumento,
+        'orgao_documento_hospede': hospede.orgaodocumento,
+        ####################################################
+        'tipo_apartamento': apartamento.tipoapart,
+        'descricao_apartamento': apartamento.descricao, 
+        'qtd_excedentes': movAparts.qtd_excedentes,
+        'data_entrada': movAparts.data_checkin,
+        'hora_entrada': movAparts.hora_checkin,
+        'data_saida': movAparts.data_checkout,
+        'hora_saida': movAparts.hora_checkout,
+
+
+    }
+
+    return render(request, 'home/FichaNacionalHospedes.html', context )

@@ -38,7 +38,8 @@ class Empresa(models.Model):
 
     nome = models.CharField("Nome", max_length=150, unique=True, error_messages={'unique': "Empresa já cadastrada ! ! !", })
     email = models.EmailField(("Email"), max_length=254, unique=True, error_messages={'unique': "Email já cadastrado ! ! !", })
-    fone = models.CharField(("Fone"), max_length=20)
+    fone = models.CharField(("Fone"), max_length=20, null=True, blank=True)
+    whatsApp = models.CharField(("WhatsApp"), max_length=20, null=True, blank=True)
     cnpj = models.CharField(max_length=18, unique=True, error_messages={'unique': "CNPJ já cadastrado ! ! !", })
     endereco = models.CharField(("Endereço"), max_length=100)
     cidade = models.CharField(("Cidade"), max_length=100)

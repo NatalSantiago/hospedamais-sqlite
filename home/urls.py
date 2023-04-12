@@ -77,4 +77,6 @@ urlpatterns = [
 
     path('apartamento/<str:descApart>/cancelar_reserva/', views.cancelar_reserva, name='cancelar_reserva'),
 
+    path('FichaNacional/<int:apartamento_id>/', views.FichaNacionalRegistroHospedes, name='FichaNacionalRegistroHospedes'),
+
 ]
