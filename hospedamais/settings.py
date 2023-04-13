@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'cpf_field',
     'django_user_agents',
     'widget_tweaks',
-]
+ ]
 
 
 # Crispy Forms

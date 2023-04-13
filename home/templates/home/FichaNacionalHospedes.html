@@ -31,27 +31,27 @@
 
 <p style="position:absolute;top:175px;left:100px;white-space:nowrap" class="ft00">
 
-<p style="position:absolute;top:8px;left:256px; font-size: 20px; white-space:nowrap" class="ft00">
+<p style="position:absolute;top:6px;left:256px; font-size: 20px; white-space:nowrap" class="ft00">
     <b>{{ nome_empresa }}</b>
 </p>
 
-<p style="position:absolute;top:40px;left:256px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:38px;left:256px;white-space:nowrap" class="ft01">
     <b>CNPJ: {{ cnpj_empresa }}   -   Fone: {{ fone_empresa }}</b>
 </p>
 
-<p style="position:absolute;top:63px;left:256px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:61px;left:256px;white-space:nowrap" class="ft01">
     <b>Endereço: {{ endereco_empresa }} - {{ cidade_empresa }}/{{ estado_empresa }} - {{ pais_empresa }}</b>
 </p>
 
-<p style="position:absolute;top:86px;left:256px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:84px;left:256px;white-space:nowrap" class="ft01">
     <b>Email: {{ email_empresa }}   -   WathsApp: {{ Whats_empresa }}</b>
 </p>
 
-<p style="position:absolute;top:281px;left:50px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:270px;left:50px;white-space:nowrap" class="ft01">
     <a>{{ descricao_apartamento }}</a>
 </p>
 
-<p style="position:absolute;top:281px;left:372px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:270px;left:372px;white-space:nowrap" class="ft01">
     <a>
         {% if qtd_excedentes %}
             {{ qtd_excedentes }}
@@ -59,27 +59,219 @@
     </a>
 </p>
 
-<p style="position:absolute;top:281px;left:486px;white-space:nowrap" class="ft01">
-    <a id="data_entrada">{{ data_entrada|date:"d/m/Y" }}</a>
+<p style="position:absolute;top:270px;left:486px;white-space:nowrap" class="ft01">
+    <a>{{ data_entrada|date:"d/m/Y" }}</a>
 </p>
 
-<p style="position:absolute;top:281px;left:602px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:270px;left:602px;white-space:nowrap" class="ft01">
     <a>{{ hora_entrada }}</a>
 </p>
 
 
-<p style="position:absolute;top:281px;left:684px;white-space:nowrap" class="ft01">
-    <a id="data_saida">{{ data_saida|date:"d/m/Y" }}</a>
+<p style="position:absolute;top:270px;left:684px;white-space:nowrap" class="ft01">
+    <a>{{ data_saida|date:"d/m/Y" }}</a>
 </p>
 
-<p style="position:absolute;top:281px;left:798px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:270px;left:798px;white-space:nowrap" class="ft01">
     <a>{{ hora_saida }}</a>
 </p>
 
-<p style="position:absolute;top:405px;left:50px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:390px;left:50px;white-space:nowrap" class="ft01">
     <a>{{ nome_hospede }}</a>
 </p>
 
+<p style="position:absolute;top:390px;left:636px;white-space:nowrap" class="ft01">
+    <a>{{ data_nascimento_hospede|date:"d/m/Y" }}</a>
+</p>
+
+
+<p style="position:absolute;top:390px;left:775px;white-space:nowrap" class="ft01">
+    <a>
+      {% if idade_hospede %}
+         {{ idade_hospede }} anos
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:462px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ profissao_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:462px;left:332px;white-space:nowrap" class="ft01">
+    <a>{{ nacionalidade_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:462px;left:612px;white-space:nowrap" class="ft01">
+    <a>{{ genero_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:462px;left:723px;white-space:nowrap" class="ft01">
+    <a>{{ cpf_hospede }}</a>
+</p>
+
+
+<p style="position:absolute;top:532px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ numero_documento_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:532px;left:357px;white-space:nowrap" class="ft01">
+    <a>{{ tipo_documento_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:532px;left:596px;white-space:nowrap" class="ft01">
+    <a>{{ orgao_documento_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:596px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ endereco_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:596px;left:652px;white-space:nowrap" class="ft01">
+    <a>{{ fone_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:663px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ cep_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:663px;left:190px;white-space:nowrap" class="ft01">
+    <a>{{ cidade_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:663px;left:494px;white-space:nowrap" class="ft01">
+    <a>{{ estado_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:663px;left:596px;white-space:nowrap" class="ft01">
+    <a>{{ pais_hospede }}</a>
+</p>
+
+
+
+<p style="position:absolute;top:945px;left:42px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_ferias %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:945px;left:225px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_congresso %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:945px;left:463px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_cursos %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:945px;left:675px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_parentes %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:992px;left:42px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_negocios %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:992px;left:225px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_compras %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:992px;left:463px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_religiao %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:992px;left:675px;white-space:nowrap" class="ft01">
+    <a>
+      {% if motViagem_outros %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<!--************************************************************************************-->
+<p style="position:absolute;top:1077px;left:44px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_aviao %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1077px;left:152px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_carro %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1077px;left:269px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_onibus %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1077px;left:401px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_moto %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1077px;left:510px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_navio %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1077px;left:635px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_trem %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1077px;left:755px;white-space:nowrap" class="ft01">
+    <a>
+      {% if meioTransp_outros %}
+        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+      {% endif %}
+    </a>
+</p>
+
+<p style="position:absolute;top:1154px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ email_hospede }}</a>
+</p>
 
 
 

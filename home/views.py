@@ -1099,6 +1099,11 @@ def liberar_apartamento(request, pk):
 
 ################### Exclusão de Itens de Consumo ###################
 
+from datetime import datetime
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import MovimentosAparts, hospedes, apartamentos
+
 @login_required
 def FichaNacionalRegistroHospedes(request, apartamento_id):
     empresa = request.user.perfilusuario.empresa
@@ -1108,6 +1113,14 @@ def FichaNacionalRegistroHospedes(request, apartamento_id):
     hospede = hospedes.objects.get(id=movAparts.hospede_id)
 
     apartamento = apartamentos.objects.get(id=apartamento_id)
+
+    age = None
+
+    # Cálculo de idade do hospede
+    if hospede.datanascimento:
+       birth_date = hospede.datanascimento
+       current_year = datetime.now().year
+       age = current_year - birth_date.year
 
     context = {
         'nome_empresa': empresa.nome,
@@ -1132,6 +1145,7 @@ def FichaNacionalRegistroHospedes(request, apartamento_id):
         'endereco_hospede': hospede.endereco,
         'cidade_hospede': hospede.cidade,
         'estado_hospede': hospede.estado,
+        'cep_hospede': hospede.cep,
         'pais_hospede': hospede.Pais,
         'tipo_documento_hospede': hospede.tipodocindentificacao,
         'numero_documento_hospede': hospede.numerodocumento,
@@ -1144,8 +1158,26 @@ def FichaNacionalRegistroHospedes(request, apartamento_id):
         'hora_entrada': movAparts.hora_checkin,
         'data_saida': movAparts.data_checkout,
         'hora_saida': movAparts.hora_checkout,
-
-
+        'idade_hospede': age, # Idade do hospede
+        #################################################
+        'motViagem_ferias': hospede.motviagemLazerferias,
+        'motViagem_congresso': hospede.motviagemCongressoFeira,
+        'motViagem_cursos': hospede.motviagemEstudoCursos,
+        'motViagem_parentes': hospede.motviagemParentesAmigos,
+        'motViagem_negocios': hospede.motviagemNegocios,
+        'motViagem_compras': hospede.motviagemCompras,
+        'motViagem_religiao': hospede.motviagemReligiao,
+        'motViagem_outros': hospede.motviagemOutros,
+        'meioTransp_aviao': hospede.meiotransporteAviao,
+        'meioTransp_carro': hospede.meiotransporteCarro,
+        'meioTransp_onibus': hospede.meiotransporteOnibus,
+        'meioTransp_moto': hospede.meiotransporteMoto,
+        'meioTransp_navio': hospede.meiotransporteNavio,
+        'meioTransp_trem': hospede.meiotransporteTrem,
+        'meioTransp_outros': hospede.meiotransporteOutros,
     }
 
-    return render(request, 'home/FichaNacionalHospedes.html', context )
+    return render(request, 'home/FichaNacionalHospedes.html', context)
+
+#######################################################################
+
