@@ -17,6 +17,14 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  
 
+  <!-- Select2 CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.min.css">
+
+  <!-- Select2 JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
+
 <br>
 <style>
    /*the container must be positioned relative:*/
@@ -114,7 +122,12 @@
               <div class="form-row">
                 <div class="form-group col-md-6 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Descrição</p>
-                  <input id="myInput" type="text" name="myInput" placeholder="Descrição" class="inline" onblur="verificarValor()">
+                  <select type="text" id="myInput" name="myInput" class="form-control select2" autofocus onchange="verificarValor()">
+                    <option value=""></option>
+                    {% for produto in intensConsumoList %}
+                      <option value= "{{ produto.text }}"> {{ produto.text }}</option>
+                    {% endfor %}
+                  </select>
                 </div>
                 <div class="form-group col-md-2 mb-0">
                   <p class="inline" style="text-align: right">Preço:</p>
@@ -144,6 +157,108 @@
    </div>
 </div>
 
+<!-- Formatação Style do Select2 dentro do modal  - ( Start ) -->
+<style>
+
+.form-group p {
+  line-height: 38px; /* ajuste este valor de acordo com a altura dos campos de entrada */
+}
+
+.modal-dialog {
+  max-width: 670px; /* ajuste este valor de acordo com a largura desejada */
+  width: 100%; /* ajuste este valor de acordo com a largura desejada */
+}
+
+  /* Diminui o altura entre a descrição do campo */
+.inline { display: inline-block; margin-right: 10px; margin-bottom: 5px; }
+
+#ModalCheckinReserva .nav-link.active {
+  background-color: #ADD8E6; /* azul claro */
+  color: #000; /* preto */  
+  }
+
+.select2-selection--single { background-color: #f2f2f2 !important; }
+.select2-container { height: auto !important; }
+.select2-selection--single { height: auto !important; }
+.select2-selection__rendered { height: auto !important; }
+.select2 { height: auto !important; }
+</style>
+
+<!-- Inicia o Select2 myHospede dentro do modal  - ( Start ) -->
+<script>
+$(document).ready(function() {
+    $('#myInput').select2({
+      placeholder: "Selecione o item",
+    });
+    $('#myInput').on('keyup click', function(e) {
+      if (e.keyCode === 13 || e.type === 'click') {
+        $('#myInput').select2('open');
+      }
+    });
+    $('#myInput').select2('focus');
+});
+</script>
+<!-- Inicia o Select2 myHospede dentro do modal  - ( End ) -->
+
+<!-- Inicia função buscar preço do item  - ( Start ) -->
+<script>
+$(document).ready(function() {
+  // Detectar a mudança na opção selecionada do select
+  $('#myInput').on('change', function() {
+    var itemId = $(this).val(); // Pegar o valor da opção selecionada
+    if (itemId) {
+      // Fazer a requisição AJAX para buscar o preço de venda do item
+      $.ajax({
+        url: '/buscar-preco-item/' + itemId + '/', // URL da view que busca o preço do item
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+          if (data.precoVenda) {
+            // Atribuir o preço de venda ao campo de input
+            $('#precoItem').val(data.precoVenda);
+          } else {
+            // Limpar o campo de input se o preço de venda não for encontrado
+            $('#precoItem').val('');
+          }
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          console.log('Erro na requisição AJAX: ' + errorThrown);
+        }
+      });
+    } else {
+      // Limpar o campo de input se nenhuma opção for selecionada
+      $('#precoItem').val('');
+    }
+  });
+
+  // Detectar a tecla Enter pressionada após a seleção do item no select
+  $('#myInput').on('keydown', function(e) {
+    if (e.which == 13) { // Código da tecla Enter é 13
+      e.preventDefault(); // Prevenir o comportamento padrão da tecla Enter
+      $('#qtdItem').focus(); // Direcionar o foco para o campo de input qtdItem
+    }
+  });
+});
+</script>
+<!-- Inicia função buscar preço do item  - ( End ) -->
+
+<script>
+$("#myInput").on("select2:close", function() {
+  var valorSelecionado = $(this).val(); // obtém o valor selecionado no Select2
+  if (valorSelecionado !== "") { // verifica se algum valor foi selecionado
+    document.getElementById("btn-add").disabled = false; // habilita o botão "submit"
+    document.getElementById("btn-voltar").disabled = false; // habilita o botão "submit"
+    document.getElementById("btn-exit").disabled = false; // habilita o botão "submit"
+    document.getElementById("qtdItem").focus(); // coloca o foco no campo "qtdItem"
+  } else {
+    document.getElementById("btn-add").disabled = true; // desabilita o botão "submit"
+    document.getElementById("btn-voltar").disabled = true; // desabilita o botão "submit"
+    document.getElementById("btn-exit").disabled = true; // desabilita o botão "submit"
+  }
+});
+</script>
+
+
 <!-- ###### Ativar o prescionamento da tecla ENTER ##################  -->
 <script src="{% static 'js/custom.js' %}"></script>
 <script>
@@ -159,20 +274,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
 function verificarValor() {
-  var intensConsumoList = {{ intensConsumoList|safe }};
   var valorDigitado = document.getElementById("myInput").value; // obter o valor digitado
 
-  if (valorDigitado !== "" && intensConsumoList.indexOf(valorDigitado) === -1) { // verificar se o valor digitado não está em branco e se existe na lista
-      Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: "Item não cadastrado!",
-        confirmButtonText: "OK"
-      }).then(function(result) {
-        // Coloca o foco de volta no campo "myInput"
-        document.getElementById("myInput").focus();
-      });
-
+  if (valorDigitado !== "") { // verificar se o valor digitado não está em branco e se existe na lista
+      document.getElementById("myInput").focus();
   } else if (valorDigitado !== "") { // verifica se o campo "myInput" não está em branco
       document.getElementById("btn-add").disabled = false; // habilita o botão "submit"
       document.getElementById("btn-voltar").disabled = false; // habilita o botão "submit"
@@ -182,12 +287,9 @@ function verificarValor() {
       document.getElementById("btn-add").disabled = true; // habilita o botão "submit"
       document.getElementById("btn-voltar").disabled = true; // habilita o botão "submit"
       document.getElementById("btn-exit").disabled = true; // habilita o botão "submit"
-
   }
 }
 </script>
-
-
 
 
 <!-- ###### Não permitir o campo qtdItem em branco ou negativo ##################  -->
@@ -253,147 +355,9 @@ function verificarValor() {
   });
 </script>
 
-
-<!-- ################## Busca o preço do item selecionado ########################### -->
-<script>
-$(document).ready(function() {
-  $('#myInput').on('change', function() {
-    var descricao = $(this).val();
-    if (descricao !== "") {
-      $.ajax({
-        url: '/caminho/para/get_preco_itemconsumo/' + descricao + '/',
-        type: 'GET',
-        success: function(data) {
-          $('#precoItem').val(data.preco_venda);
-        },
-        error: function(xhr, status, error) {
-          console.log('Erro ao obter preço de venda do item de consumo');
-        }
-      });
-    }
-  });
-});
-</script>
-
-
 <!-- ################### Formatar preço do item ##################################### -->
 
 <!-- ################### Formatar preço total ##################################### -->
-
-
-<!-- ########################## autocomplete descricao ################################# -->
-<script>
-function autocomplete(inp, arr) {
-  /*the autocomplete function takes two arguments,
-  the text field element and an array of possible autocompleted values:*/
-  var currentFocus;
-  /*execute a function when someone writes in the text field:*/
-  inp.addEventListener("input", function(e) {
-      var a, b, i, val = this.value;
-      /*close any already open lists of autocompleted values*/
-      closeAllLists();
-      if (!val) { return false;}
-      currentFocus = -1;
-      /*create a DIV element that will contain the items (values):*/
-      a = document.createElement("DIV");
-      a.setAttribute("id", this.id + "autocomplete-list");
-      a.setAttribute("class", "autocomplete-items");
-      /*append the DIV element as a child of the autocomplete container:*/
-      this.parentNode.appendChild(a);
-      /*for each item in the array...*/
-      for (i = 0; i < arr.length; i++) {
-        /*check if the item starts with the same letters as the text field value:*/
-        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
-          /*create a DIV element for each matching element:*/
-          b = document.createElement("DIV");
-          /*make the matching letters bold:*/
-          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
-          b.innerHTML += arr[i].substr(val.length);
-          /*insert a input field that will hold the current array item's value:*/
-          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
-          /*execute a function when someone clicks on the item value (DIV element):*/
-          b.addEventListener("click", function(e) {
-              /*insert the value for the autocomplete text field:*/
-              inp.value = this.getElementsByTagName("input")[0].value;
-              /*close the list of autocompleted values,
-              (or any other open lists of autocompleted values:*/
-              closeAllLists();
-              /*clear the qtdItem field:*/
-              document.getElementById('qtdItem').value = '';
-          });
-          a.appendChild(b);
-        }
-      }
-  });
-  /*execute a function presses a key on the keyboard:*/
-  inp.addEventListener("keydown", function(e) {
-      var x = document.getElementById(this.id + "autocomplete-list");
-      if (x) x = x.getElementsByTagName("div");
-      if (e.keyCode == 40) {
-        /*If the arrow DOWN key is pressed,
-        increase the currentFocus variable:*/
-        currentFocus++;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode == 38) { //up
-        /*If the arrow UP key is pressed,
-        decrease the currentFocus variable:*/
-        currentFocus--;
-        /*and and make the current item more visible:*/
-        addActive(x);
-      } else if (e.keyCode == 13) {
-        /*If the ENTER key is pressed, prevent the form from being submitted,*/
-        e.preventDefault();
-        if (currentFocus > -1) {
-          /*and simulate a click on the "active" item:*/
-          if (x) x[currentFocus].click();
-        }
-      }
-  });
-  function addActive(x) {
-    /*a function to classify an item as "active":*/
-    if (!x) return false;
-    /*start by removing the "active" class on all items:*/
-    removeActive(x);
-    if (currentFocus >= x.length) currentFocus = 0;
-    if (currentFocus < 0) currentFocus = (x.length - 1);
-    /*add class "autocomplete-active":*/
-    x[currentFocus].classList.add("autocomplete-active");
-  }
-  function removeActive(x) {
-    /*a function to remove the "active" class from all autocomplete items:*/
-    for (var i = 0; i < x.length; i++) {
-      x[i].classList.remove("autocomplete-active");
-    }
-  }
-  function closeAllLists(elmnt) {
-    /*close all autocomplete lists in the document,
-    except the one passed as an argument:*/
-    var x = document.getElementsByClassName("autocomplete-items");
-    for (var i = 0; i < x.length; i++) {
-      if (elmnt != x[i] && elmnt != inp) {
-        x[i].parentNode.removeChild(x[i]);
-      }
-    }
-  }
-  /*execute a function when someone clicks in the document:*/
-  document.addEventListener("click", function (e) {
-      closeAllLists(e.target);
-  });
-}
-
-/*An array containing all the country names in the world:*/
-/*
-var countries = ["Afghanistan"];
-
-*/
-
-var intensConsumoList = {{ intensConsumoList|safe }};
-
-/*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
-autocomplete(document.getElementById("myInput"), intensConsumoList);
-</script>
-
 
 {% endblock %}
 

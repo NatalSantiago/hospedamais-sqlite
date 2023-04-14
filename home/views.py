@@ -694,8 +694,13 @@ def LancarNovoItemHospede(request, movID):
        apartamento = movimento_apart.apartamento
        hospede = movimento_apart.hospede
 
-       itens = ItensConsumo.objects.filter(empresa=empresa)
-       intensConsumoList = [item.descricao for item in itens]
+#       itens = ItensConsumo.objects.filter(empresa=empresa)
+#       intensConsumoList = [item.descricao for item in itens]
+
+       itemLTs = ItensConsumo.objects.filter(empresa=empresa)
+       
+       # Cria uma lista de dicionários com os dados dos itens
+       intensConsumoList = [{'idItem': itemLT.id, 'text': itemLT.descricao} for itemLT in itemLTs]
 
     except (PerfilUsuario.DoesNotExist):
        return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
@@ -765,17 +770,19 @@ def delete_item_consumo_apart(request, item_pk):
 ######################################
 
 from django.http import JsonResponse
+from django.views import View
 from .models import ItensConsumo
 
-def get_preco_itemconsumo(request, item_lancamento_id):
+@login_required
+def BuscarPrecoItem(request, item_descricao):
+    empresa = request.user.perfilusuario.empresa
     try:
-        # Obtém o item de consumo correspondente ao ID fornecido
-        itemconsumo = ItensConsumo.objects.get(pk=item_lancamento_id)
-
-        # Retorna o preço de venda do item de consumo em um objeto JSON
-        return JsonResponse({'preco_venda': itemconsumo.precoVenda})
+       item = ItensConsumo.objects.get(empresa=empresa, descricao=item_descricao)
+       preco_venda = item.precoVenda
+       data = {'precoVenda': preco_venda}
+       return JsonResponse(data)
     except ItensConsumo.DoesNotExist:
-        return JsonResponse({'error': 'Item de consumo não encontrado'}, status=404)
+       return JsonResponse({'precoVenda': None})
 
 ##################################################################################
 
@@ -820,6 +827,7 @@ def get_preco_itemconsumo_by_descricao(request, descricao):
     try:
         item_id = ItensConsumo.get_id_by_descricao(descricao)
         item_consumo = ItensConsumo.objects.get(pk=item_id)
+       
         return JsonResponse({'preco_venda': item_consumo.precoVenda})
     except ItensConsumo.DoesNotExist:
         return JsonResponse({'error': 'Item de consumo não encontrado'}, status=404)

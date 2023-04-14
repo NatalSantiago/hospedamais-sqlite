@@ -63,7 +63,9 @@ urlpatterns = [
 
     path('delete_item_consumo_apart/<int:item_pk>/', delete_item_consumo_apart, name='delete_item_consumo_apart'),
 
-    path('caminho/para/get_preco_itemconsumo/<str:descricao>/', views.get_preco_itemconsumo_by_descricao, name='get_preco_itemconsumo_by_descricao'),
+#    path('caminho/para/get_preco_itemconsumo/<str:descricao>/', views.get_preco_itemconsumo_by_descricao, name='get_preco_itemconsumo_by_descricao'),
+
+    path('buscar-preco-item/<str:item_descricao>/', views.BuscarPrecoItem, name='buscar_preco_item'),
 
     path('buscar_apartamento/', views.buscar_apartamento, name='buscar_apartamento'),
 

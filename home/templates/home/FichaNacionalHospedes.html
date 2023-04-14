@@ -1,7 +1,6 @@
 
 {% load static %}
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,26 +30,25 @@
 
 <p style="position:absolute;top:175px;left:100px;white-space:nowrap" class="ft00">
 
+<!-- Impressão cabeçalho com os dados da empresa ( Start )-->
 <p style="position:absolute;top:6px;left:256px; font-size: 20px; white-space:nowrap" class="ft00">
     <b>{{ nome_empresa }}</b>
 </p>
-
 <p style="position:absolute;top:38px;left:256px;white-space:nowrap" class="ft01">
     <b>CNPJ: {{ cnpj_empresa }}   -   Fone: {{ fone_empresa }}</b>
 </p>
-
 <p style="position:absolute;top:61px;left:256px;white-space:nowrap" class="ft01">
     <b>Endereço: {{ endereco_empresa }} - {{ cidade_empresa }}/{{ estado_empresa }} - {{ pais_empresa }}</b>
 </p>
-
 <p style="position:absolute;top:84px;left:256px;white-space:nowrap" class="ft01">
     <b>Email: {{ email_empresa }}   -   WathsApp: {{ Whats_empresa }}</b>
 </p>
+<!-- Impressão cabeçalho com os dados da empresa ( End )-->
 
+<!-- Impressão dos dados da hospedagem ( Start )-->
 <p style="position:absolute;top:270px;left:50px;white-space:nowrap" class="ft01">
     <a>{{ descricao_apartamento }}</a>
 </p>
-
 <p style="position:absolute;top:270px;left:372px;white-space:nowrap" class="ft01">
     <a>
         {% if qtd_excedentes %}
@@ -58,118 +56,111 @@
         {% endif %}
     </a>
 </p>
-
 <p style="position:absolute;top:270px;left:486px;white-space:nowrap" class="ft01">
     <a>{{ data_entrada|date:"d/m/Y" }}</a>
 </p>
-
 <p style="position:absolute;top:270px;left:602px;white-space:nowrap" class="ft01">
     <a>{{ hora_entrada }}</a>
 </p>
-
-
 <p style="position:absolute;top:270px;left:684px;white-space:nowrap" class="ft01">
     <a>{{ data_saida|date:"d/m/Y" }}</a>
 </p>
-
 <p style="position:absolute;top:270px;left:798px;white-space:nowrap" class="ft01">
     <a>{{ hora_saida }}</a>
 </p>
+<!-- Impressão dos dados da hospedagem ( End )-->
 
+<!-- Impressão dos dados do hospede ( Start )-->
 <p style="position:absolute;top:390px;left:50px;white-space:nowrap" class="ft01">
-    <a>{{ nome_hospede }}</a>
+  <a>{{ nome_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:390px;left:636px;white-space:nowrap" class="ft01">
-    <a>{{ data_nascimento_hospede|date:"d/m/Y" }}</a>
+  <a>{{ data_nascimento_hospede|date:"d/m/Y" }}</a>
 </p>
 
-
 <p style="position:absolute;top:390px;left:775px;white-space:nowrap" class="ft01">
-    <a>
-      {% if idade_hospede %}
-         {{ idade_hospede }} anos
-      {% endif %}
-    </a>
+  <a>
+    {% if idade_hospede %}
+      {{ idade_hospede }} anos
+    {% endif %}
+  </a>
 </p>
 
 <p style="position:absolute;top:462px;left:50px;white-space:nowrap" class="ft01">
-    <a>{{ profissao_hospede }}</a>
+  <a>{{ profissao_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:462px;left:332px;white-space:nowrap" class="ft01">
-    <a>{{ nacionalidade_hospede }}</a>
+  <a>{{ nacionalidade_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:462px;left:612px;white-space:nowrap" class="ft01">
-    <a>{{ genero_hospede }}</a>
+  <a>{{ genero_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:462px;left:723px;white-space:nowrap" class="ft01">
-    <a>{{ cpf_hospede }}</a>
+  <a>{{ cpf_hospede }}</a>
 </p>
 
-
 <p style="position:absolute;top:532px;left:50px;white-space:nowrap" class="ft01">
-    <a>{{ numero_documento_hospede }}</a>
+  <a>{{ numero_documento_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:532px;left:357px;white-space:nowrap" class="ft01">
-    <a>{{ tipo_documento_hospede }}</a>
+  <a>{{ tipo_documento_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:532px;left:596px;white-space:nowrap" class="ft01">
-    <a>{{ orgao_documento_hospede }}</a>
+  <a>{{ orgao_documento_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:596px;left:50px;white-space:nowrap" class="ft01">
-    <a>{{ endereco_hospede }}</a>
+  <a>{{ endereco_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:596px;left:652px;white-space:nowrap" class="ft01">
-    <a>{{ fone_hospede }}</a>
+  <a>{{ fone_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:663px;left:50px;white-space:nowrap" class="ft01">
-    <a>{{ cep_hospede }}</a>
+  <a>{{ cep_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:663px;left:190px;white-space:nowrap" class="ft01">
-    <a>{{ cidade_hospede }}</a>
+  <a>{{ cidade_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:663px;left:494px;white-space:nowrap" class="ft01">
-    <a>{{ estado_hospede }}</a>
+  <a>{{ estado_hospede }}</a>
 </p>
 
 <p style="position:absolute;top:663px;left:596px;white-space:nowrap" class="ft01">
-    <a>{{ pais_hospede }}</a>
+  <a>{{ pais_hospede }}</a>
 </p>
 
-
-
 <p style="position:absolute;top:945px;left:42px;white-space:nowrap" class="ft01">
-    <a>
-      {% if motViagem_ferias %}
-        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
-      {% endif %}
-    </a>
+  <a>
+    {% if motViagem_ferias %}
+      <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+    {% endif %}
+  </a>
 </p>
 
 <p style="position:absolute;top:945px;left:225px;white-space:nowrap" class="ft01">
-    <a>
-      {% if motViagem_congresso %}
-        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
-      {% endif %}
-    </a>
+  <a>
+    {% if motViagem_congresso %}
+      <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+    {% endif %}
+  </a>
 </p>
 
 <p style="position:absolute;top:945px;left:463px;white-space:nowrap" class="ft01">
-    <a>
-      {% if motViagem_cursos %}
-        <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
-      {% endif %}
-    </a>
+  <a>
+    {% if motViagem_cursos %}
+      <i class="fa fa-check fa-lg" aria-hidden="true"></i> <!-- fa-lg para tamanho 1,33 vezes maior -->
+    {% endif %}
+  </a>
 </p>
 
 <p style="position:absolute;top:945px;left:675px;white-space:nowrap" class="ft01">
@@ -273,16 +264,15 @@
     <a>{{ email_hospede }}</a>
 </p>
 
-
-
 <a href="{% url 'apartHome' %}">
     <button style="position:absolute;top:135px;right:550px;" class="no-print">
         <i class="fa fa-history"></i> Voltar
     </button>
 </a>
+<!-- Impressão dos dados do hospede ( End )-->
+
 
 <!-- Adicione a classe "no-print" para ocultar o botão de impressão na impressão -->
-
 <button onclick="window.print()" style="position:absolute;top:135px;right:70px;" class="no-print">
     <i class="fas fa-print"></i> Imprimir
 </button>
