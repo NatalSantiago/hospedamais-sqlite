@@ -73,7 +73,7 @@ urlpatterns = [
 
     path('SalvarCheckIn/', views.SalvarCheckIn, name='SalvarCheckIn'),
 
-    path('ConfirmarCancelarReserva/', views.ConfirmarCancelarReserva, name='ConfirmarCancelarReserva'),
+    path('ConfirmarReserva/', views.ConfirmarReserva, name='ConfirmarReserva'),
 
     path('apartamento/<int:pk>/liberar/', views.liberar_apartamento, name='liberar_apartamento'),
 

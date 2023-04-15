@@ -909,6 +909,11 @@ from .models import apartamentos, hospedes
 
 from decimal import Decimal, Context
 
+from django.shortcuts import render, redirect
+
+from sweetify import sweetify
+
+
 @login_required
 def SalvarCheckIn(request):
     empresa = request.user.perfilusuario.empresa
@@ -918,8 +923,10 @@ def SalvarCheckIn(request):
     if action == 'salva_checkin':
        apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartCheckin')).first()
        if request.POST.get('myHospede') == '':
+          sweetify.error(request, 'Hóspede não selecionado, Erro ao realizar o Check-In  !  !', persistent='OK')
           return redirect('apartHome')
        if request.POST.get('myQtdHospedadosCheckin') == '':    
+          sweetify.error(request, 'Qtd Hóspede não informada, Erro ao realizar o Check-In  !  !', persistent='OK')
           return redirect('apartHome')
 
        hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
@@ -952,8 +959,9 @@ def SalvarCheckIn(request):
                # atualiza o campo tipostatus do apartamento para "Ocupado"
                apartamento.tipostatus = 'Ocupado'
                apartamento.save()
-
+               sweetify.success(request, 'Check-In realizado com sucesso    !  !', persistent='OK')
                return redirect('apartHome')
+           
     ## Quando o usuario clicar no botão Reservar no modal CheckIn/Reserva
     elif action == 'salva_reserva':
        apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartReserva')).first()
@@ -965,9 +973,9 @@ def SalvarCheckIn(request):
        hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
 
        if request.method == 'POST':
-           form = MovimentosReservaForm(request.POST or None)
-           if form.is_valid():
-               movimentApart = form.save(commit=False)
+           form2 = MovimentosReservaForm(request.POST or None)
+           if form2.is_valid():
+               movimentApart = form2.save(commit=False)
                movimentApart.empresa = empresa
                movimentApart.apartamento_id = apartamento.id
                movimentApart.hospede_id = hospede.id
@@ -987,7 +995,7 @@ def SalvarCheckIn(request):
                # atualiza o campo tipostatus do apartamento para "Ocupado"
                apartamento.tipostatus = 'Reservado'
                apartamento.save()
-
+               sweetify.success(request, 'Reserva realizada com sucesso    !  !', persistent='OK')
                return redirect('apartHome')
 
 
@@ -997,7 +1005,7 @@ def SalvarCheckIn(request):
 #######################################################################################
 
 @login_required
-def ConfirmarCancelarReserva(request):
+def ConfirmarReserva(request):
     empresa = request.user.perfilusuario.empresa
 
     if request.method == 'POST':
@@ -1053,21 +1061,6 @@ def ConfirmarCancelarReserva(request):
                    apartamento.save()
 
                return redirect('apartHome')
-#        elif action == 'CancelarReserva':
-#                   apartamento_descricao = request.POST.get('myApartamentoReservado')
-#                   hospede_nome = request.POST.get('myHospedeReservado')
-#                   reserva = MovimentoReservas.objects.filter(empresa=empresa, 
-#                       apartamento__descricao=apartamento_descricao, 
-#                       hospede__nome=hospede_nome
-#                   ).last()
-        
-#                   if reserva:
-#                       reserva.status_reserva = 'Cancelada'
-#                       reserva.save()
-#                       apartamento = reserva.apartamento
-#                       apartamento.tipostatus = 'Livre'
-#                       apartamento.save()
-#                   return redirect('apartHome')
 
     return redirect('apartHome')
 

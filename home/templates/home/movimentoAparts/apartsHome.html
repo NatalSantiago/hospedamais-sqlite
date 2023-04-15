@@ -123,7 +123,6 @@
 <!-- ################### Modal CheckIn / Reserva - ( Start ) ######################### -->
 {{ form.media }}        
 
-
 <form method="POST" action="{% url 'SalvarCheckIn' %}" >
 
 {% csrf_token %}
@@ -213,7 +212,7 @@
               </div>  
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button id="btn-exit" class="btn btn-success" name="action" value="salva_checkin" method="POST">Confirmar Check-In</button>
+                <button id="btn-ConfirmarCheckin" class="btn btn-success" name="action" value="salva_checkin" method="POST">Confirmar Check-In</button>
               </div>                
             </div>  
             <!--************************************************************************-->
@@ -271,6 +270,9 @@
 </div>
 </form>
 
+{% load sweetify %}
+{% sweetify %}
+
 <!-- Formatação Style do Select2 dentro do modal  - ( Start ) -->
 <style>
 
@@ -297,6 +299,7 @@
 .select2-selection__rendered { height: auto !important; }
 .select2 { height: auto !important; }
 </style>
+
 
 <!-- Atualiza da data de saída dependendo da data de entrada  Check-in - ( Start ) -->
 <script>
@@ -473,7 +476,7 @@ function setApartamento(descricao) {
 
 <!-- ################### Modal Confirmar reserva - ( Start ) ######################### -->
 
-<form method="POST" id="formCancelarReserva" action="{% url 'ConfirmarCancelarReserva' %}" >
+<form method="POST" id="formCancelarReserva" action="{% url 'ConfirmarReserva' %}" >
 
 {% csrf_token %}
 
