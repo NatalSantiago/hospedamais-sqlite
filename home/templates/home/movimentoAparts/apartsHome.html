@@ -50,8 +50,8 @@
             <div class="card-bodyMeu text-center" style="line-height: 0.50;" id="card-bodyMeu">
               {% if apartamento.tipostatus == 'Livre' %}
                  <br>
-                 <i style="font-size: 14px;">Tipo: {{ apartamento.tipoapart }}</i><br><br><br>
-                 <i style="font-size: 14px;">Status: {{ apartamento.tipostatus }}</i><br><br>
+                 <i style="font-size: 13px;">TIPO: {{ apartamento.tipoapart }}</i><br><br><br>
+                 <i style="font-size: 13px;">STATUS: {{ apartamento.tipostatus }}</i><br><br>
               {% elif apartamento.tipostatus == 'Reservado' %}                 
                    {% with reserva=apartamento.movimentoreservas_set.all.last %}
                        <br>
@@ -145,13 +145,10 @@
 
       }
 
-
       .card-footerMeu {
         width: 100%; /* largura de 100% para ocupar todo o espaço disponível */
         padding: 5px; /* opcional: adicionar espaço interno de 10 pixels */
       }
-
-      
 
       .minimize-btn {
         margin-right: 10px; /* ajuste o valor da margem direita conforme necessário */
@@ -164,17 +161,35 @@
 <!-- função que minimiza os card´s - ( Start )-->
 <script>
 $(document).ready(function() {
-  // Adicione um manipulador de eventos para o botão de minimizar
+  // Verificar se o estado oculto está armazenado no localStorage
+  var cardBodyHidden = localStorage.getItem('cardBodyHidden');
+  if (cardBodyHidden === 'true') {
+    // Se estiver oculto, esconda os elementos "card-bodyMeu"
+    $('.card-bodyMeu').hide();
+    $('[id^="minimizeBtn"]').removeClass('fa-window-minimize');
+  }
+
+  // Adicionar um manipulador de eventos para o botão de minimizar
   $('[id^="minimizeBtn"]').on('click', function() {
     var currentClass = $(this).attr('class');
     if (currentClass.includes('fa-window-minimize')) {
-      // Oculte todos os elementos "card-bodyMeu"
+      // Ocultar todos os elementos "card-bodyMeu"
       $('.card-bodyMeu').hide();
-      // Altere o ícone para maximizar em todos os cards
+      // Alterar o ícone para maximizar em todos os cards
       $('[id^="minimizeBtn"]').removeClass('fa-window-minimize');
-    }
+
+      // Armazenar o estado oculto no localStorage
+      localStorage.setItem('cardBodyHidden', 'true');
+    } 
+  });
+
+  // Adicionar um manipulador de eventos para o link <a>
+  $('.brand-link').on('click', function() {
+    // Remover o estado oculto do localStorage
+    localStorage.removeItem('cardBodyHidden');
   });
 });
+
 </script>
 <!-- função que minimiza os card´s - ( End )-->
 
