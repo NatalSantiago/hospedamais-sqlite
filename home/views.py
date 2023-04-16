@@ -555,40 +555,6 @@ def itensConsumo_delete(request, itenConsumo_pk):
 
 ################### ApartsHome ###################
 
-
-""""
-from .models import MovimentosAparts, ItensConsumoAparts
-
-@login_required
-def ApartHome_list(request):
-    try:
-       perfil_usuario = request.user.perfilusuario
-       empresa = perfil_usuario.empresa
-       nome_empresa = empresa.nome
-       empresa_iduser = perfil_usuario.empresa.pk
-       apartamentos_com_movimentos_nao_pagos_fechados = apartamentos.objects.filter(empresa=empresa, movimentosaparts__pago_sn='N').distinct()
-       apartamentos_sem_movimentos_nao_pagos = apartamentos.objects.filter(empresa=empresa).exclude(id__in=apartamentos_com_movimentos_nao_pagos_fechados.values('id'))
-       movimentos_aparts_nao_pagos_fechados = MovimentosAparts.objects.filter(apartamento__in=apartamentos_com_movimentos_nao_pagos_fechados, pago_sn='N')
-
-       hospLTs = hospedes.objects.filter(empresa=empresa)
-       
-       lista_hospedes = [{'idHospede': hospLT.id, 'text': hospLT.nome} for hospLT in hospLTs]
-
-
-       context = {
-           'apartamentos': apartamentos_com_movimentos_nao_pagos_fechados.union(apartamentos_sem_movimentos_nao_pagos),
-           'empresa': empresa,
-           'empresa_iduser': empresa_iduser,
-           'nome_empresa': nome_empresa,
-           'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
-           'lista_hospedes': lista_hospedes
-        }
-
-    except PerfilUsuario.DoesNotExist:
-       return redirect('inicio')
-
-    return render(request, 'home/movimentoAparts/apartsHome.html', context)
-"""
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import RequestContext
@@ -605,9 +571,13 @@ def ApartHome_list(request):
         empresa_iduser = perfil_usuario.empresa.pk
 
         hospLTs = hospedes.objects.filter(empresa=empresa)
-       
         # Cria uma lista de dicionários com os dados dos hóspedes
         lista_hospedes = [{'idHospede': hospLT.id, 'text': hospLT.nome} for hospLT in hospLTs]
+
+        apartLTs = apartamentos.objects.filter(empresa=empresa, tipostatus__in=["Livre", "Reservado"])
+        # Cria uma lista de dicionários com os dados dos apartamentos Livres e Reservados
+        lista_apartamentos = [{'idApart': apartLT.id, 'text': apartLT.descricao} for apartLT in apartLTs]
+
 
         # Filtra os movimentos de apartamentos não pagos e fechados
         apartamentos_com_movimentos_nao_pagos_fechados = apartamentos.objects.filter(
@@ -634,6 +604,7 @@ def ApartHome_list(request):
             'nome_empresa': nome_empresa,
             'movimentos_aparts_nao_pagos': movimentos_aparts_nao_pagos_fechados,
             'lista_hospedes': lista_hospedes,
+            'lista_apartamentos': lista_apartamentos,
             'data_atual': data_atual,
             'data_saida': data_saida,
             'movimentos_reservas': movimentos_reservas  # Adiciona os dados da tabela MovimentoReservas ao contexto
@@ -681,6 +652,7 @@ def itens_consumo_aparts_apartamento(request, apartamento_id):
     return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
 
 ################### Lançar novo item no apartamento ###################
+from datetime import datetime
 
 @login_required
 def LancarNovoItemHospede(request, movID):
@@ -694,11 +666,7 @@ def LancarNovoItemHospede(request, movID):
        apartamento = movimento_apart.apartamento
        hospede = movimento_apart.hospede
 
-#       itens = ItensConsumo.objects.filter(empresa=empresa)
-#       intensConsumoList = [item.descricao for item in itens]
-
        itemLTs = ItensConsumo.objects.filter(empresa=empresa)
-       
        # Cria uma lista de dicionários com os dados dos itens
        intensConsumoList = [{'idItem': itemLT.id, 'text': itemLT.descricao} for itemLT in itemLTs]
 
@@ -728,6 +696,10 @@ def LancarNovoItemHospede(request, movID):
           itemconsumo.preco_item = request.POST.get('precoItem')
           itemconsumo.qtd_lancamento = request.POST.get('qtdItem')
           itemconsumo.valor_total = request.POST.get('precoTotal')
+          # Incluir data e hora atual nos campos data_lancamento e hora_lancamento
+          itemconsumo.data_lancamento = datetime.now().date()
+          itemconsumo.hora_lancamento = datetime.now().time()
+
           itemconsumo.save()
 
           action = request.POST.get('action')
@@ -904,7 +876,9 @@ def buscar_reservas(request):
     else:
         return JsonResponse({}, status=400)
 
-######################################################################################
+
+###############################################################################
+
 from .models import apartamentos, hospedes
 
 from decimal import Decimal, Context
@@ -1059,8 +1033,8 @@ def ConfirmarReserva(request):
                    # atualiza o campo tipostatus do apartamento para "Ocupado"
                    apartamento.tipostatus = 'Ocupado'
                    apartamento.save()
-
-               return redirect('apartHome')
+                   sweetify.success(request, 'Check-In realizado com sucesso    !  !', persistent='OK')
+                   return redirect('apartHome')
 
     return redirect('apartHome')
 
@@ -1181,4 +1155,110 @@ def FichaNacionalRegistroHospedes(request, apartamento_id):
     return render(request, 'home/FichaNacionalHospedes.html', context)
 
 #######################################################################
+
+@login_required
+def buscar_checkin(request, apart_id):
+    perfil_usuario = request.user.perfilusuario
+    empresa = perfil_usuario.empresa
+
+    if request.method == 'POST':
+
+        checkin = MovimentosAparts.objects.filter(
+            empresa=empresa, pago_sn='N', apartamento_id=apart_id
+        ).select_related('apartamento').values(
+            'hospede__nome',
+            'qtd_hospedes',
+            'data_checkin',
+            'hora_checkin',  # Adicionado hora_checkin
+            'data_checkout',
+            'hora_checkout',  # Adicionado hora_checkout
+            'apartamento__descricao',
+            'apartamento__qtdpessoas',
+            'valor_adiantamento',
+            'valor_pago_excedente',  # Adicionado valor_pago_excedente
+            'valor_consumo',
+            'forma_pagamento',
+            'data_fechamento',
+            'hora_fechamento',  # Adicionado hora_fechamento
+            'valor_total_conta',
+            'valor_desconto',
+            'valor_total_pago',
+            'observacao',
+            'pago_sn',
+        ).last()
+        if checkin:
+            apartamento = checkin['apartamento__descricao']
+            qtdpessoas = int(checkin['apartamento__qtdpessoas'])
+            valor_antecipado = checkin['valor_adiantamento']
+            observacao = checkin['observacao']
+            return JsonResponse({
+                'apartamento': apartamento,
+                'qtdpessoas': qtdpessoas,
+                'hospede': checkin['hospede__nome'],
+                'qtd_hospedes': checkin['qtd_hospedes'],
+                'data_checkin': checkin['data_checkin'],
+                'hora_checkin': checkin['hora_checkin'],  # Retornado hora_checkin
+                'data_checkout': checkin['data_checkout'],
+                'hora_checkout': checkin['hora_checkout'],  # Retornado hora_checkout
+                'valor_antecipado': valor_antecipado,
+                'valor_pago_excedente': checkin['valor_pago_excedente'],  # Retornado valor_pago_excedente
+                'valor_consumo': checkin['valor_consumo'],
+                'forma_pagamento': checkin['forma_pagamento'],
+                'data_fechamento': checkin['data_fechamento'],
+                'hora_fechamento': checkin['hora_fechamento'],  # Retornado hora_fechamento
+                'valor_total_conta': checkin['valor_total_conta'],
+                'valor_desconto': checkin['valor_desconto'],
+                'valor_total_pago': checkin['valor_total_pago'],
+                'observacao': observacao,
+                'pago_sn': checkin['pago_sn'],
+            })
+        else:
+            return JsonResponse({}, status=404)
+    else:
+        return JsonResponse({}, status=400)
+
+####################################################################################
+
+# View para buscar a quantidade de pessoas do apartamento
+@login_required
+def buscar_qtdpessoas(request):
+    empresa = request.user.perfilusuario.empresa
+    apart_desc = request.GET.get('apartDesc') # Obtém o ID do apartamento do parâmetro GET
+    apart = apartamentos.objects.get(empresa=empresa, descricao=apart_desc) # Busca o apartamento no banco de dados
+    qtdpessoas = apart.qtdpessoas # Obtém a quantidade de pessoas do apartamento
+    data = {'qtdpessoas': qtdpessoas} # Cria um dicionário com a quantidade de pessoas
+    return JsonResponse(data) # Retorna os dados como uma resposta JSON
+
+#####################################################################################
+
+@login_required
+def ConfirmarMudancaApart(request, apartAtualDesc, apartNovoDesc):
+    empresa = request.user.perfilusuario.empresa
+
+    apartAtual = get_object_or_404(apartamentos, empresa=empresa, descricao=apartAtualDesc)
+    apartNovo = get_object_or_404(apartamentos, empresa=empresa, descricao=apartNovoDesc)
+
+    movAparts = MovimentosAparts.objects.get(empresa=empresa, pago_sn='N', apartamento_id=apartAtual.pk)
+
+    if request.method == 'POST':
+
+        # Atualiza o id do apartamento no MovimentosApart
+        movAparts.apartamento_id = apartNovo.pk
+        movAparts.save()
+
+        # Filtra os registros de ItensConsumoAparts com base no movimento e atualiza o campo apartamento
+        itens_consumo_aparts = ItensConsumoAparts.objects.filter(movimento_id=movAparts.pk)
+        itens_consumo_aparts.update(apartamento_id=apartNovo.pk)
+
+        # Atualiza o tipostatus do apartAtual para "Livre"
+        apartAtual.tipostatus = "Livre"
+        apartAtual.save()
+
+        # Atualiza o tipostatus do apartNovo para "Ocupado"
+        apartNovo.tipostatus = "Ocupado"
+        apartNovo.save()
+
+
+
+        return JsonResponse({'status': 'success'})
 

@@ -81,4 +81,10 @@ urlpatterns = [
 
     path('FichaNacional/<int:apartamento_id>/', views.FichaNacionalRegistroHospedes, name='FichaNacionalRegistroHospedes'),
 
+    path('buscar_checkin/<int:apart_id>/', views.buscar_checkin, name='buscar_checkin'),
+
+    path('buscar_qtdpessoas/', views.buscar_qtdpessoas, name='buscar_qtdpessoas'),
+
+    path('apartamento/<str:apartAtualDesc>/<str:apartNovoDesc>/ConfirmarMudancaApart/', views.ConfirmarMudancaApart, name='ConfirmarMudancaApart'),
+
 ]

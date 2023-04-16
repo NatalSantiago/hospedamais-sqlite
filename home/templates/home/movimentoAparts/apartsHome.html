@@ -77,9 +77,16 @@
                   <a class="icon-spacing" href="#">
                     <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual"></i>
                   </a>
+
                   <a class="icon-spacing" href="#">
-                    <i class="fa fa-exchange icon-spacing" aria-hidden="true" title="Mudar de acomodação"></i>
+                    <i class="fa fa-exchange icon-spacing" aria-hidden="true" title="Mudar Acomodação" id="botaoMudarAcomodacao" data-toggle="modal" data-target="#ModalMudarAcomodacao" onclick="setApartamentoCheckInt({{ apartamento.id }})"></i>
+
                   </a>
+
+
+
+
+
                   <a class="icon-spacing" href="#">
                     <i class="fa fa-sign-out icon-spacing" aria-hidden="true" title="Efetuar Check-Out"></i>
                   </a>
@@ -352,6 +359,7 @@ $(document).ready(function() {
 });
 </script>
 <!-- Inicia o Select2 myHospede dentro do modal  - ( End ) -->
+
 <style>
 .disabled {
   pointer-events: none;
@@ -566,7 +574,6 @@ function setApartamento(descricao) {
 </div>
 </form>
 
-
 <!-- ################### Modal Confirmar reserva - ( End ) ######################### -->
 
 <!-- Cancelar Reserva - ( Start ) -->
@@ -689,5 +696,265 @@ function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApart
   }
 </script>
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
+
+
+<!-- ################### Modal Mudar acomodação - ( Start ) ######################### -->
+
+<form>
+
+{% csrf_token %}
+
+<div class="modal fade" id="ModalMudarAcomodacao" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Mudar Acomodação</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container">
+          <div class="tab-content">
+            <!--************************************************************************-->
+            <div id="checkin" class="tab-pane fade show active">
+              <div class="form-row">
+                <div class="form-group col-md-6 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hóspede:</p>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    </div>
+                    <input id="myHospedeMudar" type="text" name="myHospedeMudar" class="form-control" readonly>
+                  </div>
+                </div>
+                <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Apartamento:</p>
+                  <input id="myApartamentoMudar" type="text" name="myApartamentoMudar" placeholder="Apartamento" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hóspedes:</p>
+                  <input style="text-align: center" id="myQtdHospedesApartMudar" type="number" name="myQtdHospedesApartMudar" placeholder="Qtd. hóspedes" class="inline" readonly>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Hospedado(s):</p>
+                  <input style="text-align: center" id="myQtdHospedadosMudar" type="number" name="myQtdHospedadosMudar" placeholder="hospedados" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                  <input id="myDataEntradaApartMudar" type="date" name="myDataEntradaApartMudar" placeholder="Data entrada" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left;">Hora:</p>
+                  <input id="myHoraEntradaApartMudar" type="time" name="myHoraEntradaApartMudar" placeholder="Hora entrada" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                  <input id="myDataSaidaMudar" type="date" name="myDataSaidaMudar" placeholder="Data saída" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left;">Hora:</p>
+                  <input id="myHoraSaidaApartMudar" type="time" name="myHoraSaidaApartMudar" placeholder="Hora saida" class="inline" readonly>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
+                     <input style="text-align: right" id="myAntecipadoMudar" type="text" name="myAntecipadoMudar" placeholder="Valor antecipado" class="inline" readonly>
+                </div>
+                <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Observação:</p>
+                  <input id="myOBSMudar" type="text" name="myOBSMudar" placeholder="Observação" class="inline">
+                </div>
+              </div>  
+              <hr>
+              <div class="form-group col-md-14 mb-0" style="text-align: left;">
+                <div class="input-group-prepend">
+                  <span class="input-group-text d-flex align-items-center"><i class="fas fa-bed"></i></span>
+                    <select type="text" id="myNovoApartamento" name="myNovoApartamento" class="form-control select2">
+                      <option value=""></option>
+                      {% for apart in lista_apartamentos %}
+                        <option value= "{{ apart.text }}"> {{ apart.text }}</option>
+                      {% endfor %}
+                    </select>
+
+                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                      <input style="text-align: center" id="myQtdHospedesNovoApart" type="number" name="myQtdHospedesNovoApart" placeholder="Qtd. hóspedes" class="inline" readonly>
+                    </div>
+                </div>
+              </div>
+
+              <br>
+
+              <div class="modal-footer">
+                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                <button type="button" class="btn btn-warning" id="ConfirmarMudanca-button"> Confirmar Mudança</button>
+              </div>                
+            </div>  
+          </div>
+         </div>
+       </div>
+    </div>
+  </div>
+</div>
+</form>
+
+<!-- ################### Modal Mudar acomodação - ( End ) ######################### -->
+
+<!-- Inicia o Select2 myHospede dentro do modal  - ( Start ) -->
+<script>
+$(document).ready(function() {
+  $('#ModalMudarAcomodacao').on('shown.bs.modal', function() {
+    $('#myNovoApartamento').select2({
+      placeholder: "Selecione a nova acomodação",
+      dropdownParent: $('#ModalMudarAcomodacao'),
+    });
+    $('#myNovoApartamento').on('keyup click', function(e) {
+      if (e.keyCode === 13 || e.type === 'click') {
+        $('#myNovoApartamento').select2('open');
+      }
+    });
+    $('#myNovoApartamento').select2('focus');
+  });
+});
+</script>
+<!-- Inicia o Select2 myHospede dentro do modal  - ( End ) -->
+
+
+<!-- buscar os dados do Check-In ( Start )-->
+<script>
+function setApartamentoCheckInt(apart_id) {
+  // Faz uma requisição AJAX ao servidor para buscar o check-in
+  $.ajax({
+    url: `/buscar_checkin/${apart_id}/`,
+    method: 'POST',
+    data: {
+      apart_id: apart_id,
+      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+    },
+    success: function(checkin) {
+      document.getElementById("myHospedeMudar").value = checkin.hospede;
+      document.getElementById("myApartamentoMudar").value = checkin.apartamento;
+      document.getElementById("myQtdHospedesApartMudar").value = checkin.qtdpessoas;
+      document.getElementById("myQtdHospedadosMudar").value = checkin.qtd_hospedes;
+      document.getElementById("myDataEntradaApartMudar").value = checkin.data_checkin;
+      document.getElementById("myHoraEntradaApartMudar").value = checkin.hora_checkin;
+      document.getElementById("myDataSaidaMudar").value = checkin.data_checkout;
+      document.getElementById("myHoraSaidaApartMudar").value = checkin.hora_checkout;
+      document.getElementById("myAntecipadoMudar").value = checkin.valor_antecipado;
+      /////////////////////////////////////////////////////////////////////////
+      document.getElementById("myOBSMudar").value = checkin.observacao;
+      $('#myNovoApartamento').focus();
+    },
+    error: function() {
+      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+      Swal.fire({
+        icon: 'error',
+        title: 'Ops...',
+        text: 'Ocorreu um erro ao buscar o Check-In.'
+      });
+    }
+  });
+}
+</script>
+
+<!-- buscar os dados do Check-In ( End )-->
+
+<!-- Iniciar a busca da qtd de hospede do apartamento selecionado - ( Start )-->
+<script>
+$(document).ready(function() {
+  // Adiciona um evento de mudança ao select com o ID myNovoApartamento
+  $('#myNovoApartamento').on('change', function() {
+    var apartDesc = $(this).val(); // Obtém o valor selecionado do select
+    buscarQtdPessoas(apartDesc); // Chama a função para buscar a quantidade de pessoas
+  });
+
+  // Função para buscar a quantidade de pessoas do apartamento selecionado
+  function buscarQtdPessoas(apartDesc) {
+    $.ajax({
+      url: '/buscar_qtdpessoas/', // Substitua pela URL correta do Django
+      type: 'GET',
+      data: {apartDesc: apartDesc},
+      success: function(data) {
+        $('#myQtdHospedesNovoApart').val(data.qtdpessoas); // Coloca o valor retornado na variável myQtdHospedesNovoApart
+      },
+      error: function() {
+        console.log('Erro ao buscar a quantidade de pessoas do apartamento');
+      }
+    });
+  }
+});
+</script>
+<!-- Iniciar a busca da qtd de hospede do apartamento selecionado - ( End )-->
+
+<!-- Confirmar mudança de apartamento - ( Start ) -->
+<script>
+  document.getElementById('ConfirmarMudanca-button').addEventListener('click', function() {
+    const apartAtualDesc = document.getElementById('myApartamentoMudar').value;
+    const apartNovoDesc = document.getElementById('myNovoApartamento').value;
+
+    if (apartNovoDesc === '') {
+      Swal.fire('Erro', 'Por favor, selecione a nova acomodação.', 'error');
+      document.getElementById('myNovoApartamento').focus();
+      return; // Retorna para evitar que o código continue executando após o erro
+    }
+
+    Swal.fire({
+      title: 'Deseja realmente efetuar a mudança de acomodação  ?',
+      text: '',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, Confirmar',
+      cancelButtonText: 'Sair'
+    }).then((result) => {
+      if (result.isConfirmed) {
+
+
+        let url = `/apartamento/${apartAtualDesc}/${apartNovoDesc}/ConfirmarMudancaApart/`;
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            Swal.fire('Mudança efetuada com sucesso  !', '', 'success').then(() => {
+              window.location.href = "{% url 'apartHome' %}";
+            });
+          } else {
+            Swal.fire('Oops...', 'Ocorreu um erro ao tentar efetuar a mudança de acomodação.', 'error');
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          Swal.fire('Oops...', 'Ocorreu um erro ao tentar efetuar a mudança de acomodação.', 'error');
+        });
+      }
+    })
+  });
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+<!-- Confirmar mudança de apartamento - ( End ) -->
+
 
 {% endblock %}
