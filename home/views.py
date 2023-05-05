@@ -795,10 +795,12 @@ def salvar_variaveis(request):
 from django.http import JsonResponse
 from .models import ItensConsumo
 
+@login_required
 def get_preco_itemconsumo_by_descricao(request, descricao):
+    empresa = request.user.perfilusuario.empresa
     try:
         item_id = ItensConsumo.get_id_by_descricao(descricao)
-        item_consumo = ItensConsumo.objects.get(pk=item_id)
+        item_consumo = ItensConsumo.objects.get(empresa=empresa, pk=item_id)
        
         return JsonResponse({'preco_venda': item_consumo.precoVenda})
     except ItensConsumo.DoesNotExist:
