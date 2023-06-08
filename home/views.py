@@ -1158,62 +1158,72 @@ def FichaNacionalRegistroHospedes(request, apartamento_id):
 
 #######################################################################
 
+from django.db.models import Sum
+import locale
+
 @login_required
 def buscar_checkin(request, apart_id):
+    # Define a localidade para o formato brasileiro
+    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+
     perfil_usuario = request.user.perfilusuario
     empresa = perfil_usuario.empresa
 
-    if request.method == 'POST':
+    movimento = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N', apartamento_id=apart_id).first()
 
-        checkin = MovimentosAparts.objects.filter(
-            empresa=empresa, pago_sn='N', apartamento_id=apart_id
-        ).select_related('apartamento').values(
-            'hospede__nome',
-            'qtd_hospedes',
-            'data_checkin',
-            'hora_checkin',  # Adicionado hora_checkin
-            'data_checkout',
-            'hora_checkout',  # Adicionado hora_checkout
-            'apartamento__descricao',
-            'apartamento__qtdpessoas',
-            'valor_adiantamento',
-            'valor_pago_excedente',  # Adicionado valor_pago_excedente
-            'valor_consumo',
-            'forma_pagamento',
-            'data_fechamento',
-            'hora_fechamento',  # Adicionado hora_fechamento
-            'valor_total_conta',
-            'valor_desconto',
-            'valor_total_pago',
-            'observacao',
-            'pago_sn',
-        ).last()
-        if checkin:
-            apartamento = checkin['apartamento__descricao']
-            qtdpessoas = int(checkin['apartamento__qtdpessoas'])
-            valor_antecipado = checkin['valor_adiantamento']
-            observacao = checkin['observacao']
-            return JsonResponse({
-                'apartamento': apartamento,
-                'qtdpessoas': qtdpessoas,
-                'hospede': checkin['hospede__nome'],
-                'qtd_hospedes': checkin['qtd_hospedes'],
-                'data_checkin': checkin['data_checkin'],
-                'hora_checkin': checkin['hora_checkin'],  # Retornado hora_checkin
-                'data_checkout': checkin['data_checkout'],
-                'hora_checkout': checkin['hora_checkout'],  # Retornado hora_checkout
-                'valor_antecipado': valor_antecipado,
-                'valor_pago_excedente': checkin['valor_pago_excedente'],  # Retornado valor_pago_excedente
-                'valor_consumo': checkin['valor_consumo'],
-                'forma_pagamento': checkin['forma_pagamento'],
-                'data_fechamento': checkin['data_fechamento'],
-                'hora_fechamento': checkin['hora_fechamento'],  # Retornado hora_fechamento
-                'valor_total_conta': checkin['valor_total_conta'],
-                'valor_desconto': checkin['valor_desconto'],
-                'valor_total_pago': checkin['valor_total_pago'],
-                'observacao': observacao,
-                'pago_sn': checkin['pago_sn'],
-            })
+    itens_consumo_aparts = ItensConsumoAparts.objects.filter(empresa=empresa, apartamento_id=apart_id, movimento_id=movimento.pk)
+
+    Somavalor_total = itens_consumo_aparts.aggregate(total=Sum('valor_total'))['total'] or 0
+
+    apartamento = apartamentos.objects.filter(empresa=empresa, id=apart_id).first()
+
+    hospede = hospedes.objects.get(id=movimento.hospede_id)
+
+    # Cálculo do número de diárias
+    data_checkin = movimento.data_checkin
+    data_atual = date.today()
+    num_diarias = (data_atual - data_checkin).days
+    ##################################################
+    ValorPorExcedente = movimento.valor_pago_excedente
+
+    if movimento.qtd_excedentes:
+       ValorTotalDiarias = ( apartamento.valordiaria * num_diarias ) + ( movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias )
+       ValorPorExcedente = ( movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias )
+    else:
+       ValorTotalDiarias = ( apartamento.valordiaria * num_diarias )
+
+    # Aqui faz as contas do débito atual
+    SomaDebitoAtual = movimento.valor_total_pago
+    if movimento.valor_adiantamento:
+       SomaDebitoAtual = (ValorTotalDiarias + Somavalor_total ) - movimento.valor_adiantamento
+    else:
+       SomaDebitoAtual = (ValorTotalDiarias + Somavalor_total )
+
+    if request.method == 'POST':
+        if movimento:
+            checkin_data = {
+                'apartamento': apartamento.descricao,
+                'qtdpessoas': apartamento.qtdpessoas,
+                'hospede': hospede.nome,
+                'qtd_hospedes': movimento.qtd_hospedes,
+                'data_checkin': movimento.data_checkin,
+                'hora_checkin': movimento.hora_checkin,
+                'data_checkout': movimento.data_checkout,
+                'hora_checkout': movimento.hora_checkout,
+                'valor_antecipado': locale.currency(movimento.valor_adiantamento, grouping=True, symbol=True) if movimento.valor_adiantamento and movimento.valor_adiantamento > 0 else "",
+                'valor_pago_excedente': locale.currency(ValorPorExcedente, grouping=True, symbol=True) if ValorPorExcedente and ValorPorExcedente > 0 else "",
+                'valor_consumo': locale.currency(Somavalor_total, grouping=True, symbol=True) if Somavalor_total and Somavalor_total > 0 else "",
+                'forma_pagamento': movimento.forma_pagamento,
+                'data_fechamento': movimento.data_fechamento,
+                'hora_fechamento': movimento.hora_fechamento,
+                'valor_total_conta': locale.currency(SomaDebitoAtual, grouping=True, symbol=True) if SomaDebitoAtual else "",
+                'valor_total_pago': movimento.valor_total_pago,
+                'ValorTotalDiarias': locale.currency(ValorTotalDiarias, grouping=True, symbol=True) if ValorTotalDiarias else "",
+                'observacao': movimento.observacao,
+                'pago_sn': movimento.pago_sn,
+            }
+
+            return JsonResponse(checkin_data)
         else:
             return JsonResponse({}, status=404)
     else:
@@ -1245,6 +1255,13 @@ def ConfirmarMudancaApart(request, apartAtualDesc, apartNovoDesc):
     if request.method == 'POST':
 
         # Atualiza o id do apartamento no MovimentosApart
+        qtd_hospedes = apartNovo.qtdpessoas
+        qtd_hospedados = movAparts.qtd_hospedes
+        if qtd_hospedados > qtd_hospedes:
+           movAparts.qtd_excedentes = qtd_hospedados - qtd_hospedes
+        else:
+           movAparts.qtd_excedentes = 0
+
         movAparts.apartamento_id = apartNovo.pk
         movAparts.save()
 
@@ -1259,8 +1276,6 @@ def ConfirmarMudancaApart(request, apartAtualDesc, apartNovoDesc):
         # Atualiza o tipostatus do apartNovo para "Ocupado"
         apartNovo.tipostatus = "Ocupado"
         apartNovo.save()
-
-
 
         return JsonResponse({'status': 'success'})
 

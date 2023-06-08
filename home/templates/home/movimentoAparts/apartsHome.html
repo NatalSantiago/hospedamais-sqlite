@@ -1032,7 +1032,7 @@ $(document).ready(function() {
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Débito Atual - R$</h3>
+        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Débito Atual</h3>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -1104,13 +1104,18 @@ $(document).ready(function() {
                      <input style="text-align: right" id="myConsumoDebito" type="text" name="myConsumoDebito" placeholder="Valor consumo" class="inline" readonly>
                 </div>
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Desconto:</p>
-                     <input style="text-align: right" id="myValorDescontoDebito" type="text" name="myValorDescontoDebito" placeholder="Valor desconto" class="inline" readonly>
+                  <p class="inline" style="text-align: left">Valor Diárias:</p>
+                     <input style="text-align: right" id="myValorDiarias" type="text" name="myValorDiarias" placeholder="Valor diárias" class="inline" readonly>
                 </div>
+
                 <div class="form-group col-md-3 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">DÉBITO ATUAL:</p>
-                     <input style="text-align: right" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
+                  <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
                 </div>
+
+
+
+
               </div>  
               <div class="modal-footer">
                 <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
@@ -1123,18 +1128,6 @@ $(document).ready(function() {
   </div>
 </div>
 </form>
-
-<script>
-    $(document).ready(function(){
-        $("#ModalDebitoAtual").on("shown.bs.modal", function() {
-            $("#myAntecipadoDebito").mask("#.##0,00", {reverse: true});
-            $("#myValorExcedenteDebito").mask("#.##0,00", {reverse: true});
-            $("#myConsumoDebito").mask("#.##0,00", {reverse: true});
-            $("#myValorDescontoDebito").mask("#.##0,00", {reverse: true});
-            $("#myDebitoAtual").mask("#.##0,00", {reverse: true});
-        });
-    });
-</script>
 
 <!-- ################### Modal Verificar Débito Atual - ( End ) ######################### -->
 
@@ -1159,10 +1152,12 @@ function setApartamentoDebito(apart_id) {
       document.getElementById("myDataSaidaDebito").value = checkin.data_checkout;
       document.getElementById("myHoraSaidaApartDebito").value = checkin.hora_checkout;
       document.getElementById("myAntecipadoDebito").value = checkin.valor_antecipado;
+      document.getElementById("myConsumoDebito").value = checkin.valor_consumo;
+      document.getElementById("myValorExcedenteDebito").value = checkin.valor_pago_excedente;
+      document.getElementById("myValorDiarias").value = checkin.ValorTotalDiarias;
+      document.getElementById("myDebitoAtual").value = checkin.valor_total_conta;
       /////////////////////////////////////////////////////////////////////////
       document.getElementById("myOBSDebito").value = checkin.observacao;
-      document.getElementById("valor_pago_excedente").value = checkin.valor_antecipado;
-
     },
     error: function() {
       // Mostra uma mensagem de erro caso ocorra algum problema na requisição
