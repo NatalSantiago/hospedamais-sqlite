@@ -16,6 +16,8 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/autonumeric@4.1.0/dist/autoNumeric.min.js"></script>
+
 <!-- Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
@@ -1084,35 +1086,42 @@ $(document).ready(function() {
                 </div>
               </div>
               <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Adiantamento:</p>
                      <input style="text-align: right" id="myAntecipadoDebito" type="text" name="myAntecipadoDebito" placeholder="Valor antecipado" class="inline" readonly>
                 </div>
-                <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                <div class="form-group col-md-8 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Observação:</p>
                   <input id="myOBSDebito" type="text" name="myOBSDebito" placeholder="Observação" class="inline" readonly>
                 </div>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Qtd.Diárias:</p>
+                     <input style="text-align: center" id="myQtdDiariasAtual" type="text" name="myValorExcedenteDebito" placeholder="Valor por excedente" class="inline" readonly>
+                </div>
               </div>  
-
               <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor por Excedentes:</p>
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">V.Excedentes:</p>
                      <input style="text-align: right" id="myValorExcedenteDebito" type="text" name="myValorExcedenteDebito" placeholder="Valor por excedente" class="inline" readonly>
                 </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Valor Consumo:</p>
                      <input style="text-align: right" id="myConsumoDebito" type="text" name="myConsumoDebito" placeholder="Valor consumo" class="inline" readonly>
                 </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                <div class="form-group col-md-2 mb-0" style="text-align: left;">
                   <p class="inline" style="text-align: left">Valor Diárias:</p>
                      <input style="text-align: right" id="myValorDiarias" type="text" name="myValorDiarias" placeholder="Valor diárias" class="inline" readonly>
                 </div>
 
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">DÉBITO ATUAL:</p>
-                  <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
-                </div>
 
+<div class="form-group col-md-3 mb-0" style="text-align: left;">
+  <p class="inline" style="text-align: left">Desconto %:</p>
+  <input style="text-align: right; background-color: yellow; color: black; font-weight: bold;" id="myDescontoDebito" type="text" name="myDescontoDebito" placeholder="Desconto" class="inline" onblur="atualizarValor()">
+</div>
+<div class="form-group col-md-3 mb-0" style="text-align: left;">
+  <p class="inline" style="text-align: left">DÉBITO ATUAL:</p>
+  <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
+</div>
 
 
 
@@ -1130,6 +1139,53 @@ $(document).ready(function() {
 </form>
 
 <!-- ################### Modal Verificar Débito Atual - ( End ) ######################### -->
+
+
+
+<script>
+  // Inicializa o AutoNumeric no campo de desconto
+  const myDescontoDebito = new AutoNumeric('#myDescontoDebito', {
+    currencySymbol: 'R$ ',
+    decimalCharacter: ',',
+    digitGroupSeparator: '.',
+    decimalPlaces: 2,
+    unformatOnSubmit: true
+  });
+
+
+function formatarValor(numero) {
+  const formatter = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
+  return formatter.format(numero);
+}
+
+function atualizarValor() {
+  const desconto = myDescontoDebito.getNumber();
+
+  // Obter os valores dos campos e atribuir zero se estiverem em branco
+  const valorExcedenteDebitoInput = document.getElementById('myValorExcedenteDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
+  const valorExcedenteDebito = valorExcedenteDebitoInput ? parseFloat(valorExcedenteDebitoInput) : 0;
+
+  const consumoDebitoInput = document.getElementById('myConsumoDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
+  const consumoDebito = consumoDebitoInput ? parseFloat(consumoDebitoInput) : 0;
+
+  const valorDiariasInput = document.getElementById('myValorDiarias').value.replace('R$ ', '').replace('.', '').replace(',', '.');
+  const valorDiarias = valorDiariasInput ? parseFloat(valorDiariasInput) : 0;
+
+  const antecipadoDebitoInput = document.getElementById('myAntecipadoDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
+  const antecipadoDebito = antecipadoDebitoInput ? parseFloat(antecipadoDebitoInput) : 0;
+
+  const debitoAtual = (valorExcedenteDebito + consumoDebito + valorDiarias) - antecipadoDebito - desconto;
+  const debitoAtualFormatado = formatarValor(debitoAtual);
+
+  document.getElementById('myDebitoAtual').value = debitoAtualFormatado;
+}
+
+</script>
+
+
 
 <!-- buscar os dados do Débito do cliente ( Start )-->
 <script>
@@ -1152,6 +1208,10 @@ function setApartamentoDebito(apart_id) {
       document.getElementById("myDataSaidaDebito").value = checkin.data_checkout;
       document.getElementById("myHoraSaidaApartDebito").value = checkin.hora_checkout;
       document.getElementById("myAntecipadoDebito").value = checkin.valor_antecipado;
+      document.getElementById("myQtdDiariasAtual").value = checkin.Qtd_Diarias_atual;
+
+
+
       document.getElementById("myConsumoDebito").value = checkin.valor_consumo;
       document.getElementById("myValorExcedenteDebito").value = checkin.valor_pago_excedente;
       document.getElementById("myValorDiarias").value = checkin.ValorTotalDiarias;

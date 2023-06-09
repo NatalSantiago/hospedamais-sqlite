@@ -885,6 +885,8 @@ from .models import apartamentos, hospedes
 
 from decimal import Decimal, Context
 
+from datetime import datetime
+
 from django.shortcuts import render, redirect
 
 from sweetify import sweetify
@@ -904,6 +906,15 @@ def SalvarCheckIn(request):
        if request.POST.get('myQtdHospedadosCheckin') == '':    
           sweetify.error(request, 'Qtd Hóspede não informada, Erro ao realizar o Check-In  !  !', persistent='OK')
           return redirect('apartHome')
+       #########################################################################
+       ## Verificar se a data do Check-in e maior que a data atual
+       my_data_entrada_checkin = request.POST.get('myDataEntradaCheckin')
+       data_atual = datetime.now().date()
+
+       if datetime.strptime(my_data_entrada_checkin, '%Y-%m-%d').date() > data_atual:
+          sweetify.error(request, 'A data do Check-in não pode ser maior que a data atual. Erro ao realizar o Check-In!', persistent='OK')
+          return redirect('apartHome')       
+       #########################################################################
 
        hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
 
@@ -942,8 +953,10 @@ def SalvarCheckIn(request):
     elif action == 'salva_reserva':
        apartamento = apartamentos.objects.filter(empresa=empresa, descricao=request.POST.get('myApartReserva')).first()
        if request.POST.get('myHospede') == '':
+          sweetify.error(request, 'Hóspede não selecionado, Erro ao realizar a reserva  !  !', persistent='OK')
           return redirect('apartHome')
        if request.POST.get('myQtdHospdesReserva') == '':    
+          sweetify.error(request, 'Qtd Hóspede não informada, Erro ao realizar a reserva  !  !', persistent='OK')
           return redirect('apartHome')
 
        hospede = hospedes.objects.get(empresa=empresa, pk=request.POST.get('myHospede'))
@@ -1184,20 +1197,19 @@ def buscar_checkin(request, apart_id):
     data_atual = date.today()
     num_diarias = (data_atual - data_checkin).days
     ##################################################
-    ValorPorExcedente = movimento.valor_pago_excedente
-
-    if movimento.qtd_excedentes:
-       ValorTotalDiarias = ( apartamento.valordiaria * num_diarias ) + ( movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias )
-       ValorPorExcedente = ( movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias )
+    if movimento.qtd_excedentes and movimento.qtd_excedentes > 0:
+       ValorTotalDiarias = (apartamento.valordiaria * num_diarias) + (movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias)
+       ValorPorExcedente = (movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias)
     else:
-       ValorTotalDiarias = ( apartamento.valordiaria * num_diarias )
+       ValorTotalDiarias = (apartamento.valordiaria * num_diarias)
+       ValorPorExcedente = 0
 
     # Aqui faz as contas do débito atual
     SomaDebitoAtual = movimento.valor_total_pago
     if movimento.valor_adiantamento:
-       SomaDebitoAtual = (ValorTotalDiarias + Somavalor_total ) - movimento.valor_adiantamento
+       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total ) - movimento.valor_adiantamento
     else:
-       SomaDebitoAtual = (ValorTotalDiarias + Somavalor_total )
+       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total )
 
     if request.method == 'POST':
         if movimento:
@@ -1218,6 +1230,7 @@ def buscar_checkin(request, apart_id):
                 'hora_fechamento': movimento.hora_fechamento,
                 'valor_total_conta': locale.currency(SomaDebitoAtual, grouping=True, symbol=True) if SomaDebitoAtual else "",
                 'valor_total_pago': movimento.valor_total_pago,
+                'Qtd_Diarias_atual': num_diarias,
                 'ValorTotalDiarias': locale.currency(ValorTotalDiarias, grouping=True, symbol=True) if ValorTotalDiarias else "",
                 'observacao': movimento.observacao,
                 'pago_sn': movimento.pago_sn,
