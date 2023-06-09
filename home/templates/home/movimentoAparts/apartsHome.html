@@ -1112,23 +1112,31 @@ $(document).ready(function() {
                   <p class="inline" style="text-align: left">Valor Diárias:</p>
                      <input style="text-align: right" id="myValorDiarias" type="text" name="myValorDiarias" placeholder="Valor diárias" class="inline" readonly>
                 </div>
-
-
-<div class="form-group col-md-3 mb-0" style="text-align: left;">
-  <p class="inline" style="text-align: left">Desconto %:</p>
-  <input style="text-align: right; background-color: yellow; color: black; font-weight: bold;" id="myDescontoDebito" type="text" name="myDescontoDebito" placeholder="Desconto" class="inline" onblur="atualizarValor()">
-</div>
-<div class="form-group col-md-3 mb-0" style="text-align: left;">
-  <p class="inline" style="text-align: left">DÉBITO ATUAL:</p>
-  <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
-</div>
-
-
-
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">Desconto %:</p>
+                  <input style="text-align: right; background-color: yellow; color: black; font-weight: bold;" id="myDescontoDebito" type="text" name="myDescontoDebito" placeholder="Desconto" class="inline" onblur="atualizarValor()">
+                </div>
+                <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                  <p class="inline" style="text-align: left">DÉBITO ATUAL:</p>
+                  <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
+                </div>
               </div>  
-              <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-              </div>                
+
+
+<style>
+  .custom-btn {
+    width: 120px; /* Defina a largura desejada para os botões */
+  }
+</style>
+
+<div class="modal-footer d-flex justify-content-center">
+  <button type="button" class="btn btn-danger flex-fill custom-btn" onclick="window.location.href='{% url 'apartHome' %}'">Sair</button>
+  <button type="button" class="btn btn-warning flex-fill custom-btn" id="ImprimirExtratoConsumo">
+    <i class="fas fa-print"></i> Extrato Consumo
+  </button>
+</div>
+
+
             </div>  
           </div>
          </div>
@@ -1166,6 +1174,7 @@ function atualizarValor() {
 
   // Obter os valores dos campos e atribuir zero se estiverem em branco
   const valorExcedenteDebitoInput = document.getElementById('myValorExcedenteDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
+  
   const valorExcedenteDebito = valorExcedenteDebitoInput ? parseFloat(valorExcedenteDebitoInput) : 0;
 
   const consumoDebitoInput = document.getElementById('myConsumoDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');

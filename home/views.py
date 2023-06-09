@@ -1198,7 +1198,9 @@ def buscar_checkin(request, apart_id):
     num_diarias = (data_atual - data_checkin).days
     ##################################################
     if movimento.qtd_excedentes and movimento.qtd_excedentes > 0:
-       ValorTotalDiarias = (apartamento.valordiaria * num_diarias) + (movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias)
+#       ValorTotalDiarias = (apartamento.valordiaria * num_diarias) + (movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias)
+
+       ValorTotalDiarias = (apartamento.valordiaria * num_diarias)
        ValorPorExcedente = (movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias)
     else:
        ValorTotalDiarias = (apartamento.valordiaria * num_diarias)
