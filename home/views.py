@@ -1176,11 +1176,11 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import MovimentosAparts, hospedes, apartamentos
 from django.db.models import Sum
-import locale
-
+import locale, re
+from decimal import Decimal
 
 @login_required
-def ExtratoConsumoHospede(request, nome_apartamento):
+def ExtratoConsumoHospede(request, nome_apartamento, desconto_debito):
     # Define a localidade para o formato brasileiro
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
@@ -1197,6 +1197,14 @@ def ExtratoConsumoHospede(request, nome_apartamento):
 
     hospede = hospedes.objects.get(id=movimento.hospede_id)
 
+    if not desconto_debito:
+        desconto_debito = 0
+    else:
+        # Remove o símbolo "R$" e os espaços em branco do valor monetário
+        desconto_debito = re.sub(r'[^\d,]', '', desconto_debito).replace(',', '.')
+
+    desconto_debito = float(desconto_debito)
+
     # Cálculo do número de diárias
     data_checkin = movimento.data_checkin
     data_atual = date.today()
@@ -1212,9 +1220,9 @@ def ExtratoConsumoHospede(request, nome_apartamento):
     # Aqui faz as contas do débito atual
     SomaDebitoAtual = movimento.valor_total_pago
     if movimento.valor_adiantamento:
-       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total ) - movimento.valor_adiantamento
+       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total ) - movimento.valor_adiantamento - Decimal(desconto_debito)
     else:
-       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total )
+       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total ) - Decimal(desconto_debito)
 
     if movimento:
         context = {
@@ -1255,6 +1263,8 @@ def ExtratoConsumoHospede(request, nome_apartamento):
             'ValorTotalDiarias': locale.currency(ValorTotalDiarias, grouping=True, symbol=True) if ValorTotalDiarias else "",
             'observacao': movimento.observacao,
             'pago_sn': movimento.pago_sn,
+            'desconto_debito': locale.currency(abs(desconto_debito), grouping=True, symbol=True) if desconto_debito else "",
+
         }
     return render(request, 'home/relatorios/extratoConsumo.html', context)
 

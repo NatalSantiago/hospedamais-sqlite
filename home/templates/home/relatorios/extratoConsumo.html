@@ -87,15 +87,44 @@
     <a>{{ email_hospede }}</a>
 </p>
 
+<!-- Impressão dos dados do hospede ( End )-->
+
+<!-- Impressão dos dados do resumo ( Start )-->
+
+<p style="position: absolute; top: 1043px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
+    <a><b>{{ valor_antecipado }}</b></a>
+</p>
+
+<p style="position:absolute;top:1043px; right:32px; white-space:nowrap" class="ft01">
+    <a><b>{{ valor_pago_excedente }}</b></a>
+</p>
+
+<p style="position: absolute; top: 1078px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
+    <a><b>{{ valor_consumo }}</b></a>
+</p>
+
+<p style="position: absolute; top: 1078px; right: 32px; white-space: nowrap; text-align: right;" class="ft01">
+    <a><b>{{ ValorTotalDiarias }}</b></a>
+</p>
+
+<p style="position: absolute; top: 1112px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
+    <a><b>{{ desconto_debito }}</b></a>
+</p>
+
+<p style="position:absolute;top:1112px; right:32px; white-space:nowrap" class="ft01">
+    <a><b>{{ valor_total_conta }}</b></a>
+</p>
+
+<!-- Impressão dos dados do resumo ( End )-->
+
+<!-- Adicione a classe "no-print" para ocultar o botão de impressão na impressão -->
+
 <a href="{% url 'apartHome' %}">
     <button style="position:absolute;top:142px;right:590px;" class="no-print">
         <i class="fa fa-history"></i> Voltar
     </button>
 </a>
-<!-- Impressão dos dados do hospede ( End )-->
 
-
-<!-- Adicione a classe "no-print" para ocultar o botão de impressão na impressão -->
 <button onclick="window.print()" style="position:absolute;top:142px;right:215px;" class="no-print">
     <i class="fas fa-print"></i> Imprimir
 </button>
