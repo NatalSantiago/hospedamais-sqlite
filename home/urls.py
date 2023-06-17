@@ -11,6 +11,8 @@ from .views import itensConsumo_check_description,verificaSeHospedeExite,verific
 
 from .views import delete_item_consumo_apart
 
+from home import views
+
 urlpatterns = [
 
     path('', PaginaInicial.as_view(), name='inicio'),
@@ -80,6 +82,11 @@ urlpatterns = [
     path('apartamento/<str:descApart>/cancelar_reserva/', views.cancelar_reserva, name='cancelar_reserva'),
 
     path('FichaNacional/<int:apartamento_id>/', views.FichaNacionalRegistroHospedes, name='FichaNacionalRegistroHospedes'),
+
+    path('ExtratoConsumoHospede/<str:nome_apartamento>/', views.ExtratoConsumoHospede, name='ExtratoConsumoHospede'),
+
+
+
 
     path('buscar_checkin/<int:apart_id>/', views.buscar_checkin, name='buscar_checkin'),
 

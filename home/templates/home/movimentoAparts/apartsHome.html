@@ -93,7 +93,6 @@
                     <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ficha Nacional de Registro de Hóspedes"></i>
                   </a>
                   <a class="icon-spacing" href="#">
-
                     <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual" id="botaoDebitoAtual" data-toggle="modal" data-target="#ModalDebitoAtual" onclick="setApartamentoDebito({{ apartamento.id }})"></i>
                   </a>
                   <a class="icon-spacing" href="#">
@@ -1131,10 +1130,10 @@ $(document).ready(function() {
 
 <div class="modal-footer d-flex justify-content-center">
   <button type="button" class="btn btn-danger flex-fill custom-btn" onclick="window.location.href='{% url 'apartHome' %}'">Sair</button>
-  <button type="button" class="btn btn-warning flex-fill custom-btn" id="ImprimirExtratoConsumo">
-    <i class="fas fa-print"></i> Extrato Consumo
-  </button>
+  <button type="button" class="btn btn-warning flex-fill custom-btn" onclick="redirecionarExtratoConsumo()">Extrato Consumo</button>
 </div>
+
+
 
 
             </div>  
@@ -1148,6 +1147,14 @@ $(document).ready(function() {
 
 <!-- ################### Modal Verificar Débito Atual - ( End ) ######################### -->
 
+
+<script>
+    function redirecionarExtratoConsumo() {
+        var nomeApartamento = document.getElementById('myApartamentoDebito').value;
+        var url = "/ExtratoConsumoHospede/" + encodeURIComponent(nomeApartamento) + "/";
+        window.location.href = url;
+    }
+</script>
 
 
 <script>
@@ -1197,6 +1204,7 @@ function atualizarValor() {
 
 
 <!-- buscar os dados do Débito do cliente ( Start )-->
+
 <script>
 function setApartamentoDebito(apart_id) {
   // Faz uma requisição AJAX ao servidor para buscar o check-in
@@ -1218,9 +1226,6 @@ function setApartamentoDebito(apart_id) {
       document.getElementById("myHoraSaidaApartDebito").value = checkin.hora_checkout;
       document.getElementById("myAntecipadoDebito").value = checkin.valor_antecipado;
       document.getElementById("myQtdDiariasAtual").value = checkin.Qtd_Diarias_atual;
-
-
-
       document.getElementById("myConsumoDebito").value = checkin.valor_consumo;
       document.getElementById("myValorExcedenteDebito").value = checkin.valor_pago_excedente;
       document.getElementById("myValorDiarias").value = checkin.ValorTotalDiarias;
@@ -1239,6 +1244,7 @@ function setApartamentoDebito(apart_id) {
   });
 }
 </script>
+
 
 <!-- buscar os dados do Check-In ( End )-->
 

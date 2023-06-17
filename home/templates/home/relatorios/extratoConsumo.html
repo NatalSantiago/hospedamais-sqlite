@@ -1,0 +1,106 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon" />
+<style>
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+	
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 892px; /* Defina a largura do container */
+}
+</style>
+</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+
+<body bgcolor="#A0A0A0" vlink="blue" link="blue">
+<div class="container">
+<div id="page1-div" style="position:relative;width:892px;height:1262px;">
+<img width="882" height="1260" src="{% static 'img/ExtratoConsumo.png' %}" alt="background image"/>
+
+<p style="position:absolute;top:175px;left:100px;white-space:nowrap" class="ft00">
+
+<!-- Impressão cabeçalho com os dados da empresa ( Start )-->
+<p style="position:absolute;top:6px;left:265px; font-size: 20px; white-space:nowrap" class="ft00">
+    <b>{{ nome_empresa }}</b>
+</p>
+<p style="position:absolute;top:38px;left:265px;white-space:nowrap" class="ft01">
+    <b>CNPJ: {{ cnpj_empresa }}   -   Fone: {{ fone_empresa }}</b>
+</p>
+<p style="position:absolute;top:61px;left:265px;white-space:nowrap" class="ft01">
+    <b>Endereço: {{ endereco_empresa }} - {{ cidade_empresa }}/{{ estado_empresa }} - {{ pais_empresa }}</b>
+</p>
+<p style="position:absolute;top:84px;left:265px;white-space:nowrap" class="ft01">
+    <b>Email: {{ email_empresa }}   -   WathsApp: {{ Whats_empresa }}</b>
+</p>
+<!-- Impressão cabeçalho com os dados da empresa ( End )-->
+
+<!-- Impressão dos dados da hospedagem ( Start )-->
+<p style="position:absolute;top:220px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ descricao_apartamento }}</a>
+</p>
+<p style="position:absolute;top:220px;left:398px;white-space:nowrap" class="ft01">
+    <a>
+        {% if qtd_excedentes %}
+            {{ qtd_excedentes }}
+        {% endif %}
+    </a>
+</p>
+<p style="position:absolute;top:220px;left:505px;white-space:nowrap" class="ft01">
+    <a>{{ data_entrada|date:"d/m/Y" }}</a>
+</p>
+<p style="position:absolute;top:220px;left:622px;white-space:nowrap" class="ft01">
+    <a>{{ hora_entrada }}</a>
+</p>
+<p style="position:absolute;top:220px;left:710px;white-space:nowrap" class="ft01">
+    <a>{{ data_saida|date:"d/m/Y" }}</a>
+</p>
+<p style="position:absolute;top:220px;left:828px;white-space:nowrap" class="ft01">
+    <a>{{ hora_saida }}</a>
+</p>
+<!-- Impressão dos dados da hospedagem ( End )-->
+
+<!-- Impressão dos dados do hospede ( Start )-->
+<p style="position:absolute;top:330px;left:50px;white-space:nowrap" class="ft01">
+  <a>{{ nome_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:330px;left:490px;white-space:nowrap" class="ft01">
+  <a>{{ fone_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:462px;left:723px;white-space:nowrap" class="ft01">
+  <a>{{ cpf_hospede }}</a>
+</p>
+
+<p style="position:absolute;top:1154px;left:50px;white-space:nowrap" class="ft01">
+    <a>{{ email_hospede }}</a>
+</p>
+
+<a href="{% url 'apartHome' %}">
+    <button style="position:absolute;top:142px;right:590px;" class="no-print">
+        <i class="fa fa-history"></i> Voltar
+    </button>
+</a>
+<!-- Impressão dos dados do hospede ( End )-->
+
+
+<!-- Adicione a classe "no-print" para ocultar o botão de impressão na impressão -->
+<button onclick="window.print()" style="position:absolute;top:142px;right:215px;" class="no-print">
+    <i class="fas fa-print"></i> Imprimir
+</button>
+
+</div>
+</div>
+</body>
+</html>

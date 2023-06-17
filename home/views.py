@@ -1167,7 +1167,96 @@ def FichaNacionalRegistroHospedes(request, apartamento_id):
         'meioTransp_outros': hospede.meiotransporteOutros,
     }
 
-    return render(request, 'home/FichaNacionalHospedes.html', context)
+    return render(request, 'home/relatorios/FichaNacionalHospedes.html', context)
+
+#######################################################################
+
+from datetime import datetime
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import MovimentosAparts, hospedes, apartamentos
+from django.db.models import Sum
+import locale
+
+
+@login_required
+def ExtratoConsumoHospede(request, nome_apartamento):
+    # Define a localidade para o formato brasileiro
+    locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+
+    perfil_usuario = request.user.perfilusuario
+    empresa = perfil_usuario.empresa
+
+    apartamento = apartamentos.objects.filter(empresa=empresa, descricao=nome_apartamento).first()
+
+    movimento = MovimentosAparts.objects.filter(empresa=empresa, pago_sn='N', apartamento_id=apartamento.pk).first()
+
+    itens_consumo_aparts = ItensConsumoAparts.objects.filter(empresa=empresa, apartamento_id=apartamento.pk, movimento_id=movimento.pk)
+
+    Somavalor_total = itens_consumo_aparts.aggregate(total=Sum('valor_total'))['total'] or 0
+
+    hospede = hospedes.objects.get(id=movimento.hospede_id)
+
+    # Cálculo do número de diárias
+    data_checkin = movimento.data_checkin
+    data_atual = date.today()
+    num_diarias = (data_atual - data_checkin).days
+    ##################################################
+    if movimento.qtd_excedentes and movimento.qtd_excedentes > 0:
+       ValorTotalDiarias = (apartamento.valordiaria * num_diarias)
+       ValorPorExcedente = (movimento.qtd_excedentes * apartamento.valorporexcedente * num_diarias)
+    else:
+       ValorTotalDiarias = (apartamento.valordiaria * num_diarias)
+       ValorPorExcedente = 0
+
+    # Aqui faz as contas do débito atual
+    SomaDebitoAtual = movimento.valor_total_pago
+    if movimento.valor_adiantamento:
+       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total ) - movimento.valor_adiantamento
+    else:
+       SomaDebitoAtual = (ValorTotalDiarias + ValorPorExcedente + Somavalor_total )
+
+    if movimento:
+        context = {
+            'nome_empresa': empresa.nome,
+            'empresa_iduser': empresa.pk,
+            'fone_empresa': empresa.fone,
+            'Whats_empresa': empresa.whatsApp,
+            'cnpj_empresa': empresa.cnpj,
+            'endereco_empresa': empresa.endereco,
+            'cidade_empresa': empresa.cidade,
+            'estado_empresa': empresa.estado,
+            'pais_empresa': empresa.Pais,
+            'email_empresa': empresa.email,
+            ###############################
+            'nome_hospede': hospede.nome,
+            'cpf_hospede': hospede.cpf,
+            'fone_hospede': hospede.fone,
+            ##############################################
+            'tipo_apartamento': apartamento.tipoapart,
+            'descricao_apartamento': apartamento.descricao, 
+            'qtd_excedentes': movimento.qtd_excedentes,
+            'data_entrada': movimento.data_checkin,
+            'hora_entrada': movimento.hora_checkin,
+            'data_saida': movimento.data_checkout,
+            'hora_saida': movimento.hora_checkout,
+            'qtdpessoas': apartamento.qtdpessoas,
+            'hospede': hospede.nome,
+            'qtd_hospedes': movimento.qtd_hospedes,
+            'valor_antecipado': locale.currency(movimento.valor_adiantamento, grouping=True, symbol=True) if movimento.valor_adiantamento and movimento.valor_adiantamento > 0 else "",
+            'valor_pago_excedente': locale.currency(ValorPorExcedente, grouping=True, symbol=True) if ValorPorExcedente and ValorPorExcedente > 0 else "",
+            'valor_consumo': locale.currency(Somavalor_total, grouping=True, symbol=True) if Somavalor_total and Somavalor_total > 0 else "",
+            'forma_pagamento': movimento.forma_pagamento,
+            'data_fechamento': movimento.data_fechamento,
+            'hora_fechamento': movimento.hora_fechamento,
+            'valor_total_conta': locale.currency(SomaDebitoAtual, grouping=True, symbol=True) if SomaDebitoAtual else "",
+            'valor_total_pago': movimento.valor_total_pago,
+            'Qtd_Diarias_atual': num_diarias,
+            'ValorTotalDiarias': locale.currency(ValorTotalDiarias, grouping=True, symbol=True) if ValorTotalDiarias else "",
+            'observacao': movimento.observacao,
+            'pago_sn': movimento.pago_sn,
+        }
+    return render(request, 'home/relatorios/extratoConsumo.html', context)
 
 #######################################################################
 
