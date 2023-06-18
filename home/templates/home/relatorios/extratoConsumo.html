@@ -46,40 +46,40 @@
 <!-- Impressão cabeçalho com os dados da empresa ( End )-->
 
 <!-- Impressão dos dados da hospedagem ( Start )-->
-<p style="position:absolute;top:220px;left:50px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:217px;left:50px;white-space:nowrap" class="ft01">
     <a>{{ descricao_apartamento }}</a>
 </p>
-<p style="position:absolute;top:220px;left:398px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:217px;left:398px;white-space:nowrap" class="ft01">
     <a>
         {% if qtd_excedentes %}
             {{ qtd_excedentes }}
         {% endif %}
     </a>
 </p>
-<p style="position:absolute;top:220px;left:505px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:217px;left:505px;white-space:nowrap" class="ft01">
     <a>{{ data_entrada|date:"d/m/Y" }}</a>
 </p>
-<p style="position:absolute;top:220px;left:622px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:217px;left:622px;white-space:nowrap" class="ft01">
     <a>{{ hora_entrada }}</a>
 </p>
-<p style="position:absolute;top:220px;left:710px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:217px;left:710px;white-space:nowrap" class="ft01">
     <a>{{ data_saida|date:"d/m/Y" }}</a>
 </p>
-<p style="position:absolute;top:220px;left:828px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:217px;left:828px;white-space:nowrap" class="ft01">
     <a>{{ hora_saida }}</a>
 </p>
 <!-- Impressão dos dados da hospedagem ( End )-->
 
 <!-- Impressão dos dados do hospede ( Start )-->
-<p style="position:absolute;top:330px;left:50px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:310px;left:50px;white-space:nowrap" class="ft01">
   <a>{{ nome_hospede }}</a>
 </p>
 
-<p style="position:absolute;top:330px;left:490px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:310px;left:490px;white-space:nowrap" class="ft01">
   <a>{{ fone_hospede }}</a>
 </p>
 
-<p style="position:absolute;top:462px;left:723px;white-space:nowrap" class="ft01">
+<p style="position:absolute;top:310px;left:723px;white-space:nowrap" class="ft01">
   <a>{{ cpf_hospede }}</a>
 </p>
 
@@ -89,29 +89,50 @@
 
 <!-- Impressão dos dados do hospede ( End )-->
 
+<!-- Impressão dos itens consumidos ( Start )-->
+
+<table style="position: absolute; top: 422px; table-layout: fixed;">
+  <tbody>
+    {% for item in itens_consumo_aparts %}
+      {% if forloop.counter <= 25 %}
+        <tr>
+          <td style="padding-left: 40px; padding-bottom: 4px; font-family: 'Courier New', Courier, monospace; width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.item_lancamento.descricao }}</td>
+          <td style="padding-left: 115px; padding-bottom: 4px; font-family: 'Courier New', Courier, monospace; white-space: nowrap;">{{ item.item_lancamento.unidade }}</td>
+          <td style="text-align: right; padding-left: 78px; padding-bottom: 4px; font-family: 'Courier New', Courier, monospace; white-space: nowrap;">{{ item.preco_item }}</td>
+          <td style="text-align: right; padding-left: 48px; padding-bottom: 4px; font-family: 'Courier New', Courier, monospace; width: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.qtd_lancamento }}</td>
+          <td style="text-align: right; padding-left: 60px; padding-bottom: 4px; font-family: 'Courier New', Courier, monospace; width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ item.valor_total }}</td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Impressão dos itens consumidos ( End )-->
+
+
 <!-- Impressão dos dados do resumo ( Start )-->
 
-<p style="position: absolute; top: 1043px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
+<p style="position: absolute; top: 1050px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
     <a><b>{{ valor_antecipado }}</b></a>
 </p>
 
-<p style="position:absolute;top:1043px; right:32px; white-space:nowrap" class="ft01">
+<p style="position:absolute;top:1050px; right:32px; white-space:nowrap" class="ft01">
     <a><b>{{ valor_pago_excedente }}</b></a>
 </p>
 
-<p style="position: absolute; top: 1078px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
+<p style="position: absolute; top: 1084px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
     <a><b>{{ valor_consumo }}</b></a>
 </p>
 
-<p style="position: absolute; top: 1078px; right: 32px; white-space: nowrap; text-align: right;" class="ft01">
+<p style="position: absolute; top: 1084px; right: 32px; white-space: nowrap; text-align: right;" class="ft01">
     <a><b>{{ ValorTotalDiarias }}</b></a>
 </p>
 
-<p style="position: absolute; top: 1112px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
+<p style="position: absolute; top: 1119px; right: 310px; white-space: nowrap; text-align: right;" class="ft01">
     <a><b>{{ desconto_debito }}</b></a>
 </p>
 
-<p style="position:absolute;top:1112px; right:32px; white-space:nowrap" class="ft01">
+<p style="position:absolute;top:1119px; right:32px; white-space:nowrap" class="ft01">
     <a><b>{{ valor_total_conta }}</b></a>
 </p>
 

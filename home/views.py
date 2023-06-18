@@ -1193,6 +1193,8 @@ def ExtratoConsumoHospede(request, nome_apartamento, desconto_debito):
 
     itens_consumo_aparts = ItensConsumoAparts.objects.filter(empresa=empresa, apartamento_id=apartamento.pk, movimento_id=movimento.pk)
 
+    posicoes_top = [408] * len(itens_consumo_aparts)
+
     Somavalor_total = itens_consumo_aparts.aggregate(total=Sum('valor_total'))['total'] or 0
 
     hospede = hospedes.objects.get(id=movimento.hospede_id)
@@ -1264,6 +1266,8 @@ def ExtratoConsumoHospede(request, nome_apartamento, desconto_debito):
             'observacao': movimento.observacao,
             'pago_sn': movimento.pago_sn,
             'desconto_debito': locale.currency(abs(desconto_debito), grouping=True, symbol=True) if desconto_debito else "",
+            'itens_consumo_aparts': itens_consumo_aparts,
+            'posicoes_top': posicoes_top,
 
         }
     return render(request, 'home/relatorios/extratoConsumo.html', context)

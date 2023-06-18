@@ -249,8 +249,7 @@ class ItensConsumoAparts(models.Model):
     valor_total = models.DecimalField(("Total"), max_digits=15, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
-#      return f"{self.item_lancamento.descricao} - Apart: {self.valor_total}"
-     return f"Apart: {self.valor_total}"
+        return f"{self.item_lancamento.descricao} - Apart: {self.valor_total}"
 
 #########################################################################################
 
