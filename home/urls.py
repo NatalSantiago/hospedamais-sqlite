@@ -9,6 +9,8 @@ from .views import PaginaInicial
 
 from .views import itensConsumo_check_description,verificaSeHospedeExite,verificaSeApartamentoExite
 
+from .views import verificar_estoque
+
 from .views import delete_item_consumo_apart
 
 from home import views
@@ -62,6 +64,10 @@ urlpatterns = [
     path('itens_consumo_aparts/<int:apartamento_id>/', views.itens_consumo_aparts_apartamento, name='itens_consumo_aparts_apartamento'),
 
     path('LancarNovoItemHospede/<int:movID>/', views.LancarNovoItemHospede, name='LancarNovoItemHospede'),
+
+    path('verificar_estoque/<str:descricao>/<int:qtd_item>/', views.verificar_estoque, name='verificar_estoque'),
+
+
 
     path('delete_item_consumo_apart/<int:item_pk>/', delete_item_consumo_apart, name='delete_item_consumo_apart'),
 

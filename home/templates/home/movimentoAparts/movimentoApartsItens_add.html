@@ -293,32 +293,58 @@ function verificarValor() {
 
 
 <!-- ###### Não permitir o campo qtdItem em branco ou negativo ##################  -->
+
 <script>
-  // Seleciona o campo "qtdItem"
-  var qtdItem = document.getElementById("qtdItem");
+// Seleciona o campo "qtdItem" e "myInput"
+var qtdItem = document.getElementById("qtdItem");
+var myInput = document.getElementById("myInput");
 
-  // Adiciona um ouvinte de evento para verificar o valor do campo quando o foco sair dele
-  qtdItem.addEventListener("blur", function() {
-    // Obtém o valor atual do campo
-    var valor = parseInt(this.value);
+// Adiciona um ouvinte de evento para verificar o valor do campo quando o foco sair dele
+qtdItem.addEventListener("blur", function() {
+  // Obtém o valor atual do campo
+  var valor = parseInt(this.value);
+  var descricao = myInput.value; // Obtém a descrição do item
 
-    // Verifica se o valor é menor do que zero ou está vazio
-    if (valor <= 0 || this.value === "") {
-      // Exibe uma mensagem de erro personalizada usando SweetAlert2
-      Swal.fire({
-        icon: "error",
-        title: "Erro!",
-        text: "A quantidade tem que ser maior que 0 ! !",
-        confirmButtonText: "OK"
-      }).then(function(result) {
-        // Coloca o foco de volta no campo "qtdItem"
-        qtdItem.focus();
-      });
+  // Verifica se o valor é menor do que zero, igual a zero ou está vazio
+  if (valor <= 0 || this.value === "") {
+    // Exibe uma mensagem de erro personalizada usando SweetAlert2
+    Swal.fire({
+      icon: "error",
+      title: "Erro!",
+      text: "A quantidade tem que ser maior que 0!",
+      confirmButtonText: "OK"
+    }).then(function(result) {
+      // Coloca o foco de volta no campo "qtdItem"
+      qtdItem.focus();
+    });
+  } else {
+    // Realiza uma requisição AJAX para verificar o estoque
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/verificar_estoque/' + encodeURIComponent(descricao) + '/' + valor, true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var response = JSON.parse(xhr.responseText);
+        if (response.estoqueDisponivel === false) {
+          // Exibe uma mensagem de erro personalizada usando SweetAlert2
+          Swal.fire({
+            icon: "error",
+            title: "Erro!",
+            html: "Não há estoque suficiente!<br><br>Descrição: " + descricao + "<br>Estoque disponível: " + response.estoqueAtual,
+            confirmButtonText: "OK"
+          }).then(function(result) {
+            // Define o valor do campo "qtdItem" como 0
+            qtdItem.value = 0;
+            // Coloca o foco de volta no campo "qtdItem"
+            qtdItem.focus();
+          });
+        }
+      }
+    };
+    xhr.send();
+  }
+});
 
-    }
-  });
 </script>
-
 
 <!-- ###### FIM Não permitir o campo qtdItem em branco ou negativo ##################  -->
 

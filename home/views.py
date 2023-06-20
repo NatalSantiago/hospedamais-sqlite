@@ -652,6 +652,7 @@ def itens_consumo_aparts_apartamento(request, apartamento_id):
     return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
 
 ################### Lançar novo item no apartamento ###################
+
 from datetime import datetime
 
 @login_required
@@ -661,7 +662,7 @@ def LancarNovoItemHospede(request, movID):
        empresa = request.user.perfilusuario.empresa
        nome_empresa = empresa.nome
        apartID = request.GET.get('apartID')
-       nomeApartamento =request.GET.get('nomeApartamento')
+       nomeApartamento = request.GET.get('nomeApartamento')
        movimento_apart = MovimentosAparts.objects.get(id=movID)
        apartamento = movimento_apart.apartamento
        hospede = movimento_apart.hospede
@@ -670,7 +671,7 @@ def LancarNovoItemHospede(request, movID):
        # Cria uma lista de dicionários com os dados dos itens
        intensConsumoList = [{'idItem': itemLT.id, 'text': itemLT.descricao} for itemLT in itemLTs]
 
-    except (PerfilUsuario.DoesNotExist):
+    except PerfilUsuario.DoesNotExist:
        return redirect('itens_consumo_aparts_apartamento', apartamento_id=apartID)
 
     context = {
@@ -681,7 +682,7 @@ def LancarNovoItemHospede(request, movID):
        'apartID': request.GET.get('apartID'),
        'movID': request.GET.get('movID'),
        'intensConsumoList': intensConsumoList
-       }
+    }
 
     if request.method == 'POST':
        if form.is_valid():
@@ -690,17 +691,20 @@ def LancarNovoItemHospede(request, movID):
           itemconsumo.apartamento = apartamento
           itemconsumo.hospede = hospede
           itemconsumo.movimento_id = movID
-          ##########################################
           item_id = ItensConsumo.get_id_by_descricao(request.POST.get('myInput'))
           itemconsumo.item_lancamento_id = item_id
           itemconsumo.preco_item = request.POST.get('precoItem')
           itemconsumo.qtd_lancamento = request.POST.get('qtdItem')
           itemconsumo.valor_total = request.POST.get('precoTotal')
-          # Incluir data e hora atual nos campos data_lancamento e hora_lancamento
           itemconsumo.data_lancamento = datetime.now().date()
           itemconsumo.hora_lancamento = datetime.now().time()
-
           itemconsumo.save()
+
+          # Ajustar o campo estoqueAtual do item, exceto para a unidade "SV"
+          item_obj = ItensConsumo.objects.get(id=item_id)
+          if item_obj.unidade != 'SV':
+              item_obj.estoqueAtual -= int(request.POST.get('qtdItem'))
+              item_obj.save()
 
           action = request.POST.get('action')
           if action == 'save_add':
@@ -712,32 +716,68 @@ def LancarNovoItemHospede(request, movID):
           
     return render(request, 'home/movimentoAparts/movimentoApartsItens_add.html', context)
 
+#######################################################################
+
+from django.http import JsonResponse
+from .models import ItensConsumo
+
+def verificar_estoque(request, descricao, qtd_item):
+    empresa = request.user.perfilusuario.empresa
+    item = ItensConsumo.objects.filter(empresa=empresa, descricao=descricao).first()
+
+    if item is None:
+        # Caso o item não seja encontrado, retorne um JSON indicando que não há estoque disponível
+        return JsonResponse({'estoqueDisponivel': False})
+
+    if item.unidade == 'SV':
+        # Se a unidade for igual a 'SV', retorne um JSON indicando que há estoque disponível
+        return JsonResponse({'estoqueDisponivel': True, 'estoqueAtual': item.estoqueAtual})
+
+    estoque_atual = item.estoqueAtual
+    valor_informado = int(qtd_item)
+    if estoque_atual >= valor_informado:
+        # Caso haja estoque suficiente, retorne um JSON indicando que há estoque disponível
+        return JsonResponse({'estoqueDisponivel': True, 'estoqueAtual': estoque_atual})
+
+    # Caso não haja estoque suficiente, retorne um JSON indicando que não há estoque disponível
+    return JsonResponse({'estoqueDisponivel': False, 'estoqueAtual': estoque_atual})
+
 
 ################### Exclusão de Itens de Consumo ###################
 
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
 from .models import ItensConsumoAparts
 
 @login_required
 def delete_item_consumo_apart(request, item_pk):
-    item = get_object_or_404(ItensConsumoAparts, pk=item_pk)
+    item = get_object_or_404(ItensConsumoAparts, pk=item_pk, empresa=request.user.perfilusuario.empresa)
     apartamento = item.apartamento
     empresa = request.user.perfilusuario.empresa
-    
+
+    # Obter o item de consumo associado
+    item_consumo = item.item_lancamento
+
     if request.method == 'POST':
+        if item_consumo.unidade != 'SV':
+            # Atualizar o estoque atual do item de consumo, exceto para a unidade "SV"
+            item_consumo.estoqueAtual += item.qtd_lancamento
+            item_consumo.save()
+
+        # Excluir o item de consumo do hospede
         item.delete()
-        return redirect(reverse('itens_consumo_aparts_apartamento', args=[apartamento.id])) 
-    
+
+        return redirect(reverse('itens_consumo_aparts_apartamento', args=[apartamento.id]))
+
     context = {
         'item': item,
         'nome_empresa': empresa.nome,
         'empresa_iduser': empresa.pk
     }
-    
+
     return render(request, 'home/movimentoAparts/listaItensConsumo.html', context)
+
 
 ######################################
 

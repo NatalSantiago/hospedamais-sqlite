@@ -1,16 +1,10 @@
-{% extends "home/base.html" %}
-
-{% load static %}
-
-{% block content %}
-
-{% csrf_token %}
+{% extends "home/base.html" %} {% load static %} {% block content %} {% csrf_token %}
 
 <!-- Bootstrap CSS -->
 
 <!-- Select2 CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/css/select2.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2-bootstrap-css/1.4.6/select2-bootstrap.min.css" />
 
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -24,1237 +18,1301 @@
 <!-- Select2 JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
 
-<link  rel= 'stylesheet'  href= 'https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.min.css' >
-<script src= "https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.all.min.js" ></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.10.1/dist/sweetalert2.all.min.js"></script>
 
-    <!-- =======  Data-Table  = Start  ========================== -->
-    <br>
-    <div class="container">
-      <div class="row m-0">
+<!-- =======  Data-Table  = Start  ========================== -->
+<div style="line-height: 1;">
+    <br />
+</div>
+
+<div class="container">
+    <div class="row m-0">
         {% for apartamento in apartamentos %}
         <div class="col-xl-3 col-lg-6 col-md-6 col-12 mb-6">
-          <div class="card text-center">
-            <div class="card-headerMeu {% if apartamento.tipostatus == 'Livre' %}bg-success{% elif apartamento.tipostatus == 'Reservado' %}bg-warning{% elif apartamento.tipostatus == 'Ocupado' %}bg-danger{% elif apartamento.tipostatus == 'Em manutenção' %}bg-purple{% endif %}">
-              <span class="text-white"> <!-- Adiciona a classe text-dark para definir a cor do texto como preto -->
-                {% if apartamento.tipostatus == 'Ocupado' %}
-                  <i class="fa fa-key">  -  </i>
-                {% elif apartamento.tipostatus == 'Em manutenção' %}
-                  <i class="fas fa-wrench">  -  </i>
-                {% elif apartamento.tipostatus == 'Reservado' %}
-                  <i class="fa fa-calendar-check-o">  -  </i>
-                {% elif apartamento.tipostatus == 'Livre' %}
-                  <i class="fa fa-tag">  -  </i>
-                {% endif %}
-                {{ apartamento.descricao }}
-              </span>
-              <i id="minimizeBtn{{ apartamento.id }}" class="fas fa-window-minimize text-dark minimize-btn" style="float: right !important;"></i>
-            </div>
-            <div class="card-bodyMeu text-center" style="line-height: 0.50;" id="card-bodyMeu">
-              {% if apartamento.tipostatus == 'Livre' %}
-                 <br>
-                 <i style="font-size: 13px;">TIPO: {{ apartamento.tipoapart }}</i><br><br><br>
-                 <i style="font-size: 13px;">STATUS: {{ apartamento.tipostatus }}</i><br><br>
-              {% elif apartamento.tipostatus == 'Reservado' %}                 
-                   {% with reserva=apartamento.movimentoreservas_set.all.last %}
-                       <br>
-                       <i style="font-size: 12px;">{{ reserva.hospede.nome }}</i><br><br><br>
-                       <i class="fa fa-calendar-check-o" style="font-size: 12px;"> Reservado para: {{ reserva.entrada_prevista|date:'d/m/Y' }}</i><br><br>
-                   {% endwith %}
-              {% elif apartamento.tipostatus == 'Ocupado' %}
-                   {% for movimento in apartamento.movimentosaparts_set.all %}
-                       {% if movimento.pago_sn != 'S' %}
-                           <br>
-                           <i style="font-size: 12px;"> {{ movimento.hospede.nome }}</i><br><br><br>
-                           <i class="fa fa-calendar-check-o" style="font-size: 12px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br><br>
-                       {% endif %}
-                   {% endfor %}
-              {% elif apartamento.tipostatus == 'Em manutenção' %}
-                   <br>
-                   <i>Tipo: {{ apartamento.tipoapart }}</i><br><br><br>
-                   <i>Status: {{ apartamento.tipostatus }}</i><br><br>
-              {% endif %}
-            </div>
-            <div class="card-footerMeu text-muted bg-light-gray">
-              {% if apartamento.tipostatus == 'Livre' %}
-                <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalCheckinReserva" onclick="setApartamento('{{ apartamento.descricao }}', {{ apartamento.qtdpessoas }})"> Check-In / Reservar</button>
-              {% elif apartamento.tipostatus == 'Reservado' %}                 
-                {% with reserva=apartamento.movimentoreservas_set.last %}
-                  <button id="botaoCheckinReserva" type="button" class="btn btn-outline-secondary fa fa-sign-in btn-short" data-toggle="modal" data-target="#ModalConfirmarCheckinReservado" data-reserva-id="{{ reserva.id }}" onclick="setApartamentoReserva('{{ reserva.id }}', '{{ reserva.hospede.nome }}', '{{ reserva.qtd_hospedes }}', '{{ apartamento.descricao }}', '{{ apartamento.qtdpessoas }}'), '{{ reserva.entrada_prevista }}' "> Check-In</button>
-                {% endwith %}
-              {% elif apartamento.tipostatus == 'Ocupado' %}
-                <div class="icons">
-                  <a class="icon-spacing"  href="{% url 'itens_consumo_aparts_apartamento' apartamento.id %}">
-                    <i class="fas fa-shopping-basket icon-spacing" title="Lançar consumo"></i>
-                  </a>
-                  <a class="icon-spacing" href="#">
-                    <i class="fas fa-light fa-envelope icon-spacing" title="Enviar mensagem"></i>
-                  </a>
-                  <a class="icon-spacing" href="{% url 'FichaNacionalRegistroHospedes' apartamento.id %}">
-                    <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ficha Nacional de Registro de Hóspedes"></i>
-                  </a>
-                  <a class="icon-spacing" href="#">
-                    <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual" id="botaoDebitoAtual" data-toggle="modal" data-target="#ModalDebitoAtual" onclick="setApartamentoDebito({{ apartamento.id }})"></i>
-                  </a>
-                  <a class="icon-spacing" href="#">
-                    <i class="fa fa-exchange icon-spacing" aria-hidden="true" title="Mudar Acomodação" id="botaoMudarAcomodacao" data-toggle="modal" data-target="#ModalMudarAcomodacao" onclick="setApartamentoCheckInt({{ apartamento.id }})"></i>
-                  </a>
-                  <a class="icon-spacing" href="#">
-                    <i class="fa fa-sign-out icon-spacing" aria-hidden="true" title="Efetuar Check-Out"></i>
-                  </a>
+            <div class="card text-center">
+                <div class="card-headerMeu {% if apartamento.tipostatus == 'Livre' %}bg-success{% elif apartamento.tipostatus == 'Reservado' %}bg-warning{% elif apartamento.tipostatus == 'Ocupado' %}bg-danger{% elif apartamento.tipostatus == 'Em manutenção' %}bg-purple{% endif %}">
+                    <span class="text-white">
+                        <!-- Adiciona a classe text-dark para definir a cor do texto como preto -->
+                        {% if apartamento.tipostatus == 'Ocupado' %}
+                        <i class="fa fa-key"> - </i>
+                        {% elif apartamento.tipostatus == 'Em manutenção' %}
+                        <i class="fas fa-wrench"> - </i>
+                        {% elif apartamento.tipostatus == 'Reservado' %}
+                        <i class="fa fa-calendar-check-o"> - </i>
+                        {% elif apartamento.tipostatus == 'Livre' %}
+                        <i class="fa fa-tag"> - </i>
+                        {% endif %} {{ apartamento.descricao }}
+                    </span>
+                    <i id="minimizeBtn{{ apartamento.id }}" class="fas fa-window-minimize text-dark minimize-btn" style="float: right !important;"></i>
                 </div>
-              {% elif apartamento.tipostatus == 'Em manutenção' %}                 
-                  <button type="button" class="btn btn-outline-success fa fa-wrench btn-short" id="liberar-button" data-id="{{ apartamento.pk }}"> Liberar</button>
-              {% endif %}
+                <div class="card-bodyMeu text-center" style="line-height: 0.5;" id="card-bodyMeu">
+                    {% if apartamento.tipostatus == 'Livre' %}
+                    <br />
+                    <i style="font-size: 13px;">TIPO: {{ apartamento.tipoapart }}</i><br />
+                    <br />
+                    <br />
+                    <i style="font-size: 13px;">STATUS: {{ apartamento.tipostatus }}</i><br />
+                    <br />
+                    {% elif apartamento.tipostatus == 'Reservado' %} {% with reserva=apartamento.movimentoreservas_set.all.last %}
+                    <br />
+                    <i style="font-size: 12px;">{{ reserva.hospede.nome }}</i><br />
+                    <br />
+                    <br />
+                    <i class="fa fa-calendar-check-o" style="font-size: 12px;"> Reservado para: {{ reserva.entrada_prevista|date:'d/m/Y' }}</i><br />
+                    <br />
+                    {% endwith %} {% elif apartamento.tipostatus == 'Ocupado' %} {% for movimento in apartamento.movimentosaparts_set.all %} {% if movimento.pago_sn != 'S' %}
+                    <br />
+                    <i style="font-size: 12px;"> {{ movimento.hospede.nome }}</i><br />
+                    <br />
+                    <br />
+                    <i class="fa fa-calendar-check-o" style="font-size: 12px;"> {{ movimento.data_checkin|date:'d/m/Y' }} - {{ movimento.data_checkout|date:'d/m/Y' }}</i><br />
+                    <br />
+                    {% endif %} {% endfor %} {% elif apartamento.tipostatus == 'Em manutenção' %}
+                    <br />
+                    <i>Tipo: {{ apartamento.tipoapart }}</i><br />
+                    <br />
+                    <br />
+                    <i>Status: {{ apartamento.tipostatus }}</i><br />
+                    <br />
+                    {% endif %}
+                </div>
+                <div class="card-footerMeu text-muted bg-light-gray">
+                    {% if apartamento.tipostatus == 'Livre' %}
+                    <button
+                        id="botaoCheckinReserva"
+                        type="button"
+                        class="btn btn-outline-secondary fa fa-sign-in btn-short"
+                        data-toggle="modal"
+                        data-target="#ModalCheckinReserva"
+                        onclick="setApartamento('{{ apartamento.descricao }}', {{ apartamento.qtdpessoas }})"
+                    >
+                        Check-In / Reservar
+                    </button>
+                    {% elif apartamento.tipostatus == 'Reservado' %} {% with reserva=apartamento.movimentoreservas_set.last %}
+                    <button
+                        id="botaoCheckinReserva"
+                        type="button"
+                        class="btn btn-outline-secondary fa fa-sign-in btn-short"
+                        data-toggle="modal"
+                        data-target="#ModalConfirmarCheckinReservado"
+                        data-reserva-id="{{ reserva.id }}"
+                        onclick="setApartamentoReserva('{{ reserva.id }}', '{{ reserva.hospede.nome }}', '{{ reserva.qtd_hospedes }}', '{{ apartamento.descricao }}', '{{ apartamento.qtdpessoas }}'), '{{ reserva.entrada_prevista }}' "
+                    >
+                        Check-In
+                    </button>
+                    {% endwith %} {% elif apartamento.tipostatus == 'Ocupado' %}
+                    <div class="icons">
+                        <a class="icon-spacing" href="{% url 'itens_consumo_aparts_apartamento' apartamento.id %}">
+                            <i class="fas fa-shopping-basket icon-spacing" title="Lançar consumo"></i>
+                        </a>
+                        <a class="icon-spacing" href="#">
+                            <i class="fas fa-light fa-envelope icon-spacing" title="Enviar mensagem"></i>
+                        </a>
+                        <a class="icon-spacing" href="{% url 'FichaNacionalRegistroHospedes' apartamento.id %}">
+                            <i class="fa fa-user-circle-o icon-spacing" aria-hidden="true" title="Ficha Nacional de Registro de Hóspedes"></i>
+                        </a>
+                        <a class="icon-spacing" href="#">
+                            <i class="fa fa-money icon-spacing" aria-hidden="true" title="Débito atual" id="botaoDebitoAtual" data-toggle="modal" data-target="#ModalDebitoAtual" onclick="setApartamentoDebito({{ apartamento.id }})"></i>
+                        </a>
+                        <a class="icon-spacing" href="#">
+                            <i
+                                class="fa fa-exchange icon-spacing"
+                                aria-hidden="true"
+                                title="Mudar Acomodação"
+                                id="botaoMudarAcomodacao"
+                                data-toggle="modal"
+                                data-target="#ModalMudarAcomodacao"
+                                onclick="setApartamentoCheckInt({{ apartamento.id }})"
+                            ></i>
+                        </a>
+                        <a class="icon-spacing" href="#">
+                            <i class="fa fa-sign-out icon-spacing" aria-hidden="true" title="Efetuar Check-Out"></i>
+                        </a>
+                    </div>
+                    {% elif apartamento.tipostatus == 'Em manutenção' %}
+                    <button type="button" class="btn btn-outline-success fa fa-wrench btn-short" id="liberar-button" data-id="{{ apartamento.pk }}">Liberar</button>
+                    {% endif %}
+                </div>
             </div>
-
-
-
-          </div>
         </div>
         {% empty %}
-            <tr class="text-center">
-              <td colspan="4">Não existe apartamentos cadastrados</td>
-            </tr>
+        <tr class="text-center">
+            <td colspan="4">Não existe apartamentos cadastrados</td>
+        </tr>
         {% endfor %}
-      </div>
     </div>
-    <!-- =======  Data-Table  = End  ===================== -->
-    <style>
-      .bg-success {background-color: #28a745;}
-      .bg-warning {background-color: #ffc107;}
-      .bg-danger {background-color: #dc3545;}
-      .bg-purple {background-color: #6f42c1;}
-      .text-white {color: #fff;}
-      .text-dark {color: #000;}
-      .bg-success .text-white {color: #fff;} /* ajuste de cor para o painel com status livre */
-      .bg-warning .text-dark {color: #000;} /* ajuste de cor para o painel com status reservado */
-      .bg-danger .text-white {color: #fff;} /* ajuste de cor para o painel com status ocupado */
-      .bg-purple .text-white {color: #fff;} /* ajuste de cor para o painel com status manutenção */
-      .card:hover {cursor: pointer;}      
-      .card-body {line-height: 1.9;}
-      .icon-spacing {margin-right: 14px;}
-      .icon-spacing:last-child {margin-right: 0;}
-      .btn-short {
-        padding-top: 0.20rem; /* Defina o valor de padding superior desejado */
-        padding-bottom: 0.20rem; /* Defina o valor de padding inferior desejado */
-      }
-      .bg-light-gray {background-color: #f3f3f3; /* cor de fundo cinza claro */}
+</div>
+<!-- =======  Data-Table  = End  ===================== -->
+<style>
+    .bg-success {
+        background-color: #28a745;
+    }
+    .bg-warning {
+        background-color: #ffc107;
+    }
+    .bg-danger {
+        background-color: #dc3545;
+    }
+    .bg-purple {
+        background-color: #6f42c1;
+    }
+    .text-white {
+        color: #fff;
+    }
+    .text-dark {
+        color: #000;
+    }
+    .bg-success .text-white {
+        color: #fff;
+    } /* ajuste de cor para o painel com status livre */
+    .bg-warning .text-dark {
+        color: #000;
+    } /* ajuste de cor para o painel com status reservado */
+    .bg-danger .text-white {
+        color: #fff;
+    } /* ajuste de cor para o painel com status ocupado */
+    .bg-purple .text-white {
+        color: #fff;
+    } /* ajuste de cor para o painel com status manutenção */
+    .card:hover {
+        cursor: pointer;
+    }
+    .card-body {
+        line-height: 1.9;
+    }
+    .icon-spacing {
+        margin-right: 14px;
+    }
+    .icon-spacing:last-child {
+        margin-right: 0;
+    }
+    .btn-short {
+        padding-top: 0.2rem; /* Defina o valor de padding superior desejado */
+        padding-bottom: 0.2rem; /* Defina o valor de padding inferior desejado */
+    }
+    .bg-light-gray {
+        background-color: #f3f3f3; /* cor de fundo cinza claro */
+    }
 
-      .card-headerMeu{
+    .card-headerMeu {
         padding: 2px; /* opcional: adicionar espaço interno de 10 pixels */
         text-align: left; /* alinhar o texto à esquerda */
         padding-left: 10px; /* adicionar espaço interno à esquerda do texto */
         padding-right: 0px; /* adicionar espaço interno à direita do texto */
+    }
 
-      }
-
-      .card-footerMeu {
+    .card-footerMeu {
         width: 100%; /* largura de 100% para ocupar todo o espaço disponível */
         padding: 5px; /* opcional: adicionar espaço interno de 10 pixels */
-      }
+    }
 
-      .minimize-btn {
+    .minimize-btn {
         margin-right: 10px; /* ajuste o valor da margem direita conforme necessário */
-      }
-
-
-    </style>
-
+    }
+</style>
 
 <!-- função que minimiza os card´s - ( Start )-->
 <script>
-$(document).ready(function() {
-  // Verificar se o estado oculto está armazenado no localStorage
-  var cardBodyHidden = localStorage.getItem('cardBodyHidden');
-  if (cardBodyHidden === 'true') {
-    // Se estiver oculto, esconda os elementos "card-bodyMeu"
-    $('.card-bodyMeu').hide();
-    $('[id^="minimizeBtn"]').removeClass('fa-window-minimize');
-  }
+    $(document).ready(function () {
+        // Verificar se o estado oculto está armazenado no localStorage
+        var cardBodyHidden = localStorage.getItem("cardBodyHidden");
+        if (cardBodyHidden === "true") {
+            // Se estiver oculto, esconda os elementos "card-bodyMeu"
+            $(".card-bodyMeu").hide();
+            $('[id^="minimizeBtn"]').removeClass("fa-window-minimize");
+        }
 
-  // Adicionar um manipulador de eventos para o botão de minimizar
-  $('[id^="minimizeBtn"]').on('click', function() {
-    var currentClass = $(this).attr('class');
-    if (currentClass.includes('fa-window-minimize')) {
-      // Ocultar todos os elementos "card-bodyMeu"
-      $('.card-bodyMeu').hide();
-      // Alterar o ícone para maximizar em todos os cards
-      $('[id^="minimizeBtn"]').removeClass('fa-window-minimize');
+        // Adicionar um manipulador de eventos para o botão de minimizar
+        $('[id^="minimizeBtn"]').on("click", function () {
+            var currentClass = $(this).attr("class");
+            if (currentClass.includes("fa-window-minimize")) {
+                // Ocultar todos os elementos "card-bodyMeu"
+                $(".card-bodyMeu").hide();
+                // Alterar o ícone para maximizar em todos os cards
+                $('[id^="minimizeBtn"]').removeClass("fa-window-minimize");
 
-      // Armazenar o estado oculto no localStorage
-      localStorage.setItem('cardBodyHidden', 'true');
-    } 
-  });
+                // Armazenar o estado oculto no localStorage
+                localStorage.setItem("cardBodyHidden", "true");
+            }
+        });
 
-  // Adicionar um manipulador de eventos para o link <a>
-  $('.brand-link').on('click', function() {
-    // Remover o estado oculto do localStorage
-    localStorage.removeItem('cardBodyHidden');
-  });
-});
-
+        // Adicionar um manipulador de eventos para o link <a>
+        $(".brand-link").on("click", function () {
+            // Remover o estado oculto do localStorage
+            localStorage.removeItem("cardBodyHidden");
+        });
+    });
 </script>
 <!-- função que minimiza os card´s - ( End )-->
 
-
 <!-- ################### Modal CheckIn / Reserva - ( Start ) ######################### -->
-{{ form.media }}        
+{{ form.media }}
 
-<form method="POST" action="{% url 'SalvarCheckIn' %}" >
-
-{% csrf_token %}
-<div class="modal fade" id="ModalCheckinReserva" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Check-In / Reserva</h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container">
-          <ul class="nav nav-tabs">
-            <li class="nav-item">
-              <a class="nav-link active" data-toggle="tab" href="#checkin" onclick="limparCamposCheckin()">Check-In</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="tab" href="#reserva">Reserva</a>
-            </li>
-          </ul>
-          <br>
-          <div class="form-group col-md-12 mb-0" style="text-align: left;">
-            <div class="input-group-prepend">
-              <span class="input-group-text d-flex align-items-center"><i class="fa fa-check-circle-o"></i></span>
-                <select type="text" id="myHospede" name="myHospede" class="form-control select2">
-                  <option value=""></option>
-                  {% for hospede in lista_hospedes %}
-                    <option value= "{{ hospede.idHospede }}"> {{ hospede.text }}</option>
-                  {% endfor %}
-                </select>
-                <a href="{% url 'apartHome' %}" class="input-group-text d-flex align-items-center fa fa-user-plus" aria-hidden="true"></a>
+<form method="POST" action="{% url 'SalvarCheckIn' %}">
+    {% csrf_token %}
+    <div class="modal fade" id="ModalCheckinReserva" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" style="text-align: center;" id="exampleModalLongTitle">Check-In / Reserva</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#checkin" onclick="limparCamposCheckin()">Check-In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#reserva">Reserva</a>
+                            </li>
+                        </ul>
+                        <br />
+                        <div class="form-group col-md-12 mb-0" style="text-align: left;">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text d-flex align-items-center"><i class="fa fa-check-circle-o"></i></span>
+                                <select type="text" id="myHospede" name="myHospede" class="form-control select2">
+                                    <option value=""></option>
+                                    {% for hospede in lista_hospedes %}
+                                    <option value="{{ hospede.idHospede }}"> {{ hospede.text }}</option>
+                                    {% endfor %}
+                                </select>
+                                <a href="{% url 'apartHome' %}" class="input-group-text d-flex align-items-center fa fa-user-plus" aria-hidden="true"></a>
+                            </div>
+                        </div>
+                        <div class="tab-content">
+                            <!--************************************************************************-->
+                            <!--******************* Modal TabLink Check-In *****************************-->
+                            <br />
+                            <div id="checkin" class="tab-pane fade show active">
+                                <div class="form-row">
+                                    <div class="form-group col-md-10 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Apartamento:</p>
+                                        <input id="myApartCheckin" type="text" name="myApartCheckin" placeholder="Apartamento" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspedes:</p>
+                                        <input style="text-align: center;" id="myQtdHospdesCheckin" type="number" name="myQtdHospdesCheckin" placeholder="Qtd. hóspedes" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hospedado(s):</p>
+                                        <input style="text-align: center;" id="myQtdHospedadosCheckin" type="number" name="myQtdHospedadosCheckin" placeholder="hospedados" class="inline" />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                                        <input type="date" id="myDataEntradaCheckin" name="myDataEntradaCheckin" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaida()" />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraEntradaCheckin" type="time" name="myHoraEntradaCheckin" placeholder="Hora entrada" class="inline" />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                                        <input type="date" id="myDataSaidaCheckin" name="myDataSaidaCheckin" value="{{ data_saida|date:'Y-m-d' }}" class="form-control" />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraSaidaCheckin" type="time" name="myHoraSaidaCheckin" placeholder="Hora saida" class="inline" />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Valor haver:</p>
+                                        <input style="text-align: right;" id="myHaverCheckin" type="text" name="myHaverCheckin" placeholder="Valor haver" class="inline" />
+                                        <script>
+                                            $(document).ready(function () {
+                                                $("#myHaverCheckin").mask("000.000.000.000.000,00", { reverse: true });
+                                            });
+                                        </script>
+                                    </div>
+                                    <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Observação:</p>
+                                        <input id="myOBSCheckin" type="text" name="myOBSCheckin" placeholder="Observação" class="inline" />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                                    <button id="btn-ConfirmarCheckin" class="btn btn-success" name="action" value="salva_checkin" method="POST">Confirmar Check-In</button>
+                                </div>
+                            </div>
+                            <!--************************************************************************-->
+                            <!--******************* Modal TabLink Reserva ******************************-->
+                            <div id="reserva" class="tab-pane fade">
+                                <div class="form-row">
+                                    <div class="form-group col-md-10 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Apartamento:</p>
+                                        <input id="myApartReserva" type="text" name="myApartReserva" placeholder="Apartamento reserva" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspedes:</p>
+                                        <input style="text-align: center;" id="myQtdHospdesReserva" type="number" name="myQtdHospdesReserva" placeholder="Qtd. hóspedes" class="inline" />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Reserva</p>
+                                        <input id="myDataDaReserva" type="date" name="myDataDaReserva" placeholder="Data reserva" class="inline" value="{{ data_atual|date:'Y-m-d' }}" />
+                                    </div>
+                                    <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                                        <input
+                                            id="myDataEntradaReserva"
+                                            type="date"
+                                            name="myDataEntradaReserva"
+                                            placeholder="Data entrada"
+                                            class="inline"
+                                            value="{{ data_atual|date:'Y-m-d' }}"
+                                            class="form-control"
+                                            onchange="preencherDataSaidaReserva()"
+                                        />
+                                    </div>
+                                    <div class="form-group col-md-4 mb-0" style="text-align: right;">
+                                        <p class="inline" style="text-align: right; line-height: 38px;">Data Saída</p>
+                                        <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}" />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Valor Antecipado:</p>
+                                        <input style="text-align: right;" id="myAntecipadoReserva" type="text" name="myAntecipadoReserva" placeholder="Valor antecipado" class="inline" />
+                                        <script>
+                                            $(document).ready(function () {
+                                                $("#myAntecipadoReserva").mask("000.000.000.000.000,00", { reverse: true });
+                                            });
+                                        </script>
+                                    </div>
+                                    <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Observação:</p>
+                                        <input id="myOBSReserva" type="text" name="myOBSReserva" placeholder="Observação" class="inline" />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                                    <button id="btn-exit" class="btn btn-success" name="action" value="salva_reserva" method="POST">Reservar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="tab-content">
-            <!--************************************************************************-->
-            <!--******************* Modal TabLink Check-In *****************************-->
-            <br>
-            <div id="checkin" class="tab-pane fade show active">
-              <div class="form-row">
-                <div class="form-group col-md-10 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartCheckin" type="text" name="myApartCheckin" placeholder="Apartamento" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspedes:</p>
-                  <input style="text-align: center" id="myQtdHospdesCheckin" type="number" name="myQtdHospdesCheckin" placeholder="Qtd. hóspedes" class="inline" readonly>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hospedado(s):</p>
-                  <input style="text-align: center" id="myQtdHospedadosCheckin" type="number" name="myQtdHospedadosCheckin" placeholder="hospedados" class="inline">
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input type="date" id="myDataEntradaCheckin" name="myDataEntradaCheckin" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaida()">
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraEntradaCheckin" type="time" name="myHoraEntradaCheckin" placeholder="Hora entrada" class="inline">
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
-                  <input type="date" id="myDataSaidaCheckin" name="myDataSaidaCheckin" value="{{ data_saida|date:'Y-m-d' }}" class="form-control">
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraSaidaCheckin" type="time" name="myHoraSaidaCheckin" placeholder="Hora saida" class="inline">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor haver:</p>
-                     <input style="text-align: right" id="myHaverCheckin" type="text" name="myHaverCheckin" placeholder="Valor haver" class="inline">
-                     <script>
-                         $(document).ready(function(){
-                             $('#myHaverCheckin').mask('000.000.000.000.000,00', {reverse: true});
-                         });
-                     </script>
-                </div>
-                <div class="form-group col-md-9 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Observação:</p>
-                  <input id="myOBSCheckin" type="text" name="myOBSCheckin" placeholder="Observação" class="inline">
-                </div>
-              </div>  
-              <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button id="btn-ConfirmarCheckin" class="btn btn-success" name="action" value="salva_checkin" method="POST">Confirmar Check-In</button>
-              </div>                
-            </div>  
-            <!--************************************************************************-->
-            <!--******************* Modal TabLink Reserva ******************************-->
-            <div id="reserva" class="tab-pane fade">
-              <div class="form-row">
-                <div class="form-group col-md-10 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartReserva" type="text" name="myApartReserva" placeholder="Apartamento reserva" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspedes:</p>
-                  <input style="text-align: center" id="myQtdHospdesReserva" type="number" name="myQtdHospdesReserva" placeholder="Qtd. hóspedes" class="inline">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-4 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Reserva</p>
-                  <input id="myDataDaReserva" type="date" name="myDataDaReserva" placeholder="Data reserva" class="inline" value="{{ data_atual|date:'Y-m-d' }}">
-                </div>
-                <div class="form-group col-md-4 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaReserva" type="date" name="myDataEntradaReserva" placeholder="Data entrada" class="inline" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaidaReserva()">
-                </div>
-                <div class="form-group col-md-4 mb-0" style="text-align: right;">
-                  <p class="inline" style="text-align: right; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaReserva" type="date" name="myDataSaidaReserva" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}">
-                </div>
-              </div>  
-              <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
-                    <input style="text-align: right" id="myAntecipadoReserva" type="text" name="myAntecipadoReserva" placeholder="Valor antecipado" class="inline">
-                     <script>
-                         $(document).ready(function(){
-                             $('#myAntecipadoReserva').mask('000.000.000.000.000,00', {reverse: true});
-                         });
-                     </script>
-                </div>
-                <div class="form-group col-md-9 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Observação:</p>
-                  <input id="myOBSReserva" type="text" name="myOBSReserva" placeholder="Observação" class="inline">
-                </div>
-              </div>  
-              <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button id="btn-exit" class="btn btn-success" name="action" value="salva_reserva" method="POST">Reservar</button>
-              </div>                
-            </div>  
-          </div>
-         </div>
-       </div>
+        </div>
     </div>
-  </div>
-</div>
 </form>
 
-{% load sweetify %}
-{% sweetify %}
+{% load sweetify %} {% sweetify %}
 
 <!-- Formatação Style do Select2 dentro do modal  - ( Start ) -->
 <style>
+    .form-group p {
+        line-height: 38px; /* ajuste este valor de acordo com a altura dos campos de entrada */
+    }
 
-.form-group p {
-  line-height: 38px; /* ajuste este valor de acordo com a altura dos campos de entrada */
-}
+    .modal-dialog {
+        max-width: 670px; /* ajuste este valor de acordo com a largura desejada */
+        width: 100%; /* ajuste este valor de acordo com a largura desejada */
+    }
 
-.modal-dialog {
-  max-width: 670px; /* ajuste este valor de acordo com a largura desejada */
-  width: 100%; /* ajuste este valor de acordo com a largura desejada */
-}
+    /* Diminui o altura entre a descrição do campo */
+    .inline {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 5px;
+    }
 
-  /* Diminui o altura entre a descrição do campo */
-.inline { display: inline-block; margin-right: 10px; margin-bottom: 5px; }
+    #ModalCheckinReserva .nav-link.active {
+        background-color: #add8e6; /* azul claro */
+        color: #000; /* preto */
+    }
 
-#ModalCheckinReserva .nav-link.active {
-  background-color: #ADD8E6; /* azul claro */
-  color: #000; /* preto */  
-  }
-
-.select2-selection--single { background-color: #f2f2f2 !important; }
-.select2-container { height: auto !important; }
-.select2-selection--single { height: auto !important; }
-.select2-selection__rendered { height: auto !important; }
-.select2 { height: auto !important; }
+    .select2-selection--single {
+        background-color: #f2f2f2 !important;
+    }
+    .select2-container {
+        height: auto !important;
+    }
+    .select2-selection--single {
+        height: auto !important;
+    }
+    .select2-selection__rendered {
+        height: auto !important;
+    }
+    .select2 {
+        height: auto !important;
+    }
 </style>
-
 
 <!-- Atualiza da data de saída dependendo da data de entrada  Check-in - ( Start ) -->
 <script>
-  function preencherDataSaida() {
-    // Obter valor do campo de entrada
-    let dataEntrada = new Date(document.getElementById("myDataEntradaCheckin").value);
-    // Adicionar um dia à data de entrada
-    let dataSaida = new Date(dataEntrada.getTime());
-    dataSaida.setDate(dataEntrada.getDate() + 1);
-    // Formatar a data de saída para exibir apenas a parte da data
-    let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
-    // Definir o valor do campo de saída
-    document.getElementById("myDataSaidaCheckin").value = dataSaidaFormatada;
-  }
+    function preencherDataSaida() {
+        // Obter valor do campo de entrada
+        let dataEntrada = new Date(document.getElementById("myDataEntradaCheckin").value);
+        // Adicionar um dia à data de entrada
+        let dataSaida = new Date(dataEntrada.getTime());
+        dataSaida.setDate(dataEntrada.getDate() + 1);
+        // Formatar a data de saída para exibir apenas a parte da data
+        let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
+        // Definir o valor do campo de saída
+        document.getElementById("myDataSaidaCheckin").value = dataSaidaFormatada;
+    }
 </script>
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
 
 <!-- Atualiza da data de saída dependendo da data de entrada  Reserva - ( Start ) -->
 <script>
-  function preencherDataSaidaReserva() {
-    // Obter valor do campo de entrada
-    let dataEntrada = new Date(document.getElementById("myDataEntradaReserva").value);
-    // Adicionar um dia à data de entrada
-    let dataSaida = new Date(dataEntrada.getTime());
-    dataSaida.setDate(dataEntrada.getDate() + 1);
-    // Formatar a data de saída para exibir apenas a parte da data
-    let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
-    // Definir o valor do campo de saída
-    document.getElementById("myDataSaidaReserva").value = dataSaidaFormatada;
-  }
+    function preencherDataSaidaReserva() {
+        // Obter valor do campo de entrada
+        let dataEntrada = new Date(document.getElementById("myDataEntradaReserva").value);
+        // Adicionar um dia à data de entrada
+        let dataSaida = new Date(dataEntrada.getTime());
+        dataSaida.setDate(dataEntrada.getDate() + 1);
+        // Formatar a data de saída para exibir apenas a parte da data
+        let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
+        // Definir o valor do campo de saída
+        document.getElementById("myDataSaidaReserva").value = dataSaidaFormatada;
+    }
 </script>
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
 
-
 <!-- Inicia o Select2 myHospede dentro do modal  - ( Start ) -->
 <script>
-$(document).ready(function() {
-  $('#ModalCheckinReserva').on('shown.bs.modal', function() {
-    $('#myHospede').select2({
-      placeholder: "Selecione o hóspede",
-      dropdownParent: $('#ModalCheckinReserva'),
+    $(document).ready(function () {
+        $("#ModalCheckinReserva").on("shown.bs.modal", function () {
+            $("#myHospede").select2({
+                placeholder: "Selecione o hóspede",
+                dropdownParent: $("#ModalCheckinReserva"),
+            });
+            $("#myHospede").on("keyup click", function (e) {
+                if (e.keyCode === 13 || e.type === "click") {
+                    $("#myHospede").select2("open");
+                }
+            });
+            $("#myHospede").select2("focus");
+        });
     });
-    $('#myHospede').on('keyup click', function(e) {
-      if (e.keyCode === 13 || e.type === 'click') {
-        $('#myHospede').select2('open');
-      }
-    });
-    $('#myHospede').select2('focus');
-  });
-});
 </script>
 <!-- Inicia o Select2 myHospede dentro do modal  - ( End ) -->
 
 <style>
-.disabled {
-  pointer-events: none;
-  opacity: 0.6;
-}
+    .disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
 </style>
 
 <script>
-function setApartamento(descricao) {
-  // Faz uma requisição AJAX ao servidor para buscar o apartamento
-  $.ajax({
-    url: '/buscar_apartamento/',
-    method: 'POST',
-    data: {
-      descricao: descricao,
-      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-    },
-    success: function(apartamento) {
-    },
-    error: function() {
-      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
-      Swal.fire({
-        icon: 'error',
-        title: 'Ops...',
-        text: 'Ocorreu um erro ao buscar o apartamento.'
-      });
+    function setApartamento(descricao) {
+        // Faz uma requisição AJAX ao servidor para buscar o apartamento
+        $.ajax({
+            url: "/buscar_apartamento/",
+            method: "POST",
+            data: {
+                descricao: descricao,
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            success: function (apartamento) {},
+            error: function () {
+                // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+                Swal.fire({
+                    icon: "error",
+                    title: "Ops...",
+                    text: "Ocorreu um erro ao buscar o apartamento.",
+                });
+            },
+        });
+        document.querySelector("#reserva").classList.remove("disabled"); // Remove a classe "disabled" do botão "Reserva"
     }
-  });
-  document.querySelector("#reserva").classList.remove("disabled"); // Remove a classe "disabled" do botão "Reserva"
-}  
 </script>
 
 <!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( Start ) -->
 <script>
-  let apartamentoSelecionado = "";
-  let qtdhospededoapartamento = "";
+    let apartamentoSelecionado = "";
+    let qtdhospededoapartamento = "";
 
-  function setApartamento(descricao, qtdpessoas) {
-  apartamentoSelecionado = descricao;
-  qtdhospededoapartamento = qtdpessoas;
-  }
+    function setApartamento(descricao, qtdpessoas) {
+        apartamentoSelecionado = descricao;
+        qtdhospededoapartamento = qtdpessoas;
+    }
 
-  $('#ModalCheckinReserva').on('shown.bs.modal', function () {
-    document.getElementById("myApartCheckin").value = apartamentoSelecionado;
-    document.getElementById("myQtdHospdesCheckin").value = qtdhospededoapartamento;
-    document.getElementById("myQtdHospedadosCheckin").value = qtdhospededoapartamento;
-    document.getElementById("myApartReserva").value = apartamentoSelecionado;
-    document.getElementById("myQtdHospdesReserva").value = qtdhospededoapartamento;
-    // Obtenha a hora atual
-    let horaAtual = new Date();
-    // Formate a hora como uma string no formato HH:mm
-    let horaFormatada = horaAtual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-    // Preencha o campo de hora com a hora formatada
-    document.getElementById("myHoraEntradaCheckin").value = horaFormatada;
-    document.getElementById("myHoraSaidaCheckin").value = horaFormatada;
-  });
+    $("#ModalCheckinReserva").on("shown.bs.modal", function () {
+        document.getElementById("myApartCheckin").value = apartamentoSelecionado;
+        document.getElementById("myQtdHospdesCheckin").value = qtdhospededoapartamento;
+        document.getElementById("myQtdHospedadosCheckin").value = qtdhospededoapartamento;
+        document.getElementById("myApartReserva").value = apartamentoSelecionado;
+        document.getElementById("myQtdHospdesReserva").value = qtdhospededoapartamento;
+        // Obtenha a hora atual
+        let horaAtual = new Date();
+        // Formate a hora como uma string no formato HH:mm
+        let horaFormatada = horaAtual.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        // Preencha o campo de hora com a hora formatada
+        document.getElementById("myHoraEntradaCheckin").value = horaFormatada;
+        document.getElementById("myHoraSaidaCheckin").value = horaFormatada;
+    });
 </script>
 <!-- Atualiza Nome do Apart / Qtd de Hospedes conforme cadastro de apartamentos - ( End ) -->
 
 <!-- Liberar apartamento em manutenção - ( Start ) -->
 <script>
-  const liberarButton = document.getElementById('liberar-button');
-  const apartamentoId = liberarButton.dataset.id;
-  document.getElementById('liberar-button').addEventListener('click', function() {
-    Swal.fire({
-      title: 'Você deseja liberar a acomodação?',
-      text: 'Essa ação não pode ser desfeita.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sim, liberar',
-      cancelButtonText: 'Cancelar'
-    }).then((result) => {
-      if (result.isConfirmed) {
-
-        let url = `/apartamento/${apartamentoId}/liberar/`;
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'success') {
-            Swal.fire('Acomodação liberada!', '', 'success').then(() => {
-              window.location.href = "{% url 'apartHome' %}";
-            });
-          } else {
-            Swal.fire('Oops...', 'Ocorreu um erro ao tentar liberar a acomodação.', 'error');
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          Swal.fire('Oops...', 'Ocorreu um erro ao tentar liberar a acomodação.', 'error');
+    const liberarButton = document.getElementById("liberar-button");
+    const apartamentoId = liberarButton.dataset.id;
+    document.getElementById("liberar-button").addEventListener("click", function () {
+        Swal.fire({
+            title: "Você deseja liberar a acomodação?",
+            text: "Essa ação não pode ser desfeita.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, liberar",
+            cancelButtonText: "Cancelar",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let url = `/apartamento/${apartamentoId}/liberar/`;
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({}),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.status === "success") {
+                            Swal.fire("Acomodação liberada!", "", "success").then(() => {
+                                window.location.href = "{% url 'apartHome' %}";
+                            });
+                        } else {
+                            Swal.fire("Oops...", "Ocorreu um erro ao tentar liberar a acomodação.", "error");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Swal.fire("Oops...", "Ocorreu um erro ao tentar liberar a acomodação.", "error");
+                    });
+            }
         });
-      }
-    })
-  });
+    });
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-      }
+        return cookieValue;
     }
-    return cookieValue;
-  }
 </script>
 <!-- Liberar apartamento em manutenção - ( End ) -->
-
-
 
 <!-- #################### Modal CheckIn / Reserva - ( End ) ######################### -->
 
 <!-- ################### Modal Confirmar reserva - ( Start ) ######################### -->
 
-<form method="POST" id="formCancelarReserva" action="{% url 'ConfirmarReserva' %}" >
+<form method="POST" id="formCancelarReserva" action="{% url 'ConfirmarReserva' %}">
+    {% csrf_token %}
 
-{% csrf_token %}
-
-<div class="modal fade" id="ModalConfirmarCheckinReservado" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Confirmar Check-In</h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container">
-          <div class="tab-content">
-            <!--************************************************************************-->
-            <div id="checkin" class="tab-pane fade show active">
-              <div class="form-row">
-                <div class="form-group col-md-12 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspede:</p>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+    <div class="modal fade" id="ModalConfirmarCheckinReservado" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" style="text-align: center;" id="exampleModalLongTitle">Confirmar Check-In</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="tab-content">
+                            <!--************************************************************************-->
+                            <div id="checkin" class="tab-pane fade show active">
+                                <div class="form-row">
+                                    <div class="form-group col-md-12 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspede:</p>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            </div>
+                                            <input id="myHospedeReservado" type="text" name="myHospedeReservado" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-10 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Apartamento:</p>
+                                        <input id="myApartamentoReservado" type="text" name="myApartamentoReservado" placeholder="Apartamento" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspedes:</p>
+                                        <input style="text-align: center;" id="myQtdHospedesApartReservado" type="number" name="myQtdHospedesApartReservado" placeholder="Qtd. hóspedes" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hospedado(s):</p>
+                                        <input style="text-align: center;" id="myQtdHospedadosReservado" type="number" name="myQtdHospedadosReservado" placeholder="hospedados" class="inline" />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                                        <input
+                                            id="myDataEntradaApartReservado"
+                                            type="date"
+                                            name="myDataEntradaApartReservado"
+                                            placeholder="Data entrada"
+                                            class="inline"
+                                            value="{{ data_atual|date:'Y-m-d' }}"
+                                            class="form-control"
+                                            onchange="preencherDataSaidaReservado()"
+                                        />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraEntradaApartReservado" type="time" name="myHoraEntradaApartReservado" placeholder="Hora entrada" class="inline" />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                                        <input id="myDataSaidaReservado" type="date" name="myDataSaidaReservado" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}" />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraSaidaApartReservado" type="time" name="myHoraSaidaApartReservado" placeholder="Hora saida" class="inline" />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Valor Antecipado:</p>
+                                        <input style="text-align: right;" id="myAntecipadoReservado" type="text" name="myAntecipadoReservado" placeholder="Valor antecipado" class="inline" />
+                                        <script>
+                                            $(document).ready(function () {
+                                                $("#myAntecipadoReservado").mask("000.000.000.000.000,00", { reverse: true });
+                                            });
+                                        </script>
+                                    </div>
+                                    <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Observação:</p>
+                                        <input id="myOBSReservado" type="text" name="myOBSReservado" placeholder="Observação" class="inline" />
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                                    <button type="button" class="btn btn-warning" id="CancelarReserva-button">Cancelar Reserva</button>
+                                    <button id="btn-exit" class="btn btn-success" name="action" value="ConfirmarCheckin" method="POST">Confirmar Check-In</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input id="myHospedeReservado" type="text" name="myHospedeReservado" class="form-control" readonly>
-                  </div>
                 </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-10 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartamentoReservado" type="text" name="myApartamentoReservado" placeholder="Apartamento" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspedes:</p>
-                  <input style="text-align: center" id="myQtdHospedesApartReservado" type="number" name="myQtdHospedesApartReservado" placeholder="Qtd. hóspedes" class="inline" readonly>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hospedado(s):</p>
-                  <input style="text-align: center" id="myQtdHospedadosReservado" type="number" name="myQtdHospedadosReservado" placeholder="hospedados" class="inline">
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaApartReservado" type="date" name="myDataEntradaApartReservado" placeholder="Data entrada" class="inline" value="{{ data_atual|date:'Y-m-d' }}" class="form-control" onchange="preencherDataSaidaReservado()">
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraEntradaApartReservado" type="time" name="myHoraEntradaApartReservado" placeholder="Hora entrada" class="inline">
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaReservado" type="date" name="myDataSaidaReservado" placeholder="Data saída" class="inline" value="{{ data_saida|date:'Y-m-d' }}">
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraSaidaApartReservado" type="time" name="myHoraSaidaApartReservado" placeholder="Hora saida" class="inline">
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
-                     <input style="text-align: right" id="myAntecipadoReservado" type="text" name="myAntecipadoReservado" placeholder="Valor antecipado" class="inline">
-                     <script>
-                         $(document).ready(function(){
-                             $('#myAntecipadoReservado').mask('000.000.000.000.000,00', {reverse: true});
-                         });
-                     </script>
-                </div>
-                <div class="form-group col-md-9 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Observação:</p>
-                  <input id="myOBSReservado" type="text" name="myOBSReservado" placeholder="Observação" class="inline">
-                </div>
-              </div>  
-              <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button type="button" class="btn btn-warning" id="CancelarReserva-button"> Cancelar Reserva</button>
-                <button id="btn-exit" class="btn btn-success" name="action" value="ConfirmarCheckin" method="POST">Confirmar Check-In</button>
-              </div>                
-            </div>  
-          </div>
-         </div>
-       </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 </form>
 
 <!-- ################### Modal Confirmar reserva - ( End ) ######################### -->
 
 <!-- Cancelar Reserva - ( Start ) -->
 <script>
-  document.getElementById('CancelarReserva-button').addEventListener('click', function() {
-    Swal.fire({
-      title: 'Deseja realmente cancelar esta reserva ?',
-      text: 'Essa ação não pode ser desfeita.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Sim, Cancelar',
-      cancelButtonText: 'Sair'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const apartamentoDesc = document.getElementById('myApartamentoReservado').value;
+    document.getElementById("CancelarReserva-button").addEventListener("click", function () {
+        Swal.fire({
+            title: "Deseja realmente cancelar esta reserva ?",
+            text: "Essa ação não pode ser desfeita.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, Cancelar",
+            cancelButtonText: "Sair",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const apartamentoDesc = document.getElementById("myApartamentoReservado").value;
 
-        let url = `/apartamento/${apartamentoDesc}/cancelar_reserva/`;
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'success') {
-            Swal.fire('Reserva cancelada com sucesso  !', '', 'success').then(() => {
-              window.location.href = "{% url 'apartHome' %}";
-            });
-          } else {
-            Swal.fire('Oops...', 'Ocorreu um erro ao tentar cancelar a reserva.', 'error');
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          Swal.fire('Oops...', 'Ocorreu um erro ao tentar cancelar a reserva.', 'error');
+                let url = `/apartamento/${apartamentoDesc}/cancelar_reserva/`;
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({}),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.status === "success") {
+                            Swal.fire("Reserva cancelada com sucesso  !", "", "success").then(() => {
+                                window.location.href = "{% url 'apartHome' %}";
+                            });
+                        } else {
+                            Swal.fire("Oops...", "Ocorreu um erro ao tentar cancelar a reserva.", "error");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Swal.fire("Oops...", "Ocorreu um erro ao tentar cancelar a reserva.", "error");
+                    });
+            }
         });
-      }
-    })
-  });
+    });
 
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-      }
+        return cookieValue;
     }
-    return cookieValue;
-  }
 </script>
 <!-- Cancelar Reserva - ( End ) -->
 
-
 <script>
-function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApartamento, qtdHospedesApartamento, DataentradaPrevista) {
-  // Faz uma requisição AJAX ao servidor para buscar a reserva
-  $.ajax({
-    url: '/buscar_reservas/',
-    method: 'POST',
-    data: {
-      reserva_id: reserva_id,
-      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-    },
-    success: function(reserva) {
-      document.getElementById("myHospedeReservado").value = reserva.hospede;
-      document.getElementById("myApartamentoReservado").value = descricaoApartamento;
-      document.getElementById("myQtdHospedesApartReservado").value = qtdHospedesApartamento;
-      document.getElementById("myQtdHospedadosReservado").value = reserva.qtd_hospedes;
-      document.getElementById("myDataEntradaApartReservado").value = reserva.entrada_prevista;
-      document.getElementById("myDataSaidaReservado").value = reserva.saida_prevista;
-      // Formatação do valor de haver na reserva
-      var numero = parseFloat(reserva.valor_antecipado);
-      var valor_formatado = numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', currencyDisplay: 'symbol' });
-      var valor_sem_moeda = valor_formatado.replace(/[^\d,.-]/g, ""); // aqui tira o R$
-      document.getElementById("myAntecipadoReservado").value = valor_sem_moeda;
-      /////////////////////////////////////////////////////////////////////////
-      document.getElementById("myOBSReservado").value = reserva.observacao;
-      // Obtenha a hora atual
-      let horaAtual = new Date();
-      // Formate a hora como uma string no formato HH:mm
-      let horaFormatada = horaAtual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-      // Preencha o campo de hora com a hora formatada
-      document.getElementById("myHoraEntradaApartReservado").value = horaFormatada;
-      document.getElementById("myHoraSaidaApartReservado").value = horaFormatada;
-      $('#myDataEntradaApartReservado').focus();
-    },
-    error: function() {
-      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
-      Swal.fire({
-        icon: 'error',
-        title: 'Ops...',
-        text: 'Ocorreu um erro ao buscar a reserva.'
-      });
+    function setApartamentoReserva(reserva_id, descricao, qtdpessoas, descricaoApartamento, qtdHospedesApartamento, DataentradaPrevista) {
+        // Faz uma requisição AJAX ao servidor para buscar a reserva
+        $.ajax({
+            url: "/buscar_reservas/",
+            method: "POST",
+            data: {
+                reserva_id: reserva_id,
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            success: function (reserva) {
+                document.getElementById("myHospedeReservado").value = reserva.hospede;
+                document.getElementById("myApartamentoReservado").value = descricaoApartamento;
+                document.getElementById("myQtdHospedesApartReservado").value = qtdHospedesApartamento;
+                document.getElementById("myQtdHospedadosReservado").value = reserva.qtd_hospedes;
+                document.getElementById("myDataEntradaApartReservado").value = reserva.entrada_prevista;
+                document.getElementById("myDataSaidaReservado").value = reserva.saida_prevista;
+                // Formatação do valor de haver na reserva
+                var numero = parseFloat(reserva.valor_antecipado);
+                var valor_formatado = numero.toLocaleString("pt-BR", { style: "currency", currency: "BRL", currencyDisplay: "symbol" });
+                var valor_sem_moeda = valor_formatado.replace(/[^\d,.-]/g, ""); // aqui tira o R$
+                document.getElementById("myAntecipadoReservado").value = valor_sem_moeda;
+                /////////////////////////////////////////////////////////////////////////
+                document.getElementById("myOBSReservado").value = reserva.observacao;
+                // Obtenha a hora atual
+                let horaAtual = new Date();
+                // Formate a hora como uma string no formato HH:mm
+                let horaFormatada = horaAtual.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                // Preencha o campo de hora com a hora formatada
+                document.getElementById("myHoraEntradaApartReservado").value = horaFormatada;
+                document.getElementById("myHoraSaidaApartReservado").value = horaFormatada;
+                $("#myDataEntradaApartReservado").focus();
+            },
+            error: function () {
+                // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+                Swal.fire({
+                    icon: "error",
+                    title: "Ops...",
+                    text: "Ocorreu um erro ao buscar a reserva.",
+                });
+            },
+        });
     }
-  });
-}
 </script>
-
 
 <!-- Atualiza da data de saída dependendo da data de entrada  Reservado - ( Start ) -->
 <script>
-  function preencherDataSaidaReservado() {
-    // Obter valor do campo de entrada
-    let dataEntrada = new Date(document.getElementById("myDataEntradaApartReservado").value);
-    // Adicionar um dia à data de entrada
-    let dataSaida = new Date(dataEntrada.getTime());
-    dataSaida.setDate(dataEntrada.getDate() + 1);
-    // Formatar a data de saída para exibir apenas a parte da data
-    let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
-    // Definir o valor do campo de saída
-    document.getElementById("myDataSaidaReservado").value = dataSaidaFormatada;
-  }
+    function preencherDataSaidaReservado() {
+        // Obter valor do campo de entrada
+        let dataEntrada = new Date(document.getElementById("myDataEntradaApartReservado").value);
+        // Adicionar um dia à data de entrada
+        let dataSaida = new Date(dataEntrada.getTime());
+        dataSaida.setDate(dataEntrada.getDate() + 1);
+        // Formatar a data de saída para exibir apenas a parte da data
+        let dataSaidaFormatada = dataSaida.toISOString().slice(0, 10);
+        // Definir o valor do campo de saída
+        document.getElementById("myDataSaidaReservado").value = dataSaidaFormatada;
+    }
 </script>
 <!-- Atualiza da data de saída dependendo da data de entrada  - ( End ) -->
-
 
 <!-- ################### Modal Mudar acomodação - ( Start ) ######################### -->
 
 <form>
+    {% csrf_token %}
 
-{% csrf_token %}
-
-<div class="modal fade" id="ModalMudarAcomodacao" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Mudar Acomodação</h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container">
-          <div class="tab-content">
-            <!--************************************************************************-->
-            <div id="checkin" class="tab-pane fade show active">
-              <div class="form-row">
-                <div class="form-group col-md-6 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspede:</p>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+    <div class="modal fade" id="ModalMudarAcomodacao" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" style="text-align: center;" id="exampleModalLongTitle">Mudar Acomodação</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="tab-content">
+                            <!--************************************************************************-->
+                            <div id="checkin" class="tab-pane fade show active">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspede:</p>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            </div>
+                                            <input id="myHospedeMudar" type="text" name="myHospedeMudar" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Apartamento:</p>
+                                        <input id="myApartamentoMudar" type="text" name="myApartamentoMudar" placeholder="Apartamento" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspedes:</p>
+                                        <input style="text-align: center;" id="myQtdHospedesApartMudar" type="number" name="myQtdHospedesApartMudar" placeholder="Qtd. hóspedes" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hospedado(s):</p>
+                                        <input style="text-align: center;" id="myQtdHospedadosMudar" type="number" name="myQtdHospedadosMudar" placeholder="hospedados" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                                        <input id="myDataEntradaApartMudar" type="date" name="myDataEntradaApartMudar" placeholder="Data entrada" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraEntradaApartMudar" type="time" name="myHoraEntradaApartMudar" placeholder="Hora entrada" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                                        <input id="myDataSaidaMudar" type="date" name="myDataSaidaMudar" placeholder="Data saída" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraSaidaApartMudar" type="time" name="myHoraSaidaApartMudar" placeholder="Hora saida" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Valor Antecipado:</p>
+                                        <input style="text-align: right;" id="myAntecipadoMudar" type="text" name="myAntecipadoMudar" placeholder="Valor antecipado" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-9 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Observação:</p>
+                                        <input id="myOBSMudar" type="text" name="myOBSMudar" placeholder="Observação" class="inline" />
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="form-group col-md-14 mb-0" style="text-align: left;">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text d-flex align-items-center"><i class="fas fa-bed"></i></span>
+                                        <select type="text" id="myNovoApartamento" name="myNovoApartamento" class="form-control select2">
+                                            <option value=""></option>
+                                            {% for apart in lista_apartamentos %}
+                                            <option value="{{ apart.text }}"> {{ apart.text }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                            <input style="text-align: center;" id="myQtdHospedesNovoApart" type="number" name="myQtdHospedesNovoApart" placeholder="Qtd. hóspedes" class="inline" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="modal-footer">
+                                    <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
+                                    <button type="button" class="btn btn-warning" id="ConfirmarMudanca-button">Confirmar Mudança</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input id="myHospedeMudar" type="text" name="myHospedeMudar" class="form-control" readonly>
-                  </div>
                 </div>
-                <div class="form-group col-md-4 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartamentoMudar" type="text" name="myApartamentoMudar" placeholder="Apartamento" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspedes:</p>
-                  <input style="text-align: center" id="myQtdHospedesApartMudar" type="number" name="myQtdHospedesApartMudar" placeholder="Qtd. hóspedes" class="inline" readonly>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hospedado(s):</p>
-                  <input style="text-align: center" id="myQtdHospedadosMudar" type="number" name="myQtdHospedadosMudar" placeholder="hospedados" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaApartMudar" type="date" name="myDataEntradaApartMudar" placeholder="Data entrada" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraEntradaApartMudar" type="time" name="myHoraEntradaApartMudar" placeholder="Hora entrada" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaMudar" type="date" name="myDataSaidaMudar" placeholder="Data saída" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraSaidaApartMudar" type="time" name="myHoraSaidaApartMudar" placeholder="Hora saida" class="inline" readonly>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Antecipado:</p>
-                     <input style="text-align: right" id="myAntecipadoMudar" type="text" name="myAntecipadoMudar" placeholder="Valor antecipado" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-9 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Observação:</p>
-                  <input id="myOBSMudar" type="text" name="myOBSMudar" placeholder="Observação" class="inline">
-                </div>
-              </div>  
-              <hr>
-              <div class="form-group col-md-14 mb-0" style="text-align: left;">
-                <div class="input-group-prepend">
-                  <span class="input-group-text d-flex align-items-center"><i class="fas fa-bed"></i></span>
-                    <select type="text" id="myNovoApartamento" name="myNovoApartamento" class="form-control select2">
-                      <option value=""></option>
-                      {% for apart in lista_apartamentos %}
-                        <option value= "{{ apart.text }}"> {{ apart.text }}</option>
-                      {% endfor %}
-                    </select>
-                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                      <input style="text-align: center" id="myQtdHospedesNovoApart" type="number" name="myQtdHospedesNovoApart" placeholder="Qtd. hóspedes" class="inline" readonly>
-                    </div>
-                </div>
-              </div>
-              <br>
-              <div class="modal-footer">
-                <a href="{% url 'apartHome' %}" class="btn btn-danger">Sair</a>
-                <button type="button" class="btn btn-warning" id="ConfirmarMudanca-button"> Confirmar Mudança</button>
-              </div>                
-            </div>  
-          </div>
-         </div>
-       </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 </form>
 
 <!-- ################### Modal Mudar acomodação - ( End ) ######################### -->
 
 <!-- Inicia o Select2 myHospede dentro do modal  - ( Start ) -->
 <script>
-$(document).ready(function() {
-  $('#ModalMudarAcomodacao').on('shown.bs.modal', function() {
-    $('#myNovoApartamento').select2({
-      placeholder: "Selecione a nova acomodação",
-      dropdownParent: $('#ModalMudarAcomodacao'),
+    $(document).ready(function () {
+        $("#ModalMudarAcomodacao").on("shown.bs.modal", function () {
+            $("#myNovoApartamento").select2({
+                placeholder: "Selecione a nova acomodação",
+                dropdownParent: $("#ModalMudarAcomodacao"),
+            });
+            $("#myNovoApartamento").on("keyup click", function (e) {
+                if (e.keyCode === 13 || e.type === "click") {
+                    $("#myNovoApartamento").select2("open");
+                }
+            });
+            $("#myNovoApartamento").select2("focus");
+        });
     });
-    $('#myNovoApartamento').on('keyup click', function(e) {
-      if (e.keyCode === 13 || e.type === 'click') {
-        $('#myNovoApartamento').select2('open');
-      }
-    });
-    $('#myNovoApartamento').select2('focus');
-  });
-});
 </script>
 <!-- Inicia o Select2 myHospede dentro do modal  - ( End ) -->
 
-
 <!-- buscar os dados do Check-In ( Start )-->
 <script>
-function setApartamentoCheckInt(apart_id) {
-  // Faz uma requisição AJAX ao servidor para buscar o check-in
-  $.ajax({
-    url: `/buscar_checkin/${apart_id}/`,
-    method: 'POST',
-    data: {
-      apart_id: apart_id,
-      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-    },
-    success: function(checkin) {
-      document.getElementById("myHospedeMudar").value = checkin.hospede;
-      document.getElementById("myApartamentoMudar").value = checkin.apartamento;
-      document.getElementById("myQtdHospedesApartMudar").value = checkin.qtdpessoas;
-      document.getElementById("myQtdHospedadosMudar").value = checkin.qtd_hospedes;
-      document.getElementById("myDataEntradaApartMudar").value = checkin.data_checkin;
-      document.getElementById("myHoraEntradaApartMudar").value = checkin.hora_checkin;
-      document.getElementById("myDataSaidaMudar").value = checkin.data_checkout;
-      document.getElementById("myHoraSaidaApartMudar").value = checkin.hora_checkout;
-      document.getElementById("myAntecipadoMudar").value = checkin.valor_antecipado;
-      /////////////////////////////////////////////////////////////////////////
-      document.getElementById("myOBSMudar").value = checkin.observacao;
-      $('#myNovoApartamento').focus();
-    },
-    error: function() {
-      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
-      Swal.fire({
-        icon: 'error',
-        title: 'Ops...',
-        text: 'Ocorreu um erro ao buscar o Check-In.'
-      });
+    function setApartamentoCheckInt(apart_id) {
+        // Faz uma requisição AJAX ao servidor para buscar o check-in
+        $.ajax({
+            url: `/buscar_checkin/${apart_id}/`,
+            method: "POST",
+            data: {
+                apart_id: apart_id,
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            success: function (checkin) {
+                document.getElementById("myHospedeMudar").value = checkin.hospede;
+                document.getElementById("myApartamentoMudar").value = checkin.apartamento;
+                document.getElementById("myQtdHospedesApartMudar").value = checkin.qtdpessoas;
+                document.getElementById("myQtdHospedadosMudar").value = checkin.qtd_hospedes;
+                document.getElementById("myDataEntradaApartMudar").value = checkin.data_checkin;
+                document.getElementById("myHoraEntradaApartMudar").value = checkin.hora_checkin;
+                document.getElementById("myDataSaidaMudar").value = checkin.data_checkout;
+                document.getElementById("myHoraSaidaApartMudar").value = checkin.hora_checkout;
+                document.getElementById("myAntecipadoMudar").value = checkin.valor_antecipado;
+                /////////////////////////////////////////////////////////////////////////
+                document.getElementById("myOBSMudar").value = checkin.observacao;
+                $("#myNovoApartamento").focus();
+            },
+            error: function () {
+                // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+                Swal.fire({
+                    icon: "error",
+                    title: "Ops...",
+                    text: "Ocorreu um erro ao buscar o Check-In.",
+                });
+            },
+        });
     }
-  });
-}
 </script>
 
 <!-- buscar os dados do Check-In ( End )-->
 
 <!-- Iniciar a busca da qtd de hospede do apartamento selecionado - ( Start )-->
 <script>
-$(document).ready(function() {
-  // Adiciona um evento de mudança ao select com o ID myNovoApartamento
-  $('#myNovoApartamento').on('change', function() {
-    var apartDesc = $(this).val(); // Obtém o valor selecionado do select
-    buscarQtdPessoas(apartDesc); // Chama a função para buscar a quantidade de pessoas
-  });
+    $(document).ready(function () {
+        // Adiciona um evento de mudança ao select com o ID myNovoApartamento
+        $("#myNovoApartamento").on("change", function () {
+            var apartDesc = $(this).val(); // Obtém o valor selecionado do select
+            buscarQtdPessoas(apartDesc); // Chama a função para buscar a quantidade de pessoas
+        });
 
-  // Função para buscar a quantidade de pessoas do apartamento selecionado
-  function buscarQtdPessoas(apartDesc) {
-    $.ajax({
-      url: '/buscar_qtdpessoas/', // Substitua pela URL correta do Django
-      type: 'GET',
-      data: {apartDesc: apartDesc},
-      success: function(data) {
-        $('#myQtdHospedesNovoApart').val(data.qtdpessoas); // Coloca o valor retornado na variável myQtdHospedesNovoApart
-      },
-      error: function() {
-        console.log('Erro ao buscar a quantidade de pessoas do apartamento');
-      }
+        // Função para buscar a quantidade de pessoas do apartamento selecionado
+        function buscarQtdPessoas(apartDesc) {
+            $.ajax({
+                url: "/buscar_qtdpessoas/", // Substitua pela URL correta do Django
+                type: "GET",
+                data: { apartDesc: apartDesc },
+                success: function (data) {
+                    $("#myQtdHospedesNovoApart").val(data.qtdpessoas); // Coloca o valor retornado na variável myQtdHospedesNovoApart
+                },
+                error: function () {
+                    console.log("Erro ao buscar a quantidade de pessoas do apartamento");
+                },
+            });
+        }
     });
-  }
-});
 </script>
 <!-- Iniciar a busca da qtd de hospede do apartamento selecionado - ( End )-->
 
 <!-- Confirmar mudança de apartamento - ( Start ) -->
 <script>
-  document.getElementById('ConfirmarMudanca-button').addEventListener('click', function() {
-    const apartAtualDesc = document.getElementById('myApartamentoMudar').value;
-    const apartNovoDesc = document.getElementById('myNovoApartamento').value;
+    document.getElementById("ConfirmarMudanca-button").addEventListener("click", function () {
+        const apartAtualDesc = document.getElementById("myApartamentoMudar").value;
+        const apartNovoDesc = document.getElementById("myNovoApartamento").value;
 
-    if (apartNovoDesc === '') {
-      Swal.fire('Erro', 'Por favor, selecione a nova acomodação.', 'error');
-      document.getElementById('myNovoApartamento').focus();
-      return; // Retorna para evitar que o código continue executando após o erro
-    }
-
-    Swal.fire({
-      title: 'Deseja realmente efetuar a mudança de acomodação  ?',
-      text: '',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sim, Confirmar',
-      cancelButtonText: 'Sair'
-    }).then((result) => {
-      if (result.isConfirmed) {
-
-
-        let url = `/apartamento/${apartAtualDesc}/${apartNovoDesc}/ConfirmarMudancaApart/`;
-        fetch(url, {
-          method: 'POST',
-          headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === 'success') {
-            Swal.fire('Mudança efetuada com sucesso  !', '', 'success').then(() => {
-              window.location.href = "{% url 'apartHome' %}";
-            });
-          } else {
-            Swal.fire('Oops...', 'Ocorreu um erro ao tentar efetuar a mudança de acomodação.', 'error');
-          }
-        })
-        .catch(error => {
-          console.error(error);
-          Swal.fire('Oops...', 'Ocorreu um erro ao tentar efetuar a mudança de acomodação.', 'error');
-        });
-      }
-    })
-  });
-
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+        if (apartNovoDesc === "") {
+            Swal.fire("Erro", "Por favor, selecione a nova acomodação.", "error");
+            document.getElementById("myNovoApartamento").focus();
+            return; // Retorna para evitar que o código continue executando após o erro
         }
-      }
+
+        Swal.fire({
+            title: "Deseja realmente efetuar a mudança de acomodação  ?",
+            text: "",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sim, Confirmar",
+            cancelButtonText: "Sair",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let url = `/apartamento/${apartAtualDesc}/${apartNovoDesc}/ConfirmarMudancaApart/`;
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({}),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.status === "success") {
+                            Swal.fire("Mudança efetuada com sucesso  !", "", "success").then(() => {
+                                window.location.href = "{% url 'apartHome' %}";
+                            });
+                        } else {
+                            Swal.fire("Oops...", "Ocorreu um erro ao tentar efetuar a mudança de acomodação.", "error");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Swal.fire("Oops...", "Ocorreu um erro ao tentar efetuar a mudança de acomodação.", "error");
+                    });
+            }
+        });
+    });
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
     }
-    return cookieValue;
-  }
 </script>
 <!-- Confirmar mudança de apartamento - ( End ) -->
 
 <!-- ################### Modal Verificar Débito Atual - ( Start ) ######################### -->
 
 <form method="post">
-  {% csrf_token %}
+    {% csrf_token %}
 
-<div class="modal fade" id="ModalDebitoAtual" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" style="text-align: center" id="exampleModalLongTitle">Débito Atual</h3>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container">
-          <div class="tab-content">
-            <!--************************************************************************-->
-            <div id="checkin" class="tab-pane fade show active">
-              <div class="form-row">
-                <div class="form-group col-md-6 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspede:</p>
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fas fa-user"></i></span>
+    <div class="modal fade" id="ModalDebitoAtual" tabindex="1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px; width: 100%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title" style="text-align: center;" id="exampleModalLongTitle">Débito Atual</h3>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="tab-content">
+                            <!--************************************************************************-->
+                            <div id="checkin" class="tab-pane fade show active">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspede:</p>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            </div>
+                                            <input id="myHospedeDebito" type="text" name="myHospedeDeibto" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Apartamento:</p>
+                                        <input id="myApartamentoDebito" type="text" name="myApartamentoDebito" placeholder="Apartamento" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hóspedes:</p>
+                                        <input style="text-align: center;" id="myQtdHospedesApartDebito" type="number" name="myQtdHospedesApartDebito" placeholder="Qtd. hóspedes" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hospedado(s):</p>
+                                        <input style="text-align: center;" id="myQtdHospedadosDebito" type="number" name="myQtdHospedadosDebito" placeholder="hospedados" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
+                                        <input id="myDataEntradaApartDebito" type="date" name="myDataEntradaApartDebito" placeholder="Data entrada" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Hora:</p>
+                                        <input id="myHoraEntradaApartDebito" type="time" name="myHoraEntradaApartDebito" placeholder="Hora entrada" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
+                                        <input id="myDataSaidaDebito" type="date" name="myDataSaidaDebito" placeholder="Data saída" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: center;">Hora:</p>
+                                        <input id="myHoraSaidaApartDebito" type="time" name="myHoraSaidaApartDebito" placeholder="Hora saida" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Adiantamento:</p>
+                                        <input style="text-align: right;" id="myAntecipadoDebito" type="text" name="myAntecipadoDebito" placeholder="Valor antecipado" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-8 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Observação:</p>
+                                        <input id="myOBSDebito" type="text" name="myOBSDebito" placeholder="Observação" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Qtd.Diárias:</p>
+                                        <input style="text-align: center;" id="myQtdDiariasAtual" type="text" name="myValorExcedenteDebito" placeholder="Valor por excedente" class="inline" readonly />
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">V.Excedentes:</p>
+                                        <input style="text-align: right;" id="myValorExcedenteDebito" type="text" name="myValorExcedenteDebito" placeholder="Valor por excedente" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Valor Consumo:</p>
+                                        <input style="text-align: right;" id="myConsumoDebito" type="text" name="myConsumoDebito" placeholder="Valor consumo" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-2 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Valor Diárias:</p>
+                                        <input style="text-align: right;" id="myValorDiarias" type="text" name="myValorDiarias" placeholder="Valor diárias" class="inline" readonly />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">Desconto %:</p>
+                                        <input
+                                            style="text-align: right; background-color: yellow; color: black; font-weight: bold;"
+                                            id="myDescontoDebito"
+                                            type="text"
+                                            name="myDescontoDebito"
+                                            placeholder="Desconto"
+                                            class="inline"
+                                            onblur="atualizarValor()"
+                                            value="{{ myDescontoDebito }}"
+                                        />
+                                    </div>
+                                    <div class="form-group col-md-3 mb-0" style="text-align: left;">
+                                        <p class="inline" style="text-align: left;">DÉBITO ATUAL:</p>
+                                        <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly />
+                                    </div>
+                                </div>
+
+                                <style>
+                                    .custom-btn {
+                                        width: 120px; /* Defina a largura desejada para os botões */
+                                    }
+                                </style>
+
+                                <div class="modal-footer d-flex justify-content-center">
+                                    <button type="button" class="btn btn-danger flex-fill custom-btn" onclick="window.location.href='{% url 'apartHome' %}'">Sair</button>
+                                    <button type="button" class="btn btn-warning flex-fill custom-btn" onclick="redirecionarExtratoConsumo()">Extrato Consumo</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input id="myHospedeDebito" type="text" name="myHospedeDeibto" class="form-control" readonly>
-                  </div>
                 </div>
-                <div class="form-group col-md-4 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Apartamento:</p>
-                  <input id="myApartamentoDebito" type="text" name="myApartamentoDebito" placeholder="Apartamento" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hóspedes:</p>
-                  <input style="text-align: center" id="myQtdHospedesApartDebito" type="number" name="myQtdHospedesApartDebito" placeholder="Qtd. hóspedes" class="inline" readonly>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Hospedado(s):</p>
-                  <input style="text-align: center" id="myQtdHospedadosDebito" type="number" name="myQtdHospedadosDebito" placeholder="hospedados" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Entrada</p>
-                  <input id="myDataEntradaApartDebito" type="date" name="myDataEntradaApartDebito" placeholder="Data entrada" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left;">Hora:</p>
-                  <input id="myHoraEntradaApartDebito" type="time" name="myHoraEntradaApartDebito" placeholder="Hora entrada" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left; line-height: 38px;">Data Saída</p>
-                  <input id="myDataSaidaDebito" type="date" name="myDataSaidaDebito" placeholder="Data saída" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: center;">Hora:</p>
-                  <input id="myHoraSaidaApartDebito" type="time" name="myHoraSaidaApartDebito" placeholder="Hora saida" class="inline" readonly>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Adiantamento:</p>
-                     <input style="text-align: right" id="myAntecipadoDebito" type="text" name="myAntecipadoDebito" placeholder="Valor antecipado" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-8 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Observação:</p>
-                  <input id="myOBSDebito" type="text" name="myOBSDebito" placeholder="Observação" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Qtd.Diárias:</p>
-                     <input style="text-align: center" id="myQtdDiariasAtual" type="text" name="myValorExcedenteDebito" placeholder="Valor por excedente" class="inline" readonly>
-                </div>
-              </div>  
-              <div class="form-row">
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">V.Excedentes:</p>
-                     <input style="text-align: right" id="myValorExcedenteDebito" type="text" name="myValorExcedenteDebito" placeholder="Valor por excedente" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Consumo:</p>
-                     <input style="text-align: right" id="myConsumoDebito" type="text" name="myConsumoDebito" placeholder="Valor consumo" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-2 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Valor Diárias:</p>
-                     <input style="text-align: right" id="myValorDiarias" type="text" name="myValorDiarias" placeholder="Valor diárias" class="inline" readonly>
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">Desconto %:</p>
-                  <input style="text-align: right; background-color: yellow; color: black; font-weight: bold;" id="myDescontoDebito" type="text" name="myDescontoDebito" placeholder="Desconto" class="inline" onblur="atualizarValor()" value="{{ myDescontoDebito }}">
-                </div>
-                <div class="form-group col-md-3 mb-0" style="text-align: left;">
-                  <p class="inline" style="text-align: left">DÉBITO ATUAL:</p>
-                  <input style="text-align: right; background-color: black; color: white; font-weight: bold;" id="myDebitoAtual" type="text" name="myDebitoAtual" placeholder="Débito atual" class="inline" readonly>
-                </div>
-              </div>  
-
-
-<style>
-  .custom-btn {
-    width: 120px; /* Defina a largura desejada para os botões */
-  }
-</style>
-
-<div class="modal-footer d-flex justify-content-center">
-  <button type="button" class="btn btn-danger flex-fill custom-btn" onclick="window.location.href='{% url 'apartHome' %}'">Sair</button>
-  <button type="button" class="btn btn-warning flex-fill custom-btn" onclick="redirecionarExtratoConsumo()">Extrato Consumo</button>
-</div>
-
-
-
-
-            </div>  
-          </div>
-         </div>
-       </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 </form>
 
 <!-- ################### Modal Verificar Débito Atual - ( End ) ######################### -->
 
 <script>
     function redirecionarExtratoConsumo() {
-        var nomeApartamento = document.getElementById('myApartamentoDebito').value;
-        var descontoDebito = document.getElementById('myDescontoDebito').value;
-        
+        var nomeApartamento = document.getElementById("myApartamentoDebito").value;
+        var descontoDebito = document.getElementById("myDescontoDebito").value;
+
         // Define o valor do desconto como zero se estiver em branco
         if (descontoDebito === "") {
             descontoDebito = "0";
         }
-        
+
         var url = "/ExtratoConsumoHospede/" + encodeURIComponent(nomeApartamento) + "/" + encodeURIComponent(descontoDebito) + "/";
         window.location.href = url;
     }
 </script>
 
 <script>
-  // Inicializa o AutoNumeric no campo de desconto
-  const myDescontoDebito = new AutoNumeric('#myDescontoDebito', {
-    currencySymbol: 'R$ ',
-    decimalCharacter: ',',
-    digitGroupSeparator: '.',
-    decimalPlaces: 2,
-    unformatOnSubmit: true
-  });
+    // Inicializa o AutoNumeric no campo de desconto
+    const myDescontoDebito = new AutoNumeric("#myDescontoDebito", {
+        currencySymbol: "R$ ",
+        decimalCharacter: ",",
+        digitGroupSeparator: ".",
+        decimalPlaces: 2,
+        unformatOnSubmit: true,
+    });
 
+    function formatarValor(numero) {
+        const formatter = new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+        });
+        return formatter.format(numero);
+    }
 
-function formatarValor(numero) {
-  const formatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  });
-  return formatter.format(numero);
-}
+    function atualizarValor() {
+        const desconto = myDescontoDebito.getNumber();
 
-function atualizarValor() {
-  const desconto = myDescontoDebito.getNumber();
+        // Obter os valores dos campos e atribuir zero se estiverem em branco
+        const valorExcedenteDebitoInput = document.getElementById("myValorExcedenteDebito").value.replace("R$ ", "").replace(".", "").replace(",", ".");
 
-  // Obter os valores dos campos e atribuir zero se estiverem em branco
-  const valorExcedenteDebitoInput = document.getElementById('myValorExcedenteDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
-  
-  const valorExcedenteDebito = valorExcedenteDebitoInput ? parseFloat(valorExcedenteDebitoInput) : 0;
+        const valorExcedenteDebito = valorExcedenteDebitoInput ? parseFloat(valorExcedenteDebitoInput) : 0;
 
-  const consumoDebitoInput = document.getElementById('myConsumoDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
-  const consumoDebito = consumoDebitoInput ? parseFloat(consumoDebitoInput) : 0;
+        const consumoDebitoInput = document.getElementById("myConsumoDebito").value.replace("R$ ", "").replace(".", "").replace(",", ".");
+        const consumoDebito = consumoDebitoInput ? parseFloat(consumoDebitoInput) : 0;
 
-  const valorDiariasInput = document.getElementById('myValorDiarias').value.replace('R$ ', '').replace('.', '').replace(',', '.');
-  const valorDiarias = valorDiariasInput ? parseFloat(valorDiariasInput) : 0;
+        const valorDiariasInput = document.getElementById("myValorDiarias").value.replace("R$ ", "").replace(".", "").replace(",", ".");
+        const valorDiarias = valorDiariasInput ? parseFloat(valorDiariasInput) : 0;
 
-  const antecipadoDebitoInput = document.getElementById('myAntecipadoDebito').value.replace('R$ ', '').replace('.', '').replace(',', '.');
-  const antecipadoDebito = antecipadoDebitoInput ? parseFloat(antecipadoDebitoInput) : 0;
+        const antecipadoDebitoInput = document.getElementById("myAntecipadoDebito").value.replace("R$ ", "").replace(".", "").replace(",", ".");
+        const antecipadoDebito = antecipadoDebitoInput ? parseFloat(antecipadoDebitoInput) : 0;
 
-  const debitoAtual = (valorExcedenteDebito + consumoDebito + valorDiarias) - antecipadoDebito - desconto;
-  const debitoAtualFormatado = formatarValor(debitoAtual);
+        const debitoAtual = valorExcedenteDebito + consumoDebito + valorDiarias - antecipadoDebito - desconto;
+        const debitoAtualFormatado = formatarValor(debitoAtual);
 
-  document.getElementById('myDebitoAtual').value = debitoAtualFormatado;
-}
-
+        document.getElementById("myDebitoAtual").value = debitoAtualFormatado;
+    }
 </script>
-
-
 
 <!-- buscar os dados do Débito do cliente ( Start )-->
 
 <script>
-function setApartamentoDebito(apart_id) {
-  // Faz uma requisição AJAX ao servidor para buscar o check-in
-  $.ajax({
-    url: `/buscar_checkin/${apart_id}/`,
-    method: 'POST',
-    data: {
-      apart_id: apart_id,
-      csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-    },
-    success: function(checkin) {
-      document.getElementById("myHospedeDebito").value = checkin.hospede;
-      document.getElementById("myApartamentoDebito").value = checkin.apartamento;
-      document.getElementById("myQtdHospedesApartDebito").value = checkin.qtdpessoas;
-      document.getElementById("myQtdHospedadosDebito").value = checkin.qtd_hospedes;
-      document.getElementById("myDataEntradaApartDebito").value = checkin.data_checkin;
-      document.getElementById("myHoraEntradaApartDebito").value = checkin.hora_checkin;
-      document.getElementById("myDataSaidaDebito").value = checkin.data_checkout;
-      document.getElementById("myHoraSaidaApartDebito").value = checkin.hora_checkout;
-      document.getElementById("myAntecipadoDebito").value = checkin.valor_antecipado;
-      document.getElementById("myQtdDiariasAtual").value = checkin.Qtd_Diarias_atual;
-      document.getElementById("myConsumoDebito").value = checkin.valor_consumo;
-      document.getElementById("myValorExcedenteDebito").value = checkin.valor_pago_excedente;
-      document.getElementById("myValorDiarias").value = checkin.ValorTotalDiarias;
-      document.getElementById("myDebitoAtual").value = checkin.valor_total_conta;
-      /////////////////////////////////////////////////////////////////////////
-      document.getElementById("myOBSDebito").value = checkin.observacao;
-    },
-    error: function() {
-      // Mostra uma mensagem de erro caso ocorra algum problema na requisição
-      Swal.fire({
-        icon: 'error',
-        title: 'Ops...',
-        text: 'Ocorreu um erro ao buscar o Check-In.'
-      });
+    function setApartamentoDebito(apart_id) {
+        // Faz uma requisição AJAX ao servidor para buscar o check-in
+        $.ajax({
+            url: `/buscar_checkin/${apart_id}/`,
+            method: "POST",
+            data: {
+                apart_id: apart_id,
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            success: function (checkin) {
+                document.getElementById("myHospedeDebito").value = checkin.hospede;
+                document.getElementById("myApartamentoDebito").value = checkin.apartamento;
+                document.getElementById("myQtdHospedesApartDebito").value = checkin.qtdpessoas;
+                document.getElementById("myQtdHospedadosDebito").value = checkin.qtd_hospedes;
+                document.getElementById("myDataEntradaApartDebito").value = checkin.data_checkin;
+                document.getElementById("myHoraEntradaApartDebito").value = checkin.hora_checkin;
+                document.getElementById("myDataSaidaDebito").value = checkin.data_checkout;
+                document.getElementById("myHoraSaidaApartDebito").value = checkin.hora_checkout;
+                document.getElementById("myAntecipadoDebito").value = checkin.valor_antecipado;
+                document.getElementById("myQtdDiariasAtual").value = checkin.Qtd_Diarias_atual;
+                document.getElementById("myConsumoDebito").value = checkin.valor_consumo;
+                document.getElementById("myValorExcedenteDebito").value = checkin.valor_pago_excedente;
+                document.getElementById("myValorDiarias").value = checkin.ValorTotalDiarias;
+                document.getElementById("myDebitoAtual").value = checkin.valor_total_conta;
+                /////////////////////////////////////////////////////////////////////////
+                document.getElementById("myOBSDebito").value = checkin.observacao;
+            },
+            error: function () {
+                // Mostra uma mensagem de erro caso ocorra algum problema na requisição
+                Swal.fire({
+                    icon: "error",
+                    title: "Ops...",
+                    text: "Ocorreu um erro ao buscar o Check-In.",
+                });
+            },
+        });
     }
-  });
-}
 </script>
-
 
 <!-- buscar os dados do Check-In ( End )-->
 
-
-
-
-
 {% endblock %}
-
