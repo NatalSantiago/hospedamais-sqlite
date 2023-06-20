@@ -96,3 +96,22 @@
     
 }  
 
+#btnIrAoTop {
+  position: fixed;
+  bottom: 5px;
+  right: 20px;
+  height: 45px;
+  width: 45px;
+  background: #e0dede;
+  border: none;
+  border-radius: 100%;
+  float: right;
+  margin-left: 10px;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#btnIrAoTop img {
+  width: 30px;
+}

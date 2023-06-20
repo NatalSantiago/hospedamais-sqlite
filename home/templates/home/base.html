@@ -182,8 +182,44 @@
   </div>
 
   <footer class="main-footer">
-    <strong>Copyright &copy; <a>2022 - HOSPEDA-MAIS</a>.</strong> Todos os direitos reservados.
-  </footer>
+  <strong>
+    Copyright &copy; <a>2023 - HOSPEDA-MAIS</a>.
+  </strong>
+  Todos os direitos reservados.
+
+  <!-- Botão voltar ao top -->
+  <button id="btnIrAoTop">
+    <img src="{% static 'img/Ir_ao_Top.png' %}" alt="Topo">
+  </button>
+
+  <script>
+    window.onscroll = function() {
+      scroll();
+    };
+
+    function scroll() {
+      var btn = document.getElementById("btnIrAoTop");
+      if (document.documentElement.scrollTop > 30) {
+        btn.style.opacity = "1";
+        btn.style.transform = "scale(1)";
+      } else {
+        btn.style.opacity = "0";
+        btn.style.transform = "scale(0)";
+      }
+    }
+
+    // Adicione esta função para voltar ao topo quando o botão for clicado
+    document.getElementById("btnIrAoTop").addEventListener("click", function() {
+      document.documentElement.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  </script>
+</footer>
+
+
+
 </div>
 
 <!-- AdminLTE App -->
