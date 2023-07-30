@@ -1,4 +1,10 @@
-{% extends "home/base.html" %} {% load static %} {% block content %} {% csrf_token %}
+{% extends "home/base.html" %} 
+
+{% load static %} 
+
+{% block content %} 
+
+{% csrf_token %}
 
 <!-- Bootstrap CSS -->
 
@@ -1212,8 +1218,6 @@
     </div>
 </form>
 
-<!-- ################### Modal Verificar Débito Atual - ( End ) ######################### -->
-
 <script>
     function redirecionarExtratoConsumo() {
         var nomeApartamento = document.getElementById("myApartamentoDebito").value;
@@ -1314,5 +1318,8 @@
 </script>
 
 <!-- buscar os dados do Check-In ( End )-->
+
+<!-- ################### Modal Verificar Débito Atual - ( End ) ######################### -->
+
 
 {% endblock %}

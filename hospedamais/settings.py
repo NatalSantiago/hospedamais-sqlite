@@ -57,7 +57,6 @@ USER_AGENTS_CACHE = 'default'
 
 USE_THOUSAND_SEPARATOR = True
 
-
 FORMAT_MODULE_PATH = 'home.formats'
 
 

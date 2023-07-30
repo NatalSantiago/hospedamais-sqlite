@@ -15,9 +15,15 @@ from .views import delete_item_consumo_apart
 
 from home import views
 
+from django.urls import path
+from django.views.generic.base import TemplateView
+
+
 urlpatterns = [
 
     path('', PaginaInicial.as_view(), name='inicio'),
+
+    path('', TemplateView.as_view(template_name='home/base.html'), name='base'),
 
     path('apartHome/', views.ApartHome_list, name='apartHome'),
 
@@ -89,11 +95,7 @@ urlpatterns = [
 
     path('FichaNacional/<int:apartamento_id>/', views.FichaNacionalRegistroHospedes, name='FichaNacionalRegistroHospedes'),
 
-#    path('ExtratoConsumoHospede/<str:nome_apartamento>/', views.ExtratoConsumoHospede, name='ExtratoConsumoHospede'),
     path('ExtratoConsumoHospede/<str:nome_apartamento>/<str:desconto_debito>/', views.ExtratoConsumoHospede, name='ExtratoConsumoHospede'),
-
-
-
 
     path('buscar_checkin/<int:apart_id>/', views.buscar_checkin, name='buscar_checkin'),
 

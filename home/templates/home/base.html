@@ -181,17 +181,22 @@
     {% endblock %}
   </div>
 
-  <footer class="main-footer">
-  <strong>
-    Copyright &copy; <a>2023 - HOSPEDA-MAIS</a>.
-  </strong>
+
+<footer class="main-footer" style="padding: 2px;">
+  <a href="http://www.m.c.marketing.digital.com.br" target="_blank"> <!-- Adicione este link -->
+    <img src="{% static 'img/MCMARKETINGDIGITAL-375X375.png' %}" alt="Slogan" style="border-radius: 100%; width: 38px; height: 38px; margin-left: 5px; margin-top: 2px; margin-bottom: 2px;">
+    <strong>
+      Copyright &copy; 2023 - M.C.Marketing Digital
+    </strong>
+  </a> <!-- Feche a tag <a> aqui -->
   Todos os direitos reservados.
+</footer>
 
-  <!-- Botão voltar ao top -->
-  <button id="btnIrAoTop">
-    <img src="{% static 'img/Ir_ao_Top.png' %}" alt="Topo">
-  </button>
-
+<!-- Botão voltar ao top -->
+<button id="btnIrAoTop">
+  <img src="{% static 'img/Ir_ao_Top.png' %}" alt="Topo">
+</button>
+  
   <script>
     window.onscroll = function() {
       scroll();

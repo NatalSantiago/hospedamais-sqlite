@@ -100,8 +100,8 @@
   position: fixed;
   bottom: 5px;
   right: 20px;
-  height: 45px;
-  width: 45px;
+  height: 40px;
+  width: 40px;
   background: #e0dede;
   border: none;
   border-radius: 100%;
@@ -109,7 +109,7 @@
   margin-left: 10px;
   opacity: 0;
   transform: scale(0);
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 #btnIrAoTop img {
